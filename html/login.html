@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AplikasiKasir | Login</title>
+
+  <!-- Google Font: Source Sans Pro -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="/plugins/fa-free/free.min.css">
+  <!-- icheck bootstrap -->
+  <link rel="stylesheet" href="/plugins/icheck-bootstrap/icheck-bootstrap.min.css">
+  <!-- Theme style -->
+  <link rel="stylesheet" href="/dist/css/adminlte.min.css">
+  <!-- SweetAlert2 -->
+  <link rel="stylesheet" href="../../plugins/sweetalert2-theme-bootstrap-4/bootstrap-4.min.css">
+</head>
+<body class="hold-transition login-page">
+<div class="login-box">
+  <!-- /.login-logo -->
+  <div class="card card-outline card-primary">
+    <div class="card-header text-center">
+      <a class="h1"><b>Aplikasi</b>Kasir</a>
+    </div>
+    <div class="card-body">
+      <div class="input-group mb-3">
+        <input id="username" type="username" class="form-control" placeholder="Username" autocomplete="off">
+        <div class="input-group-append">
+          <div class="input-group-text">
+            <span class="fas fa-solid fa-user"></span>
+          </div>
+        </div>
+      </div>
+      <div class="input-group mb-3">
+        <input id="password" type="password" class="form-control" placeholder="Password" autocomplete="off">
+        <div class="input-group-append">
+          <div class="input-group-text">
+            <span class="fas fa-lock"></span>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <!-- /.col -->
+        <div class="col">
+          <button type="submit" id="loginButton" class="btn btn-primary btn-block" onclick="loginFunction()">Login</button>
+        </div>
+        <!-- /.col -->
+      </div>
+    </div>
+    <!-- /.card-body -->
+  </div>
+  <!-- /.card -->
+</div>
+<!-- /.login-box -->
+
+<!-- jQuery -->
+<script src="/plugins/jquery/jquery.min.js"></script>
+<!-- Bootstrap 4 -->
+<script src="/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+<!-- AdminLTE App -->
+<script src="/dist/js/adminlte.min.js"></script>
+<!-- SweetAlert2 -->
+<script src="../../plugins/sweetalert2/sweetalert2.min.js"></script>
+<!-- Login App -->
+<script>
+  window.onload = async function() {
+    await fetch("/checkLogin", {
+        method: "POST"
+    }).then(response => {
+        if (response.status == 200) location.replace("/index.html")
+    })
+  }
+
+  $('#username').keypress(function(e){
+    if (e.keyCode == 13) {
+        e.preventDefault()
+        document.getElementById("password").focus()
+    }
+  })
+
+  $('#password').keypress(function(e){
+    if (e.keyCode == 13) {
+      e.preventDefault()
+      document.getElementById("loginButton").click()
+    }
+  })
+  async function loginFunction() {
+    await fetch(`/userLogin?username=${document.getElementById("username").value}&password=${document.getElementById("password").value}`, {
+      method: "POST"
+    }).then(value => {
+      if (value.status == 200) {
+        var date = new Date()
+        date.setDate(date.getDate() + 1)
+        document.cookie = `username=${document.getElementById("username").value}; expires=${date.toUTCString()}`
+        document.cookie = `password=${document.getElementById("password").value}; expires=${date.toUTCString()}`
+        location.replace("/index.html")
+      }
+      else {
+        document.getElementById("username").focus()
+        Swal.mixin({
+          toast: true,
+          position: 'top-end',
+          showConfirmButton: false,
+          timer: 3000
+        }).fire({
+          icon: 'error',
+          title: 'Wrong Username and Password, please enter a Valid Username and Password'
+        })
+      }
+    })
+  }
+</script>
+</body>
+</html>
