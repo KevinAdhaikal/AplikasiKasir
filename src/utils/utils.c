@@ -76,41 +76,11 @@ char* formatCurrency(int num) {
     return resultStr;
 } // thanks ChatGPT
 
-char* CatchMessage(const char* message, ...) {
-    char* result = malloc(1024);
+void CatchMessage(char* dest, const char* message, ...) {
     va_list ap;
     va_start(ap, message);
-    vsnprintf(result, 1024, message, ap);
+    vsnprintf(dest, 1024, message, ap);
     va_end(ap);
-    return result;
-}
-
-char checkFile(char* filename, char isMalloc) {
-    FILE* fp = fopen(filename, "rb");
-    if (isMalloc) free(filename);
-
-    if (!fp) return 0;
-
-    fclose(fp);
-    return 1;
-}
-
-char* readFile(char* filename, int* lenRet, char isMalloc) {
-    FILE* fp = fopen(filename, "rb");
-
-    fseek(fp, 0, SEEK_END);
-    int fsize = ftell(fp);
-    fseek(fp, 0, SEEK_SET);
-
-    char* result = malloc(fsize);
-    fread(result, fsize, 1, fp);
-
-    fclose(fp);
-
-    *lenRet = fsize;
-    if (isMalloc) free(filename);
-
-    return result;
 }
 
 char findStrLast(const char* str, const char* suffix) {
@@ -196,10 +166,6 @@ int checkString(int numStrings, ...) {
     va_end(args);
     return -1;
 }
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 
 char *urlEncode(const char *str) {
     if (str == NULL) return NULL;

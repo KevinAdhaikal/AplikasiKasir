@@ -2,9 +2,7 @@
 #define UTILS_H_INCLUDED
 
 char** strsplit(const char* s, const char* delim, size_t* nb);
-char* CatchMessage(const char *message, ...);
-char checkFile(char* filename, char isMalloc);
-char* readFile(char* filename, int* lenRet, char isMalloc);
+void CatchMessage(char* dest, const char *message, ...);
 char findStrLast(const char* str, const char* strFind);
 int findEmptyCRLFPosition(const char* str);
 int findCharNum(const char* str, char charFind);

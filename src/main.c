@@ -119,6 +119,7 @@ int main() {
     srv[1] = sb_new_server(&opt[1]);
 
     pthread_create(&serverThread, NULL, runServer, srv[1]);
+    printf("[LOGS] AplikasiKasir run at port %s!\n", opt[0].port);
     runServer(srv[0]);
     return 0;
 }
