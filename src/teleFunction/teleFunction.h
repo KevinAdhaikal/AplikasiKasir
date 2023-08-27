@@ -1,4 +1,4 @@
 #include "../../vendor/sandbird/sandbird.h"
 
-int teleTotalPembukuan(sb_Event* e);
-int teleKasir(sb_Event* e);
+void teleTotalPembukuan(http_event* e);
+void teleKasir(http_event* e);

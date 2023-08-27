@@ -5,7 +5,7 @@
 #include <stdlib.h>
 
 #include "../funcVarPub.h"
-#include "../../vendor/sandbird/sandbird.h"
+#include "../../vendor/httplib/httplibrary.h"
 #include "../sqliteFunction.h"
 #include "../../vendor/sqlite3/sqlite3.h"
 #include "../utils/utils.h"
@@ -13,39 +13,37 @@
 
 #include "cashierFunction.h"
 
-int pengaturan(sb_Event* e) {
+void pengaturan(http_event* e) {
     char tempString[1024];
     sqlite3* db;
-    switch(sb_convert_var_to_int(e->stream, "pengaturanArgs")) {
+    switch(http_get_query_to_int(e, "pengaturanArgs")) {
         case 1: {
             SQLRow row = {0};
             sqlite3_open("database/settings.db", &db);
             sqlite3_exec(db, "SELECT value FROM settings", RowBack, &row, NULL);
-            sb_send_status(e->stream, 200, "OK");
-            sb_write(e->stream, row.rows, row.totalChar);
+            http_send_status(e, 200, "OK");
+            http_write(e, row.rows, row.totalChar);
             freeRowBack(&row);
             sqlite3_close(db);
             break;
             // check configurasi dan mengirimkan ke Client
         }
         case 2: {
-            sb_Body bodyClient = {0};
+            if (e->headers.body_pos == -1) return;
             sqlite3_open("database/settings.db", &db);
-            sb_get_body(e->stream, &bodyClient);
-            char** valueSplit = strsplit(bodyClient.data, "\n", 0);
-            free(bodyClient.data);
+            char** valueSplit = strsplit(e->headers.raw_header + e->headers.body_pos, "\n", 0);
             
             if (!strlen(valueSplit[0])) {
-                sb_send_status(e->stream, 403, "Memakai Telegram Bot tidak boleh kosong!");
-                return SB_RES_OK;
+                http_send_status(e, 403, "Memakai Telegram Bot tidak boleh kosong!");
+                return;
             }
             if (!valueSplit[1][0] && valueSplit[0][1] == '1') {
-                sb_send_status(e->stream, 403, "Telegram Token ID tidak boleh kosong!");
-                return SB_RES_OK;
+                http_send_status(e, 403, "Telegram Token ID tidak boleh kosong!");
+                return;
             }
             if (!valueSplit[2][0] && valueSplit[0][1] == '1') {
-                sb_send_status(e->stream, 403, "Telegram User ID tidak boleh kosong!");
-                return SB_RES_OK;
+                http_send_status(e, 403, "Telegram User ID tidak boleh kosong!");
+                return;
             }
 
             if (teleBot.usingTelegramBot) {
@@ -68,17 +66,17 @@ int pengaturan(sb_Event* e) {
             
             free(valueSplit);
             sqlite3_close(db);
-            sb_send_status(e->stream, 200, "OK");
+            http_send_status(e, 200, "OK");
             break;
         }
         case 3: {
             int sendRet = sendMessage("Hello World from AplikasiKasir");
-            if (!sendRet) sb_send_status(e->stream, 403, "Tidak bisa terkoneksi ke telegram, apakah internet anda menyala?");
-            else if (sendRet == -1) sb_send_status(e->stream, 403, "Token Bot dan User ID yang kamu masukan itu salah! mohon masukan Token Bot dan User ID yang benar");
-            else sb_send_status(e->stream, 200, "OK");
+            if (!sendRet) http_send_status(e, 403, "Tidak bisa terkoneksi ke telegram, apakah internet anda menyala?");
+            else if (sendRet == -1) http_send_status(e, 403, "Token Bot dan User ID yang kamu masukan itu salah! mohon masukan Token Bot dan User ID yang benar");
+            else http_send_status(e, 200, "OK");
             // telegram testing
             break;
         }
     }
-    return SB_RES_OK;
+    return;
 }

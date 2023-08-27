@@ -5,22 +5,22 @@
 #include <stdlib.h>
 
 #include "../../vendor/sqlite3/sqlite3.h"
-#include "../../vendor/sandbird/sandbird.h"
+#include "../../vendor/httplib/httplibrary.h"
 #include "../sqliteFunction.h"
 #include "cashierFunction.h"
 #include "../utils/utils.h"
 
-int cashierFindBarang(sb_Event* e) {
+void cashierFindBarang(http_event* e) {
     char inputBarang[255], strTemp[1024];
     char* errMsg;
     sqlite3* db;
     SQLRow allrows = {0};
 
-    sb_get_header(e->stream, "inputBarang", inputBarang, 254);
+    http_get_header(e, "inputBarang", inputBarang, 254);
 
     if (!inputBarang[0]) {
-        sb_send_status(e->stream, 403, "Input barang tidak bisa kosong! Mohon input barang yang benar");
-        return SB_RES_OK;
+        http_send_status(e, 403, "Input barang tidak bisa kosong! Mohon input barang yang benar");
+        return;
     }
     
     sqlite3_open("database/daftarBarang.db", &db);
@@ -31,19 +31,19 @@ int cashierFindBarang(sb_Event* e) {
         freeRowBack(&allrows);
         
         if (!isStr(errMsg, "no such table", 0)) {
-            sb_send_status(e->stream, 403, "Ada yang salah pada AplikasiKasir, harap hubungi Pemilik");
+            http_send_status(e, 403, "Ada yang salah pada AplikasiKasir, harap hubungi Pemilik");
             printf("[ERROR] Something wrong in SQLite at casirLogic.c: %s\n", errMsg);
         }
-        else sb_send_status(e->stream, 403, "Barang tersebut tidak tersedia di dalam database!");
+        else http_send_status(e, 403, "Barang tersebut tidak tersedia di dalam database!");
         
         sqlite3_free(errMsg);
         sqlite3_close(db);
-        return SB_RES_OK;
+        return;
     }
 
-    sb_send_status(e->stream, 200, "OK");
-    sb_write(e->stream, allrows.rows, allrows.totalChar);
+    http_send_status(e, 200, "OK");
+    http_write(e, allrows.rows, allrows.totalChar);
     sqlite3_close(db);
     
-    return SB_RES_OK;
+    return;
 }

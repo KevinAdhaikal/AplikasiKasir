@@ -4,10 +4,9 @@
 #include <string.h>
 #include <stdlib.h>
 #include <dirent.h>
-#include <pthread.h>
 
 #include "utils/utils.h"
-#include "../vendor/sandbird/sandbird.h"
+#include "../vendor/httplib/httplibrary.h"
 #include "methodFunction/methodFunction.h"
 #include "../vendor/sqlite3/sqlite3.h"
 #include "../vendor/str/str.h"
@@ -15,15 +14,6 @@
 
 #include "sqliteFunction.h"
 #include "funcVarPub.h"
-
-pthread_t serverThread;
-
-void* runServer(void* ptr) {
-    for (;;) {
-        sb_poll_server((sb_Server*)ptr, 1000);
-    }
-    sb_close_server((sb_Server*)ptr);
-}
 
 void loadSettings() {
     sqlite3 *db;
@@ -62,7 +52,7 @@ void loadSettings() {
     return;
 }
 
-int thread_handler(sb_Event* e) {
+/*int thread_handler(sb_Event* e) {
     if (e->type == SB_EV_REQUEST && isStr(e->method, "POST", 1)) {
         char username[254];
         char password[254];
@@ -76,16 +66,13 @@ int thread_handler(sb_Event* e) {
         }
     }
     return SB_RES_OK;
-}
+}*/
 
-int event_handler(sb_Event *e) {
-    if (e->type == SB_EV_REQUEST) {
-        printf("[%s] %s\n", e->method, e->path);
-        if (!strcmp(e->method, "POST")) return POSTFunction(e);
-        else if (!strcmp(e->method, "GET")) return GETFunction(e);
-        else return SB_RES_CLOSE;
-    }
-    return SB_RES_OK;
+void event_handler(http_event* e) {
+    printf("[%s] %s\n", e->headers.method, e->headers.path);
+    if (!strcmp(e->headers.method, "POST")) POSTFunction(e);
+    else if (!strcmp(e->headers.method, "GET")) GETFunction(e);
+    return;
 }
 
 int main() {
@@ -99,27 +86,7 @@ int main() {
     memset(&teleBot, 0, sizeof(telegramBot));
     loadSettings();
 
-    sb_Server *srv[2];
-    sb_Options opt[2];
-
     // HTTP Server
-    memset(&opt[0], 0, sizeof(sb_Options));
-    opt[0].host = "0.0.0.0";
-    opt[0].port = "80";
-    opt[0].handler = event_handler;
-
-    srv[0] = sb_new_server(&opt[0]);
-
-    // HTTP Server (Telegram)
-    memset(&opt[1], 0, sizeof(sb_Options));
-    opt[1].host = "0.0.0.0";
-    opt[1].port = "8080";
-    opt[1].handler = thread_handler;
-
-    srv[1] = sb_new_server(&opt[1]);
-
-    pthread_create(&serverThread, NULL, runServer, srv[1]);
-    printf("[LOGS] AplikasiKasir run at port %s!\n", opt[0].port);
-    runServer(srv[0]);
+    http_start(http_init(8080), event_handler);
     return 0;
 }

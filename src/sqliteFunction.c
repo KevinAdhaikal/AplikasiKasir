@@ -4,7 +4,7 @@
 
 #include "../vendor/sqlite3/sqlite3.h"
 #include "sqliteFunction.h"
-#include "../vendor/sandbird/sandbird.h"
+#include "../vendor/httplib/httplibrary.h"
 
 int tableExists(void *data, int argc, char **argv, char **azColName) {
     if (argv[0]) *(char*)data = 1;
@@ -53,29 +53,29 @@ int sqlReturnInt(void* data, int argc, char** argv, char** colName) {
     return 0;
 }
 
-int sqlNormalExec(sb_Event* e, sqlite3* db, char* tempString) {
+int sqlNormalExec(http_event* e, sqlite3* db, char* tempString) {
     char* errMsg;
 
     if (sqlite3_exec(db, tempString, 0, 0, &errMsg) != SQLITE_OK) {
         printf("%s\n", errMsg);
-        sb_send_status(e->stream, 403, "Ada yang salah pada AplikasiKasir, harap hubungi Pemilik");
+        http_send_status(e, 403, "Ada yang salah pada AplikasiKasir, harap hubungi Pemilik");
         sqlite3_free(errMsg);
         sqlite3_close(db);
-        return SB_RES_OK;
+        return 0;
     }
 
     return 1;
 }
 
-int sqlBackExec(sb_Event* e, sqlite3* db, char* tempString, int (*callback)(void *, int, char **, char **), void* var) {
+int sqlBackExec(http_event* e, sqlite3* db, char* tempString, int (*callback)(void *, int, char **, char **), void* var) {
     char* errMsg;
 
     if (sqlite3_exec(db, tempString, callback, var, &errMsg)) {
         printf("%s\n", errMsg);
-        sb_send_status(e->stream, 403, "Ada yang salah pada AplikasiKasir, harap hubungi Pemilik");
+        http_send_status(e, 403, "Ada yang salah pada AplikasiKasir, harap hubungi Pemilik");
         sqlite3_free(errMsg);
         sqlite3_close(db);
-        return SB_RES_OK;
+        return 0;
     }
 
     return 1;

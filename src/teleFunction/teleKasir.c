@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "../../vendor/sandbird/sandbird.h"
+#include "../../vendor/httplib/httplibrary.h"
 #include "../utils/utils.h"
 #include "../teleFunction/teleFunction.h"
 #include "../telegramClient/telegramClient.h"
@@ -9,7 +9,7 @@
 
 #include "teleFunction.h"
 
-int teleKasir(sb_Event* e) {
+void teleKasir(http_event* e) {
     char* formatCurrency0;
     char* formatCurrency1;
     char* formatCurrency2;
@@ -20,12 +20,8 @@ int teleKasir(sb_Event* e) {
     str_init(&totalString);
     str_append_format(&totalString, "Kasir (Barang Keluar)\n\n");
 
-    sb_Body body;
-    sb_get_body(e->stream, &body);
-
     size_t sizeSplit = 0;
-    char** stringSplit = strsplit(body.data, "\n", &sizeSplit);
-    free(body.data);
+    char** stringSplit = strsplit(e->headers.raw_header + e->headers.body_pos, "\n", &sizeSplit);
 
     for (int a = 0; a < sizeSplit; a++) {
         char** valueSplit = strsplit(stringSplit[a], "|", 0);
@@ -63,8 +59,8 @@ int teleKasir(sb_Event* e) {
     sendMessage(totalString.value);
     str_finalize(&totalString);
 
-    sb_send_header(e->stream, "Access-Control-Allow-Origin", "*");
-    sb_send_status(e->stream, 200, "OK");
+    http_send_header(e, "Access-Control-Allow-Origin", "*");
+    http_send_status(e, 200, "OK");
     
-    return SB_RES_OK;
+    return;
 }

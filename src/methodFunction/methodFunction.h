@@ -5,7 +5,7 @@
 
 #include "../../vendor/sandbird/sandbird.h"
 
-int GETFunction(sb_Event* e);
-int POSTFunction(sb_Event* e);
-
+void GETFunction(http_event* e);
+void POSTFunction(http_event* e);
+void* threadFunction(void* threadArgs);
 #endif // METHODFUNCTION_H_INCLUDED

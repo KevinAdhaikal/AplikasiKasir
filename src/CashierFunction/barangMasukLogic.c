@@ -6,13 +6,13 @@
 #include <time.h>
 
 #include "../sqliteFunction.h"
-#include "../../vendor/sandbird/sandbird.h"
+#include "../../vendor/httplib/httplibrary.h"
 #include "../../vendor/sqlite3/sqlite3.h"
 #include "../utils/utils.h"
 
 #include "cashierFunction.h"
 
-int barangMasukLogic(sb_Event* e) {
+void barangMasukLogic(http_event* e) {
     char tanggalBarangMasuk[11];
     char tempString[1024];
     char* errMsg;
@@ -27,9 +27,9 @@ int barangMasukLogic(sb_Event* e) {
     time(&rawtime);
     timeinfo = localtime(&rawtime);
 
-    switch(sb_convert_var_to_int(e->stream, "barangMasukArgs")) {
+    switch(http_get_query_to_int(e, "barangMasukArgs")) {
         case 1: {
-            sb_get_header(e->stream, "tanggalBarangMasuk", tanggalBarangMasuk, 10);
+            http_get_header(e, "tanggalBarangMasuk", tanggalBarangMasuk, 10);
             sqlite3_open("database/barangMasuk.db", &db);
 
             if (tanggalBarangMasuk[0]) sprintf(tempString, "SELECT * from barangMasuk_%s", tanggalBarangMasuk);
@@ -37,15 +37,15 @@ int barangMasukLogic(sb_Event* e) {
 
             goto ROWBACK;
             // list barang masuk
-            return SB_RES_OK;
+            return;
         }
         case 2: {
             char namaBarang[255];
-            sb_get_header(e->stream, "findBarang", namaBarang, 254);
+            http_get_header(e, "findBarang", namaBarang, 254);
 
             if (!namaBarang[0]) {
-                sb_send_status(e->stream, 403, "Nama/Barcode Barang tidak boleh kosong!");
-                return SB_RES_OK;
+                http_send_status(e, 403, "Nama/Barcode Barang tidak boleh kosong!");
+                return;
             }
 
             sqlite3_open("database/daftarBarang.db", &db);
@@ -54,62 +54,62 @@ int barangMasukLogic(sb_Event* e) {
             gotoPos = 2;
             goto ROWBACK;
             // check barang masuk
-            return SB_RES_OK;
+            return;
         }
         case 3: {
             char namaBarang[255];
             char jumlahBarang[11];
             char hargaBarang[11];
 
-            sb_get_header(e->stream, "namaBarang", namaBarang, 254);
-            sb_get_header(e->stream, "jumlahBarang", jumlahBarang, 10);
-            sb_get_header(e->stream, "hargaBarang", hargaBarang, 11);
+            http_get_header(e, "namaBarang", namaBarang, 254);
+            http_get_header(e, "jumlahBarang", jumlahBarang, 10);
+            http_get_header(e, "hargaBarang", hargaBarang, 11);
 
             if (!namaBarang[0]) {
-                sb_send_status(e->stream, 403, "Nama/Barcode barang tidak boleh kosong!");
-                return SB_RES_OK;
+                http_send_status(e, 403, "Nama/Barcode barang tidak boleh kosong!");
+                return;
             } else if (!jumlahBarang[0]) {
-                sb_send_status(e->stream, 403, "Jumlah Barang tidak boleh kosong!");
-                return SB_RES_OK;
+                http_send_status(e, 403, "Jumlah Barang tidak boleh kosong!");
+                return;
             } else if (!hargaBarang[0]) {
-                sb_send_status(e->stream, 403, "Harga Barang tidak boleh kosong!");
-                return SB_RES_OK;
+                http_send_status(e, 403, "Harga Barang tidak boleh kosong!");
+                return;
             }
 
             sqlite3_open("database/barangMasuk.db", &db);
 
             sprintf(tempString, "CREATE TABLE IF NOT EXISTS barangMasuk_%d_%d_%d (nama TEXT, jumlah INT, harga INT);", timeinfo->tm_mday, timeinfo->tm_mon + 1, timeinfo->tm_year + 1900);
-            if (sqlNormalExec(e, db, tempString) == SB_RES_OK) return SB_RES_OK;
+            if (!sqlNormalExec(e, db, tempString)) return;
             sprintf(tempString, "INSERT INTO barangMasuk_%d_%d_%d (nama, jumlah, harga) VALUES ('%s', %d, %d)", timeinfo->tm_mday, timeinfo->tm_mon + 1, timeinfo->tm_year + 1900, namaBarang, atoi(jumlahBarang), atoi(hargaBarang));
-            if (sqlNormalExec(e, db, tempString) == SB_RES_OK) return SB_RES_OK;
+            if (!sqlNormalExec(e, db, tempString)) return;
             sqlite3_close(db);
 
             sqlite3_open("database/daftarBarang.db", &db);
 
             sprintf(tempString, "UPDATE daftarBarang SET jumlah=jumlah + %d where nama='%s'", atoi(jumlahBarang), namaBarang);
-            if (sqlNormalExec(e, db, tempString) == SB_RES_OK) return SB_RES_OK;
+            if (!sqlNormalExec(e, db, tempString)) return;
 
             sqlite3_close(db);
-            sb_send_status(e->stream, 200, "OK");
+            http_send_status(e, 200, "OK");
             // tambah barang masuk
-            return SB_RES_OK;
+            return;
         }
         case 4: {
             char namaBarang[255];
             char barangMasukID[11];
 
-            sb_get_header(e->stream, "namaBarang", namaBarang, 254);
-            sb_get_header(e->stream, "tanggalBarangMasuk", tanggalBarangMasuk, 11);
-            sb_get_header(e->stream, "barangMasukID", barangMasukID, 11);
+            http_get_header(e, "namaBarang", namaBarang, 254);
+            http_get_header(e, "tanggalBarangMasuk", tanggalBarangMasuk, 11);
+            http_get_header(e, "barangMasukID", barangMasukID, 11);
 
             if (!namaBarang[0]) {
-                sb_send_status(e->stream, 403, "Nama/Barcode barang tidak boleh kosong!");
-                return SB_RES_OK;
+                http_send_status(e, 403, "Nama/Barcode barang tidak boleh kosong!");
+                return;
             }
 
             if (!barangMasukID[0]) {
-                sb_send_status(e->stream, 403, "ID Barang Masuk tidak boleh kosong!");
-                return SB_RES_OK;
+                http_send_status(e, 403, "ID Barang Masuk tidak boleh kosong!");
+                return;
             }
 
             sqlite3_open("database/barangMasuk.db", &db);
@@ -124,9 +124,9 @@ int barangMasukLogic(sb_Event* e) {
             if (tanggalBarangMasuk[0]) sprintf(tempString, "DELETE FROM barangMasuk_%s where rowid=%d", tanggalBarangMasuk, atoi(barangMasukID));
             else sprintf(tempString, "DELETE FROM barangMasuk_%d_%d_%d where rowid=%d", timeinfo->tm_mday, timeinfo->tm_mon + 1, timeinfo->tm_year + 1900, atoi(barangMasukID));
 
-            if (sqlNormalExec(e, db, tempString) == SB_RES_OK) {
+            if (!sqlNormalExec(e, db, tempString)) {
                 freeRowBack(&rowBack);
-                return SB_RES_OK;
+                return;
             }
 
             sqlite3_close(db);
@@ -135,44 +135,45 @@ int barangMasukLogic(sb_Event* e) {
             rowBack.rows[rowBack.totalChar - 1] = '\0';
             sprintf(tempString, "UPDATE daftarBarang SET jumlah=jumlah - %d where nama='%s'", atoi(rowBack.rows), namaBarang);
             freeRowBack(&rowBack);
-            if (sqlNormalExec(e, db, tempString) == SB_RES_OK) return SB_RES_OK;
+            if (!sqlNormalExec(e, db, tempString)) return;
             sqlite3_close(db);
 
-            sb_send_status(e->stream, 200, "OK");
+            http_send_status(e, 200, "OK");
             // hapus barang masuk
-            return SB_RES_OK;
+            return;
         }
-        default: return SB_RES_OK;
+        default: return;
     }
 
     ROWBACK:
     if (sqlite3_exec(db, tempString, RowBack, &rowBack, &errMsg) != SQLITE_OK) {
         if (!isStr(errMsg, "no such table", 0)) {
             freeRowBack(&rowBack);
-            sb_send_status(e->stream, 403, "Ada yang salah pada AplikasiKasir, harap hubungi Pemilik");
+            http_send_status(e, 403, "Ada yang salah pada AplikasiKasir, harap hubungi Pemilik");
             printf("[ERROR] Something wrong in SQLite at barangMasukLogic.c: %s\n", errMsg);
             sqlite3_free(errMsg);
             sqlite3_close(db);
-            return SB_RES_OK;
+            return;
         }
     }
 
     if (gotoPos == 2) {
-        if (!rowBack.totalChar) sb_send_status(e->stream, 403, "Nama/Barcode Barang Tidak ada di dalam database!");
+        if (!rowBack.totalChar) http_send_status(e, 403, "Nama/Barcode Barang Tidak ada di dalam database!");
         else {
-            sb_write(e->stream, rowBack.rows, rowBack.totalChar);
-            sb_send_status(e->stream, 200, "OK");
+            http_write(e, rowBack.rows, rowBack.totalChar);
+            http_send_status(e, 200, "OK");
         }
     }
     else if (gotoPos == 4) goto GOTOPOS4;
     else {
-        sb_send_status(e->stream, 200, "OK");
-        sb_write(e->stream, rowBack.rows, rowBack.totalChar);
-        sb_writef(e->stream, "%d-%d-%d", timeinfo->tm_mday, timeinfo->tm_mon + 1, timeinfo->tm_year + 1900);
+        http_send_status(e, 200, "OK");
+        http_write(e, rowBack.rows, rowBack.totalChar);
+        sprintf(tempString, "%d-%d-%d", timeinfo->tm_mday, timeinfo->tm_mon + 1, timeinfo->tm_year + 1900);
+        http_write(e, tempString, strlen(tempString));
     }
 
     sqlite3_close(db);
     freeRowBack(&rowBack);
 
-    return SB_RES_OK;
+    return;
 }

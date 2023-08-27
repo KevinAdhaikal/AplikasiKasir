@@ -7,10 +7,10 @@
 
 #include "cashierFunction.h"
 #include "../../vendor/sqlite3/sqlite3.h"
-#include "../../vendor/sandbird/sandbird.h"
+#include "../../vendor/httplib/httplibrary.h"
 #include "../sqliteFunction.h"
 
-int tambahBarang(sb_Event* e) {
+void tambahBarang(http_event* e) {
     char namaBarang[255], jumlahBarang[11], hargaModal[11], barcodeBarang[255], hargaJual[11];
     char* errMsg;
     char strTemp[1024];
@@ -18,23 +18,23 @@ int tambahBarang(sb_Event* e) {
     sqlite3* db;
     int sqlRet;
 
-    sb_get_header(e->stream, "namaBarang", namaBarang, 254);
-    sb_get_header(e->stream, "jumlahBarang", jumlahBarang, 10);
-    sb_get_header(e->stream, "hargaModal", hargaModal, 10);
-    sb_get_header(e->stream, "barcodeBarang", barcodeBarang, 254);
-    sb_get_header(e->stream, "hargaJual", hargaJual, 10);
+    http_get_header(e, "namaBarang", namaBarang, 254);
+    http_get_header(e, "jumlahBarang", jumlahBarang, 10);
+    http_get_header(e, "hargaModal", hargaModal, 10);
+    http_get_header(e, "barcodeBarang", barcodeBarang, 254);
+    http_get_header(e, "hargaJual", hargaJual, 10);
 
     for (int a = 0; a < strlen(jumlahBarang); a++) if (!isdigit(jumlahBarang[a])) {
-        sb_send_status(e->stream, 403, "Jumlah barang tidak berbentuk nomor! Mohon input Jumlah barang yang benar");
-        return SB_RES_OK;
+        http_send_status(e, 403, "Jumlah barang tidak berbentuk nomor! Mohon input Jumlah barang yang benar");
+        return;
     }
     for (int a = 0; a < strlen(hargaModal); a++) if (!isdigit(hargaModal[a])) {
-        sb_send_status(e->stream, 403, "Harga Modal tidak berbentuk nomor! Mohon input Harga barang yang benar");
-        return SB_RES_OK;
+        http_send_status(e, 403, "Harga Modal tidak berbentuk nomor! Mohon input Harga barang yang benar");
+        return;
     }
     for (int a = 0; a < strlen(hargaJual); a++) if (!isdigit(hargaJual[a])) {
-        sb_send_status(e->stream, 403, "Harga Jual tidak berbentuk nomor! Mohon input Harga barang yang benar");
-        return SB_RES_OK;
+        http_send_status(e, 403, "Harga Jual tidak berbentuk nomor! Mohon input Harga barang yang benar");
+        return;
     }
 
     sqlite3_open("database/daftarBarang.db", &db);
@@ -46,15 +46,15 @@ int tambahBarang(sb_Event* e) {
     
     if (checkDatabase) {
         sqlite3_close(db);
-        sb_send_status(e->stream, 403, "Nama/Barcode Barang tersebut sudah ada di database! mohon ganti Nama/Barcode barang yang belum ada di Database");
-        return SB_RES_OK;
+        http_send_status(e, 403, "Nama/Barcode Barang tersebut sudah ada di database! mohon ganti Nama/Barcode barang yang belum ada di Database");
+        return;
     }
 
     sprintf(strTemp, "CREATE TABLE IF NOT EXISTS daftarBarang (nama TEXT, jumlah INT, modal INT, jual INT, barcode TEXT); INSERT INTO daftarBarang (nama, jumlah, modal, jual, barcode) values ('%s', %d, %d, %d, '%s')", namaBarang, atoi(jumlahBarang), atoi(hargaModal), atoi(hargaJual), barcodeBarang);
-    if (!sqlNormalExec(e, db, strTemp)) return SB_RES_OK;
+    if (!sqlNormalExec(e, db, strTemp)) return;
 
     sqlite3_close(db);
-    sb_send_status(e->stream, 200, "OK");
+    http_send_status(e, 200, "OK");
 
-    return SB_RES_OK;
+    return;
 }

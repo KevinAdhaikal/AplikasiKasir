@@ -6,40 +6,40 @@
 #include <ctype.h>
 
 #include "../../vendor/sqlite3/sqlite3.h"
-#include "../../vendor/sandbird/sandbird.h"
+#include "../../vendor/httplib/httplibrary.h"
 #include "../sqliteFunction.h"
 #include "../utils/utils.h"
 #include "cashierFunction.h"
 
-int editBarang(sb_Event* e) {
+void editBarang(http_event* e) {
     char* errMsg;
     char strTemp[1024];
     sqlite3* db;
     SQLRow checkRow = {0};
     char barangID[11], namaBarang[255], jumlahBarang[11], hargaModal[11], hargaJual[11], barcodeBarang[255];
 
-    sb_get_header(e->stream, "barangID", barangID, 10);
-    sb_get_header(e->stream, "namaBarang", namaBarang, 254);
-    sb_get_header(e->stream, "jumlahBarang", jumlahBarang, 10);
-    sb_get_header(e->stream, "hargaModal", hargaModal, 10);
-    sb_get_header(e->stream, "hargaJual", hargaJual, 10);
-    sb_get_header(e->stream, "barcodeBarang", barcodeBarang, 254);
+    http_get_header(e, "barangID", barangID, 10);
+    http_get_header(e, "namaBarang", namaBarang, 254);
+    http_get_header(e, "jumlahBarang", jumlahBarang, 10);
+    http_get_header(e, "hargaModal", hargaModal, 10);
+    http_get_header(e, "hargaJual", hargaJual, 10);
+    http_get_header(e, "barcodeBarang", barcodeBarang, 254);
 
     for (int a = 0; a < strlen(barangID); a++) if (!isdigit(barangID[a])) {
-        sb_send_status(e->stream, 403, "ID Barang tidak berbentuk nomor! Mohon input ID Barang yang benar");
-        return SB_RES_OK;
+        http_send_status(e, 403, "ID Barang tidak berbentuk nomor! Mohon input ID Barang yang benar");
+        return;
     }
     for (int a = 0; a < strlen(jumlahBarang); a++) if (!isdigit(jumlahBarang[a])) {
-        sb_send_status(e->stream, 403, "Jumlah Barang tidak berbentuk nomor! Mohon input Jumlah Barang yang benar");
-        return SB_RES_OK;
+        http_send_status(e, 403, "Jumlah Barang tidak berbentuk nomor! Mohon input Jumlah Barang yang benar");
+        return;
     }
     for (int a = 0; a < strlen(hargaModal); a++) if (!isdigit(hargaModal[a])) {
-        sb_send_status(e->stream, 403, "Harga Modal tidak berbentuk nomor! Mohon input Harga Barang yang benar");
-        return SB_RES_OK;
+        http_send_status(e, 403, "Harga Modal tidak berbentuk nomor! Mohon input Harga Barang yang benar");
+        return;
     }
     for (int a = 0; a < strlen(hargaJual); a++) if (!isdigit(hargaJual[a])) {
-        sb_send_status(e->stream, 403, "Harga Jual tidak berbentuk nomor! Mohon input Harga Barang yang benar");
-        return SB_RES_OK;
+        http_send_status(e, 403, "Harga Jual tidak berbentuk nomor! Mohon input Harga Barang yang benar");
+        return;
     }
 
     sqlite3_open("database/daftarBarang.db", &db);
@@ -48,19 +48,19 @@ int editBarang(sb_Event* e) {
 
     if (sqlite3_exec(db, strTemp, RowBack, &checkRow, &errMsg)) {
         freeRowBack(&checkRow);
-        sb_send_status(e->stream, 403, "Ada yang salah pada AplikasiKasir, harap hubungi Pemilik");
+        http_send_status(e, 403, "Ada yang salah pada AplikasiKasir, harap hubungi Pemilik");
         printf("[ERROR] Something wrong in SQLite at editBarang.c: %s\n", errMsg);
         sqlite3_free(errMsg);
         sqlite3_close(db);
-        return SB_RES_OK;
+        return;
     }
 
     sprintf(strTemp, "%s|%s", barangID, namaBarang);
     if (checkRow.rows && !isStr(checkRow.rows, strTemp, 0)) {
         freeRowBack(&checkRow);
-        sb_send_status(e->stream, 403, "Nama Barang tersebut sudah ada, mohon ganti Nama Barang!");
+        http_send_status(e, 403, "Nama Barang tersebut sudah ada, mohon ganti Nama Barang!");
         sqlite3_close(db);
-        return SB_RES_OK;
+        return;
     }
 
     freeRowBack(&checkRow);
@@ -70,19 +70,19 @@ int editBarang(sb_Event* e) {
         
         if (sqlite3_exec(db, strTemp, RowBack, &checkRow, &errMsg)) {
             freeRowBack(&checkRow);
-            sb_send_status(e->stream, 403, "Ada yang salah pada AplikasiKasir, harap hubungi Pemilik");
+            http_send_status(e, 403, "Ada yang salah pada AplikasiKasir, harap hubungi Pemilik");
             printf("[ERROR] Something wrong in SQLite at editBarang.c: %s\n", errMsg);
             sqlite3_free(errMsg);
             sqlite3_close(db);
-            return SB_RES_OK;
+            return;
         }
 
         sprintf(strTemp, "%s|%s", barangID, barcodeBarang);
         if (checkRow.rows && !isStr(checkRow.rows, strTemp, 0)) {
             freeRowBack(&checkRow);
-            sb_send_status(e->stream, 403, "Barcode Barang tersebut sudah ada, mohon ganti Nama Barang!");
+            http_send_status(e, 403, "Barcode Barang tersebut sudah ada, mohon ganti Nama Barang!");
             sqlite3_close(db);
-            return SB_RES_OK;
+            return;
         }
 
         freeRowBack(&checkRow);
@@ -92,15 +92,15 @@ int editBarang(sb_Event* e) {
     
     if (sqlite3_exec(db, strTemp, 0, 0, &errMsg) != SQLITE_OK) {
         freeRowBack(&checkRow);
-        sb_send_status(e->stream, 403, "Ada yang salah pada AplikasiKasir, harap hubungi Pemilik");
+        http_send_status(e, 403, "Ada yang salah pada AplikasiKasir, harap hubungi Pemilik");
         printf("[ERROR] Something wrong in SQLite at editBarang.c: %s\n", errMsg);
         sqlite3_free(errMsg);
         sqlite3_close(db);
-        return SB_RES_OK;
+        return;
     }
 
-    sb_send_status(e->stream, 200, "OK");
+    http_send_status(e, 200, "OK");
     sqlite3_close(db);
 
-    return SB_RES_OK;
+    return;
 }

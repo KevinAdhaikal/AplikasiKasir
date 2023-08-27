@@ -6,11 +6,11 @@
 #include <time.h>
 
 #include "../../vendor/sqlite3/sqlite3.h"
-#include "../../vendor/sandbird/sandbird.h"
+#include "../../vendor/httplib/httplibrary.h"
 #include "../sqliteFunction.h"
 #include "../utils/utils.h"
 
-int dashboardLogic(sb_Event* e) {
+void dashboardLogic(http_event* e) {
     char tempString[512];
     char* errMsg;
     sqlite3* db;
@@ -21,7 +21,7 @@ int dashboardLogic(sb_Event* e) {
     time(&rawtime);
     timeinfo = localtime(&rawtime);
 
-    switch(sb_convert_var_to_int(e->stream, "dashboardType")) {
+    switch(http_get_query_to_int(e, "dashboardType")) {
         case 1: {
             sqlite3_open("database/pembukuan.db", &db);
             sprintf(tempString, "SELECT SUM(jumlah) from barangTerjual_%d_%d_%d", timeinfo->tm_mday, timeinfo->tm_mon + 1, timeinfo->tm_year + 1900);
@@ -53,27 +53,27 @@ int dashboardLogic(sb_Event* e) {
             break;
         }
         default: {
-            return SB_RES_OK;
+            return;
             break;
         }
     }
 
     if (sqlite3_exec(db, tempString, RowBack, &rowBack, &errMsg) != SQLITE_OK) {
-        if (isStr(errMsg, "no such table", 0)) sb_send_status(e->stream, 200, "OK");
+        if (isStr(errMsg, "no such table", 0)) http_send_status(e, 200, "OK");
         else {
-            sb_send_status(e->stream, 403, "Ada yang salah pada AplikasiKasir, harap hubungi Pemilik");
+            http_send_status(e, 403, "Ada yang salah pada AplikasiKasir, harap hubungi Pemilik");
             printf("[ERROR] Something wrong in SQLite at dashboardLogic.c: %s\n", errMsg);
         }
         sqlite3_free(errMsg);
         freeRowBack(&rowBack);
         sqlite3_close(db);
-        return SB_RES_OK;
+        return;
     }
 
-    sb_send_status(e->stream, 200, "OK");
-    sb_write(e->stream, rowBack.rows, rowBack.totalChar);
+    http_send_status(e, 200, "OK");
+    http_write(e, rowBack.rows, rowBack.totalChar);
     freeRowBack(&rowBack);
     sqlite3_close(db);
 
-    return SB_RES_OK;
+    return;
 }

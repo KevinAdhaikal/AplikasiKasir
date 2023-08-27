@@ -5,46 +5,46 @@
 #include <stdlib.h>
 #include <ctype.h>
 
-#include "../../vendor/sandbird/sandbird.h"
+#include "../../vendor/httplib/httplibrary.h"
 #include "methodFunction.h"
 #include "../utils/utils.h"
 #include "../sqliteFunction.h"
 #include "../CashierFunction/cashierFunction.h"
 
-int POSTFunction(sb_Event* e) {
-    if (!strlen(e->path)) return SB_RES_CLOSE;
+void POSTFunction(http_event* e) {
+    if (e->headers.path[0] != '/' || e->headers.path[1] == '\0') return;
 
-    if (isStr(e->path, "/userLogin", 1)) {
+    if (isStr(e->headers.path, "/userLogin", 1)) {
         char username[20], password[20];
 
-        sb_get_var(e->stream, "username", username, 20);
-        sb_get_var(e->stream, "password", password, 20);
+        http_get_query(e, "username", username, 20);
+        http_get_query(e, "password", password, 20);
         
-        if (isStr(username, "admin", 1) && isStr(password, "admin", 1)) sb_send_status(e->stream, 200, "OK");
-        else sb_send_status(e->stream, 403, "Forbidden");
+        if (isStr(username, "admin", 1) && isStr(password, "admin", 1)) http_send_status(e, 200, "OK");
+        else http_send_status(e, 403, "Forbidden");
     }
     else {
         char username[20], password[20];
 
-        sb_get_cookie(e->stream, "username", username, 20);
-        sb_get_cookie(e->stream, "password", password, 20);
+        http_get_cookie(e, "username", username, 20);
+        http_get_cookie(e, "password", password, 20);
 
         if (isStr(username, "admin", 1) && isStr(password, "admin", 1)) {
-            if (isStr(e->path, "/checkLogin", 1)) sb_send_status(e->stream, 200, "OK");
-            else if (isStr(e->path, "/tambahBarang", 1)) tambahBarang(e);
-            else if (isStr(e->path, "/daftarBarang", 1)) daftarBarang(e);
-            else if (isStr(e->path, "/hapusDaftarBarang", 1)) hapusDaftarBarang(e);
-            else if (isStr(e->path, "/infoBarang", 1)) infoBarang(e);
-            else if (isStr(e->path, "/editBarang", 1)) editBarang(e);
-            else if (isStr(e->path, "/cashierFindBarang", 1)) cashierFindBarang(e);
-            else if (isStr(e->path, "/pembukuan", 1)) pembukuan(e);
-            else if (isStr(e->path, "/dashboardLogic", 1)) dashboardLogic(e);
-            else if (isStr(e->path, "/barangMasukLogic", 1)) barangMasukLogic(e);
-            else if (isStr(e->path, "/pengaturan", 1)) pengaturan(e);
-            else sb_send_status(e->stream, 404, "Not Found");
+            if (isStr(e->headers.path, "/checkLogin", 1)) http_send_status(e, 200, "OK");
+            else if (isStr(e->headers.path, "/tambahBarang", 1)) tambahBarang(e);
+            else if (isStr(e->headers.path, "/daftarBarang", 1)) daftarBarang(e);
+            else if (isStr(e->headers.path, "/hapusDaftarBarang", 1)) hapusDaftarBarang(e);
+            else if (isStr(e->headers.path, "/infoBarang", 1)) infoBarang(e);
+            else if (isStr(e->headers.path, "/editBarang", 1)) editBarang(e);
+            else if (isStr(e->headers.path, "/cashierFindBarang", 1)) cashierFindBarang(e);
+            else if (isStr(e->headers.path, "/pembukuan", 1)) pembukuan(e);
+            else if (isStr(e->headers.path, "/dashboardLogic", 1)) dashboardLogic(e);
+            else if (isStr(e->headers.path, "/barangMasukLogic", 1)) barangMasukLogic(e);
+            else if (isStr(e->headers.path, "/pengaturan", 1)) pengaturan(e);
+            else http_send_status(e, 404, "Not Found");
         }
-        else sb_send_status(e->stream, 403, "Forbidden");
+        else http_send_status(e, 403, "Forbidden");
     }
 
-    return SB_RES_OK;
+    return;
 }

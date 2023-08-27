@@ -1,14 +1,14 @@
 #include <stdio.h>
 
-#include "../../vendor/sandbird/sandbird.h"
+#include "../../vendor/httplib/httplibrary.h"
 
-int tambahBarang(sb_Event* e);
-int daftarBarang(sb_Event* e);
-int hapusDaftarBarang(sb_Event* e);
-int infoBarang(sb_Event* e);
-int editBarang(sb_Event* e);
-int cashierFindBarang(sb_Event* e);
-int pembukuan(sb_Event* e);
-int dashboardLogic(sb_Event* e);
-int barangMasukLogic(sb_Event* e);
-int pengaturan(sb_Event* e);
+void tambahBarang(http_event* e);
+void daftarBarang(http_event* e);
+void hapusDaftarBarang(http_event* e);
+void infoBarang(http_event* e);
+void editBarang(http_event* e);
+void cashierFindBarang(http_event* e);
+void pembukuan(http_event* e);
+void dashboardLogic(http_event* e);
+void barangMasukLogic(http_event* e);
+void pengaturan(http_event* e);

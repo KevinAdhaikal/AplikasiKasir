@@ -2,7 +2,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-#include "../../vendor/sandbird/sandbird.h"
+#include "../../vendor/httplib/httplibrary.h"
 #include "../utils/utils.h"
 #include "../../vendor/sqlite3/sqlite3.h"
 #include "../sqliteFunction.h"
@@ -11,13 +11,12 @@
 
 #include "teleFunction.h"
 
-int teleTotalPembukuan(sb_Event* e) {
+void teleTotalPembukuan(http_event* e) {
     int tempInt = 0;
     sqlite3* db[2];
     char* errMsg;
     char tempString[1024];
     SQLRow rows = {0};
-    sb_Body body = {0};
     Str resultMessage;
 
     char* formatCurrency1;
@@ -29,11 +28,8 @@ int teleTotalPembukuan(sb_Event* e) {
 
     str_append_format(&resultMessage, "Total Pembukuan\n\n");
 
-    sb_get_body(e->stream, &body);
-
     size_t splitSize = 0;
-    char** stringSplit = strsplit(body.data, "\n", &splitSize);
-    free(body.data);
+    char** stringSplit = strsplit(e->headers.raw_header + e->headers.body_pos, "\n", &splitSize);
 
     sqlite3_open("database/pembukuan.db", &db[0]);
     sqlite3_open("database/pengeluaran.db", &db[1]);
@@ -96,11 +92,11 @@ int teleTotalPembukuan(sb_Event* e) {
     sqlite3_close(db[1]);
     
     int retVal = sendMessage(resultMessage.value);
-    if (retVal == 0) sb_send_status(e->stream, 403, "Tidak bisa terkoneksi ke telegram, apakah internet anda menyala?");
-    else if (retVal == -1) sb_send_status(e->stream, 403, "Token Bot dan User ID yang kamu masukan itu salah! mohon masukan Token Bot dan User ID yang benar");
-    else sb_send_status(e->stream, 200, "OK");
-    sb_send_header(e->stream, "Access-Control-Allow-Origin", "*");
+    if (retVal == 0) http_send_status(e, 403, "Tidak bisa terkoneksi ke telegram, apakah internet anda menyala?");
+    else if (retVal == -1) http_send_status(e, 403, "Token Bot dan User ID yang kamu masukan itu salah! mohon masukan Token Bot dan User ID yang benar");
+    else http_send_status(e, 200, "OK");
+    http_send_header(e, "Access-Control-Allow-Origin", "*");
     str_finalize(&resultMessage);
     free(stringSplit);
-    return SB_RES_OK;
+    return;
 }

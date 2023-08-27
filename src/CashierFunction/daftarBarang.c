@@ -4,14 +4,14 @@
 #include <string.h>
 #include <stdlib.h>
 
-#include "../../vendor/sandbird/sandbird.h"
+#include "../../vendor/httplib/httplibrary.h"
 #include "../../vendor/sqlite3/sqlite3.h"
 #include "../sqliteFunction.h"
 #include "../utils/utils.h"
 
 #include "cashierFunction.h"
 
-int daftarBarang(sb_Event* e) {
+void daftarBarang(http_event* e) {
     FILE* fp = fopen("database/daftarBarang.db", "rb");
     if (fp) {
         fclose(fp);
@@ -25,18 +25,18 @@ int daftarBarang(sb_Event* e) {
             freeRowBack(&allRows);
 
             if (!isStr(errMsg, "no such table", 0)) {
-                sb_send_status(e->stream, 403, "Ada yang salah pada AplikasiKasir, harap hubungi Pemilik");
+                http_send_status(e, 403, "Ada yang salah pada AplikasiKasir, harap hubungi Pemilik");
                 printf("[ERROR] Something wrong in SQLite at daftarBarang.c: %s\n", errMsg);
             }
             sqlite3_free(errMsg);
             sqlite3_close(db);
-            return SB_RES_OK;
+            return;
         }
 
-        sb_send_status(e->stream, 200, "OK");
-        sb_write(e->stream, allRows.rows, allRows.totalChar);
+        http_send_status(e, 200, "OK");
+        http_write(e, allRows.rows, allRows.totalChar);
         freeRowBack(&allRows);
         sqlite3_close(db);
     }
-    return SB_RES_OK;
+    return;
 }
