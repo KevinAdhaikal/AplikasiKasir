@@ -115,15 +115,13 @@ int http_send_file(http_event* e, const char* filename) {
 
         http_send_header(e, "Content-Length", toString);
         http_buffer_append(e, "\r\n", 2);
-
-        send(e->client_sock, e->server_buffer.data, e->server_buffer.len, 0);
         fseek(fp, 0, SEEK_SET);
 
         char tempBuffer[1024];
         size_t bufferSize;
-        while(bufferSize = fread(tempBuffer, 1, 1024, fp)) {
-            send(e->client_sock, tempBuffer, bufferSize, 0);
-        }
+        while(bufferSize = fread(tempBuffer, 1, 1024, fp)) http_buffer_append(e, tempBuffer, bufferSize);
+
+        send(e->client_sock, e->server_buffer.data, e->server_buffer.len, 0);
         http_buffer_free(&e->server_buffer);
         fclose(fp);
     }
