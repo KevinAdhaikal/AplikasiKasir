@@ -52,22 +52,6 @@ void loadSettings() {
     return;
 }
 
-/*int thread_handler(sb_Event* e) {
-    if (e->type == SB_EV_REQUEST && isStr(e->method, "POST", 1)) {
-        char username[254];
-        char password[254];
-        sb_get_var(e->stream, "username", username, 255);
-        sb_get_var(e->stream, "password", password, 255);
-        if (isStr(username, "admin", 1) && isStr(password, "admin", 1)) {
-            switch(sb_convert_var_to_int(e->stream, "teleArgs")) {
-                case 1: return teleTotalPembukuan(e);
-                case 2: return teleKasir(e);
-            }
-        }
-    }
-    return SB_RES_OK;
-}*/
-
 void event_handler(http_event* e) {
     printf("[%s] %s\n", e->headers.method, e->headers.path);
     if (!strcmp(e->headers.method, "POST")) POSTFunction(e);
@@ -87,6 +71,6 @@ int main() {
     loadSettings();
 
     // HTTP Server
-    http_start(http_init(8080), event_handler);
+    http_start(http_init(80), event_handler);
     return 0;
 }

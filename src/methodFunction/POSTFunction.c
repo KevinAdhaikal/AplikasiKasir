@@ -10,6 +10,7 @@
 #include "../utils/utils.h"
 #include "../sqliteFunction.h"
 #include "../CashierFunction/cashierFunction.h"
+#include "../teleFunction/teleFunction.h"
 
 void POSTFunction(http_event* e) {
     if (e->headers.path[0] != '/' || e->headers.path[1] == '\0') return;
@@ -30,6 +31,12 @@ void POSTFunction(http_event* e) {
         http_get_cookie(e, "password", password, 20);
 
         if (isStr(username, "admin", 1) && isStr(password, "admin", 1)) {
+            switch(http_get_query_to_int(e, "teleArgs")) {
+                case 1: return teleTotalPembukuan(e);
+                case 2: return teleKasir(e);
+                default: break;
+            }
+
             if (isStr(e->headers.path, "/checkLogin", 1)) http_send_status(e, 200, "OK");
             else if (isStr(e->headers.path, "/tambahBarang", 1)) tambahBarang(e);
             else if (isStr(e->headers.path, "/daftarBarang", 1)) daftarBarang(e);
@@ -42,6 +49,7 @@ void POSTFunction(http_event* e) {
             else if (isStr(e->headers.path, "/barangMasukLogic", 1)) barangMasukLogic(e);
             else if (isStr(e->headers.path, "/pengaturan", 1)) pengaturan(e);
             else http_send_status(e, 404, "Not Found");
+            
         }
         else http_send_status(e, 403, "Forbidden");
     }

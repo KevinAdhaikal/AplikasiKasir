@@ -32,7 +32,7 @@ void pengaturan(http_event* e) {
             if (e->headers.body_pos == -1) return;
             sqlite3_open("database/settings.db", &db);
             char** valueSplit = strsplit(e->headers.raw_header + e->headers.body_pos, "\n", 0);
-            
+
             if (!strlen(valueSplit[0])) {
                 http_send_status(e, 403, "Memakai Telegram Bot tidak boleh kosong!");
                 return;
