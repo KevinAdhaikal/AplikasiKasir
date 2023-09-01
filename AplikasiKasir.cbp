@@ -103,14 +103,14 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="vendor/cJSON/cJSON_Utils.h" />
+		<Unit filename="vendor/httplib/httplibrary.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="vendor/httplib/httplibrary.h" />
 		<Unit filename="vendor/libfort/fort.c">
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="vendor/libfort/fort.h" />
-		<Unit filename="vendor/sandbird/sandbird.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="vendor/sandbird/sandbird.h" />
 		<Unit filename="vendor/sqlite3/sqlite3.c">
 			<Option compilerVar="CC" />
 		</Unit>
