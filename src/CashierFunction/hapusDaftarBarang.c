@@ -5,7 +5,6 @@
 #include <stdlib.h>
 #include <ctype.h>
 
-#include "../../vendor/sandbird/sandbird.h"
 #include "../../vendor/httplib/httplibrary.h"
 #include "../sqliteFunction.h"
 #include "../utils/utils.h"

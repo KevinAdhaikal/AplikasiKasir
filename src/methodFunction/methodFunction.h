@@ -3,7 +3,7 @@
 
 #include <stdio.h>
 
-#include "../../vendor/sandbird/sandbird.h"
+#include "../../vendor/httplib/httplibrary.h"
 
 void GETFunction(http_event* e);
 void POSTFunction(http_event* e);
