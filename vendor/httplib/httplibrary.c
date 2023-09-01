@@ -57,6 +57,7 @@ void http_buffer_resize(http_buffer* b, int new_capacity) {
 }
 
 void http_buffer_append(http_event* e, const char *data, int len) {
+    if (!data || !len) return;
     if (e->state == 0) http_buffer_init(e, 1024);
     http_buffer* b = &e->server_buffer;
 
@@ -97,6 +98,7 @@ void http_send_header(http_event* e, const char *name, const char *val) {
 }
 
 void http_write(http_event* e, const char *data, int len) {
+    if (!data || !len) return;
     if (e->state == 0) http_buffer_init(e, 1024);
     if (e->state == 1) http_send_status(e, 200, "OK");
     if (e->state == 2) http_buffer_append(e, "\r\n", 2), e->state++;
