@@ -1,4 +1,5 @@
-# AplikasiKasir
+# AplikasiKasir [EXPERIMENTAL]
+PERINGATAN: AplikasiKasir Experimental masih belom stabil!<br>
 AplikasiKasir agar memudahkan pemilik usaha untuk mengelola Kasir
 # Fitur
 - Dasar untuk Kasir (Daftar Barang, Tambah Barang, Barang Masuk, Barang Terjual, Pembukuan)
