@@ -3,6 +3,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <pthread.h>
+#include <errno.h>
 
 #ifdef _WIN32
 #include <winsock2.h>
@@ -11,11 +12,14 @@
 #include <arpa/inet.h>
 #include <sys/socket.h>
 #include <sys/types.h>
+#include <sys/select.h>
 #include <netinet/in.h>
 #include <fcntl.h>
 #endif
 
 #include "httplibrary.h"
+
+#define LIMIT_SEND 8096
 
 typedef void (*http_callback)(http_event*);
 
@@ -31,6 +35,36 @@ int find_char_num(const char* str, char ch_find) {
         if (str[a] == ch_find) return a;
     }
     return -1;
+}
+
+void send_socket(int socketfd, char* data, int len) {
+    int pos = 0;
+    fd_set writefds;
+    struct timeval timeout;
+
+    while (len > 0) {
+        FD_ZERO(&writefds);
+        FD_SET(socketfd, &writefds);
+
+        timeout.tv_sec = 5;
+        timeout.tv_usec = 0;
+
+        int select_result = select(socketfd + 1, NULL, &writefds, NULL, &timeout);
+
+        if (select_result < 1) break;
+
+        int bytes_to_send = (len > LIMIT_SEND) ? LIMIT_SEND : len;
+        int bytes_sent = send(socketfd, data + pos, bytes_to_send, 0);
+
+        if (bytes_sent == -1) {
+            if (errno == EAGAIN || errno == EWOULDBLOCK) continue;
+            break;
+        }
+
+        pos += bytes_sent;
+        len -= bytes_sent;
+    }
+    FD_CLR(socketfd, &writefds);
 }
 
 void http_buffer_init(http_event* e, int initial_capacity) {
@@ -121,9 +155,13 @@ int http_send_file(http_event* e, const char* filename) {
 
         char tempBuffer[1024];
         size_t bufferSize;
-        while(bufferSize = fread(tempBuffer, 1, 1024, fp)) http_buffer_append(e, tempBuffer, bufferSize);
+        
+        sizeloop:
+        bufferSize = fread(tempBuffer, 1, 1024, fp);
+        http_buffer_append(e, tempBuffer, bufferSize);
+        if (bufferSize) goto sizeloop;
 
-        send(e->client_sock, e->server_buffer.data, e->server_buffer.len, 0);
+        send_socket(e->client_sock, e->server_buffer.data, e->server_buffer.len);
         http_buffer_free(&e->server_buffer);
         fclose(fp);
     }
@@ -241,7 +279,7 @@ void *handle_client(void *arg) {
         event.headers.path[path_len] = '\0';
         event.headers.question_pos = find_char_num(event.headers.path, '?') + 1;
         if (event.headers.question_pos) event.headers.path[event.headers.question_pos - 1] = '\0';
-        event.headers.body_pos = find_crlfcrlf_num(event.headers.raw_header);
+        event.headers.body_pos = find_crlfcrlf_num(event.headers.raw_header) + 4;
     } else {
         if (event.headers.raw_header) free(event.headers.raw_header);
         #ifdef _WIN32
@@ -257,7 +295,7 @@ void *handle_client(void *arg) {
     thread_data->callback(&event);
 
     if (event.server_buffer.len) {
-        send(event.client_sock, event.server_buffer.data, event.server_buffer.len, 0);
+        send_socket(event.client_sock, event.server_buffer.data, event.server_buffer.len);
         http_buffer_free(&event.server_buffer);
     }
 
@@ -269,8 +307,10 @@ void *handle_client(void *arg) {
     close(thread_data->client_socket);
     #endif
 
+    FD_CLR(thread_data->client_socket, &thread_data->read_fds);
     free(thread_data);
 
+    
     return NULL;
 }
 
@@ -347,22 +387,25 @@ void http_start(int server_socket, http_callback callback) {
             }
 
             #ifndef _WIN32
-            fcntl(client_socket, F_SETFL, fcntl(client_socket, F_GETFL, 0) | O_NONBLOCK); // non blocking untuk client
+            if (fcntl(client_socket, F_SETFL, fcntl(server_socket, F_GETFL, 0) | O_NONBLOCK) == -1) {
+                perror("fcntl failed");
+                return;
+            }
             #endif
+
         }
 
         for (int fd = 0; fd <= max_fd; fd++) {
             if (FD_ISSET(fd, &read_fds)) {
                 if (fd == server_socket) continue;
-
                 pthread_t thread;
                 http_thread* thread_arg = malloc(sizeof(http_thread));
                 thread_arg->client_socket = fd;
+                thread_arg->read_fds = read_fds;
                 thread_arg->callback = callback;
                 pthread_create(&thread, NULL, handle_client, thread_arg);
                 pthread_detach(thread);
                 FD_CLR(fd, &master_fds);
-
             }
         }
     }

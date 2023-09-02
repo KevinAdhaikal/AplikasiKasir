@@ -4,6 +4,13 @@
 #include <stdio.h>
 #include <string.h>
 
+#ifdef _WIN32
+#include <winsock2.h>
+#include <windows.h>
+#else
+#include <sys/select.h>
+#endif
+
 typedef struct {
     char method[16];
     char path[128];
@@ -32,6 +39,7 @@ typedef void (*http_callback)(http_event*);
 typedef struct {
     http_callback callback;
     int client_socket;
+    fd_set read_fds;
 } http_thread;
 
 int http_init(short port);
