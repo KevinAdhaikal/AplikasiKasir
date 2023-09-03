@@ -345,6 +345,9 @@ int http_init(short port) {
     }
     #endif
 
+    int value = 1;
+    setsockopt(server_socket, SOL_SOCKET, SO_REUSEADDR, &value, 4);
+    
     memset(&server_addr, 0, sizeof(server_addr));
     server_addr.sin_family = AF_INET;
     server_addr.sin_addr.s_addr = INADDR_ANY;
