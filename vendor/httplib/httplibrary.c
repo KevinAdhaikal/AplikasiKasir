@@ -170,6 +170,7 @@ int http_send_file(http_event* e, const char* filename) {
 }
 
 void http_get_header(http_event* e, const char* header_name, char* dest, size_t dest_len) {
+    dest[0] = '\0';
     const char* header_start = strstr(e->headers.raw_header, header_name);
 
     if (header_start) {
@@ -266,9 +267,11 @@ void *handle_client(void *arg) {
         } else if (temp_len == -1) break;
 
         event.headers.raw_header = realloc(event.headers.raw_header, event.headers.raw_len + temp_len + 1);
-        memcpy(event.headers.raw_header + event.headers.raw_len, temp_req, temp_len + 1);
+        memcpy(event.headers.raw_header + event.headers.raw_len, temp_req, temp_len);
         event.headers.raw_len += temp_len;
     }
+    
+    event.headers.raw_header[event.headers.raw_len] = '\0';
 
     if (event.headers.raw_len > 0) {
         int method_len = find_char_num(event.headers.raw_header, ' ');
