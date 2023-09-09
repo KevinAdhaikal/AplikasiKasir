@@ -81,6 +81,7 @@ int thread_handler(sb_Event* e) {
 int event_handler(sb_Event *e) {
     if (e->type == SB_EV_REQUEST) {
         printf("[%s] %s\n", e->method, e->path);
+        if (includeStr(e->path, "./")) return SB_RES_CLOSE;
         if (!strcmp(e->method, "POST")) return POSTFunction(e);
         else if (!strcmp(e->method, "GET")) return GETFunction(e);
         else return SB_RES_CLOSE;
