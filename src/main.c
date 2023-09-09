@@ -54,6 +54,8 @@ void loadSettings() {
 
 void event_handler(http_event* e) {
     printf("[%s] %s\n", e->headers.method, e->headers.path);
+    if (includeStr(e->headers.path, "./")) return;
+    
     if (!strcmp(e->headers.method, "POST")) POSTFunction(e);
     else if (!strcmp(e->headers.method, "GET")) GETFunction(e);
     return;
