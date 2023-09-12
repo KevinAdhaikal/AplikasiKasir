@@ -91,7 +91,7 @@ void http_buffer_resize(http_buffer* b, int new_capacity) {
 }
 
 void http_buffer_append(http_event* e, const char *data, int len) {
-    if (!data || !len) return;
+    if (!data) return;
     if (e->state == 0) http_buffer_init(e, 1024);
     http_buffer* b = &e->server_buffer;
 
