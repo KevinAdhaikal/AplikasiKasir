@@ -59,8 +59,8 @@ void teleKasir(http_event* e) {
     sendMessage(totalString.value);
     str_finalize(&totalString);
 
-    http_send_header(e, "Access-Control-Allow-Origin", "*");
     http_send_status(e, 200, "OK");
+    http_send_header(e, "Access-Control-Allow-Origin", "*");
     
     return;
 }

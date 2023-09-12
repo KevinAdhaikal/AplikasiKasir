@@ -58,6 +58,7 @@ void event_handler(http_event* e) {
     
     if (!strcmp(e->headers.method, "POST")) POSTFunction(e);
     else if (!strcmp(e->headers.method, "GET")) GETFunction(e);
+
     return;
 }
 

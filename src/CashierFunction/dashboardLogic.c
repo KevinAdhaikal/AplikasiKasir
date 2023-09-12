@@ -70,7 +70,6 @@ void dashboardLogic(http_event* e) {
         return;
     }
 
-    http_send_status(e, 200, "OK");
     http_write(e, rowBack.rows, rowBack.totalChar);
     freeRowBack(&rowBack);
     sqlite3_close(db);

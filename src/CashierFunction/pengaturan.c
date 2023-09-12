@@ -21,7 +21,6 @@ void pengaturan(http_event* e) {
             SQLRow row = {0};
             sqlite3_open("database/settings.db", &db);
             sqlite3_exec(db, "SELECT value FROM settings", RowBack, &row, NULL);
-            http_send_status(e, 200, "OK");
             http_write(e, row.rows, row.totalChar);
             freeRowBack(&row);
             sqlite3_close(db);

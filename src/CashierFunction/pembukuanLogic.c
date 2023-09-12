@@ -91,7 +91,6 @@ void pembukuan(http_event* e) {
                 if (!sqlBackExec(e, db, tempString, sqlReturnInt, &isTrue)) return;
 
                 if (!isTrue) {
-                    http_send_status(e, 200, "OK");
                     sprintf(tempString, "%d-%d-%d", timeinfo->tm_mday, timeinfo->tm_mon + 1, timeinfo->tm_year + 1900);
                     http_write(e, tempString, strlen(tempString));
                 } else {
@@ -102,7 +101,6 @@ void pembukuan(http_event* e) {
                         return;
                     }
 
-                    http_send_status(e, 200, "OK");
                     http_write(e, row.rows, row.totalChar);
                     sprintf(tempString, "%d-%d-%d", timeinfo->tm_mday, timeinfo->tm_mon + 1, timeinfo->tm_year + 1900);
                     http_write(e, tempString, strlen(tempString));
@@ -113,7 +111,6 @@ void pembukuan(http_event* e) {
                 if (!sqlBackExec(e, db, tempString, sqlReturnInt, &isTrue)) return;
                 
                 if (!isTrue) {
-                    http_send_status(e, 200, "OK");
                     sprintf(tempString, "%d-%d-%d", timeinfo->tm_mday, timeinfo->tm_mon + 1, timeinfo->tm_year + 1900);
                     http_write(e, tempString, strlen(tempString));
                 }
@@ -283,7 +280,6 @@ void pembukuan(http_event* e) {
             if (sqlite3_exec(db, tempString, RowBack, &row, &errMsg) != SQLITE_OK) {
                 freeRowBack(&row);
                 if (isStr(errMsg, "no such table", 0)) {
-                    http_send_status(e, 200, "OK");
                     sprintf(tempString, "%d-%d-%d", timeinfo->tm_mday, timeinfo->tm_mon + 1, timeinfo->tm_year + 1900);
                     http_write(e, tempString, strlen(tempString));
                 }
@@ -292,7 +288,6 @@ void pembukuan(http_event* e) {
                 return;
             }
 
-            http_send_status(e, 200, "OK");
             http_write(e, row.rows, row.totalChar);
             sprintf(tempString, "%d-%d-%d", timeinfo->tm_mday, timeinfo->tm_mon + 1, timeinfo->tm_year + 1900);
             http_write(e, tempString, strlen(tempString));

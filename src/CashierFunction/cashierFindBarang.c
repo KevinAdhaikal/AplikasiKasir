@@ -41,7 +41,6 @@ void cashierFindBarang(http_event* e) {
         return;
     }
 
-    http_send_status(e, 200, "OK");
     http_write(e, allrows.rows, allrows.totalChar);
     sqlite3_close(db);
     

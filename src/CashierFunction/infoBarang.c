@@ -47,7 +47,6 @@ void infoBarang(http_event* e) {
 
     http_write(e, allRow.rows, allRow.totalChar);
     freeRowBack(&allRow);
-    http_send_status(e, 200, "OK");
     sqlite3_close(db);
 
     return;

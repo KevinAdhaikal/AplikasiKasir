@@ -33,7 +33,6 @@ void daftarBarang(http_event* e) {
             return;
         }
 
-        http_send_status(e, 200, "OK");
         http_write(e, allRows.rows, allRows.totalChar);
         freeRowBack(&allRows);
         sqlite3_close(db);
