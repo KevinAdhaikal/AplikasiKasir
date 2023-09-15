@@ -34,9 +34,16 @@ void cashierFindBarang(http_event* e) {
             http_send_status(e, 403, "Ada yang salah pada AplikasiKasir, harap hubungi Pemilik");
             printf("[ERROR] Something wrong in SQLite at casirLogic.c: %s\n", errMsg);
         }
-        else http_send_status(e, 403, "Barang tersebut tidak tersedia di dalam database!");
+        else http_send_status(e, 403, "Barang tersebut tidak tersedia di dalam database!"); // tidak tau mengapa, code ini tidak berjalan, jadi saya tambahkan lagi di bawah
         
         sqlite3_free(errMsg);
+        sqlite3_close(db);
+        return;
+    }
+
+    if (!isStr(errMsg, "no such table", 0)) {
+        http_send_status(e, 403, "Ada yang salah pada AplikasiKasir, harap hubungi Pemilik");
+        printf("[ERROR] Something wrong in SQLite at casirLogic.c: %s\n", errMsg);
         sqlite3_close(db);
         return;
     }
