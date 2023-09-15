@@ -4,6 +4,8 @@
 #include <unistd.h>
 #include <pthread.h>
 #include <errno.h>
+#include <sys/stat.h>
+#include <time.h>
 
 #ifdef _WIN32
 #include <winsock2.h>
@@ -17,6 +19,7 @@
 #include <fcntl.h>
 #endif
 
+#include "../../src/utils/utils.h"
 #include "httplibrary.h"
 
 #define LIMIT_SEND 8096
@@ -91,7 +94,7 @@ void http_buffer_resize(http_buffer* b, int new_capacity) {
 }
 
 void http_buffer_append(http_event* e, const char *data, int len) {
-    if (!data) return;
+    if (!data || !len) return;
     if (e->state == 0) http_buffer_init(e, 1024);
     http_buffer* b = &e->server_buffer;
 
@@ -132,27 +135,45 @@ void http_send_header(http_event* e, const char *name, const char *val) {
 }
 
 void http_write(http_event* e, const char *data, int len) {
-    if (!data || !len) return;
+    if (!data) return;
     if (e->state == 0) http_buffer_init(e, 1024);
     if (e->state == 1) http_send_status(e, 200, "OK");
     if (e->state == 2) http_buffer_append(e, "\r\n", 2), e->state++;
     http_buffer_append(e, data, !len ? strlen(data) : len);
 }
 
-int http_send_file(http_event* e, const char* filename) {
+int http_send_file(http_event* e, const char* filename, char using_cache) {
     FILE* fp = fopen(filename, "rb");
     if (!fp) return -1;
     else {
+        if (e->state == 0) http_buffer_init(e, 1024);
+
+        if (using_cache) {
+            struct stat file_stat;
+            stat(filename, &file_stat);
+            char date[20];
+            char client_date[21];
+            strftime(date, 20, "%d-%m-%y %H:%M:%S", localtime(&(file_stat.st_mtime)));
+            http_get_header(e, "If-Modified-Since", client_date, 20);
+            if (client_date && isStr(date, client_date, 1)) {
+                http_send_status(e, 304, "Not Modified");
+                fclose(fp);
+                return 1;
+            }
+            if (e->state == 1) http_send_status(e, 200, "OK");
+            http_send_header(e, "Cache-Control", "no-cache");
+            http_send_header(e, "Last-Modified", date);
+        } else {if (e->state == 1) http_send_status(e, 200, "OK");}
+        
         char toString[32];
         fseek(fp, 0, SEEK_END);
-        if (e->state == 0) http_buffer_init(e, 1024);
-        if (e->state == 1) http_send_status(e, 200, "OK");
         sprintf(toString, "%u", (unsigned)ftell(fp));
-
-        http_send_header(e, "Content-Length", toString);
-        http_buffer_append(e, "\r\n", 2);
         fseek(fp, 0, SEEK_SET);
 
+        http_send_header(e, "Content-Length", toString);
+        http_send_header(e, "Content-Type", MIMETypes(filename));
+        http_buffer_append(e, "\r\n", 2);
+        
         char tempBuffer[1024];
         size_t bufferSize;
         
