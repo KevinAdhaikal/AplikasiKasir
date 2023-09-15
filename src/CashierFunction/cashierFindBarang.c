@@ -41,7 +41,7 @@ void cashierFindBarang(http_event* e) {
         return;
     }
 
-    if (!isStr(errMsg, "no such table", 0)) {
+    if (!allrows.totalChar) {
         http_send_status(e, 403, "Ada yang salah pada AplikasiKasir, harap hubungi Pemilik");
         printf("[ERROR] Something wrong in SQLite at casirLogic.c: %s\n", errMsg);
         sqlite3_close(db);
