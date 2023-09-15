@@ -1,5 +1,6 @@
 # AplikasiKasir
 AplikasiKasir agar memudahkan pemilik usaha untuk mengelola Kasir
+Untuk mencoba versi HTTP Thread (EXPERIMENTAL): https://github.com/KevinAdhaikal/AplikasiKasir/tree/experimental
 # Fitur
 - Dasar untuk Kasir (Daftar Barang, Tambah Barang, Barang Masuk, Barang Terjual, Pembukuan)
 - Telegram (Untuk mengirim ke Informasi dari AplikasiKasir ke Telegram anda)
