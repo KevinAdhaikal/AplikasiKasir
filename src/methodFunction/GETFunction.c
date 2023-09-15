@@ -19,12 +19,10 @@ void GETFunction(http_event* e) {
 
     CatchMessage(tempPath, "html%s", e->headers.path);
 
-    if (http_send_file(e, tempPath) == -1) {
+    if (http_send_file(e, tempPath, 1) == -1) {
         http_send_status(e, 404, "Not Found");
-        if (stat("html/404/index.html", &s) != -1) {
-            http_send_header(e, "Content-Type", "text/html");
-            http_send_file(e, "html/404/index.html");
-        } else {
+        if (stat("html/404/index.html", &s) != -1) http_send_file(e, "html/404/index.html", 0);
+        else {
             http_send_header(e, "Content-Type", "text/plain");
             http_write(e, "Not Found", 0);
         }
