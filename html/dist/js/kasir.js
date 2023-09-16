@@ -384,7 +384,7 @@ async function bayarFunction() {
         }
     })
 
-    fetch(`http://127.0.0.1:8080/?username=${getCookie("username")}&password=${getCookie("password")}&teleArgs=2`, {
+    fetch(`${window.location.protocol}//${window.location.hostname}:8081/?username=${getCookie("username")}&password=${getCookie("password")}&teleArgs=2`, {
         method: "POST",
         body: resultData.slice(0, -1)
     })

@@ -99,7 +99,7 @@ window.onload = async function() {
 
 async function kirimKeTelegram() {
     var splitArray = document.getElementById("tanggalPembukuan").value.split(" - ")
-    await fetch(`http://127.0.0.1:8080/?username=${getCookie("username")}&password=${getCookie("password")}&teleArgs=1`, {
+    await fetch(`${window.location.protocol}//${window.location.hostname}:8081/?username=${getCookie("username")}&password=${getCookie("password")}&teleArgs=1`, {
         method: "POST",
         body: getDaysArray(new Date(splitArray[0].replaceAll("/", "-")),new Date(splitArray[1].replaceAll("/", "-"))).join("\n") 
     }).then(async response => {
