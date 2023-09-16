@@ -114,7 +114,7 @@ int main() {
     // HTTP Server (Telegram)
     memset(&opt[1], 0, sizeof(sb_Options));
     opt[1].host = "0.0.0.0";
-    opt[1].port = "8080";
+    opt[1].port = "8081";
     opt[1].handler = thread_handler;
 
     srv[1] = sb_new_server(&opt[1]);
