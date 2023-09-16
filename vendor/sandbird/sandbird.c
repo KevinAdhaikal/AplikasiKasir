@@ -32,6 +32,7 @@
   #include <arpa/inet.h>
   #include <netinet/in.h>
 #endif
+#include <sys/stat.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -42,7 +43,6 @@
 
 #include "../../src/utils/utils.h"
 #include "sandbird.h"
-
 
 #ifdef _WIN32
   #define close(a) closesocket(a)
@@ -593,7 +593,7 @@ int sb_send_header(sb_Stream *st, const char *field, const char *val) {
 }
 
 
-int sb_send_file(sb_Stream *st, const char *filename) {
+int sb_send_file(sb_Stream *st, const char *filename, char using_cache) {
   int err;
   char buf[32];
   size_t sz;
@@ -605,6 +605,22 @@ int sb_send_file(sb_Stream *st, const char *filename) {
   fp = fopen(filename, "rb");
   if (!fp) return SB_ECANTOPEN;
 
+  if (using_cache) {
+    struct stat file_stat;
+    stat(filename, &file_stat);
+    char date[20];
+    char client_date[21];
+    strftime(date, 20, "%d-%m-%y %H:%M:%S", localtime(&(file_stat.st_mtime)));
+    sb_get_header(st, "If-Modified-Since", client_date, 20);
+    if (client_date && isStr(date, client_date, 1)) {
+        sb_send_status(st, 304, "Not Modified");
+        fclose(fp);
+        st->state = STATE_SENDING_DATA;
+        return SB_ESUCCESS;
+    }
+    sb_send_header(st, "Cache-Control", "no-cache");
+    sb_send_header(st, "Last-Modified", date);
+  }
   /* Get file size and write headers */
   fseek(fp, 0, SEEK_END);
   sz = ftell(fp);

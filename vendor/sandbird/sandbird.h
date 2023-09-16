@@ -79,7 +79,7 @@ void sb_close_server(sb_Server *srv);
 int sb_poll_server(sb_Server *srv, int timeout);
 int sb_send_status(sb_Stream *st, int code, const char *msg);
 int sb_send_header(sb_Stream *st, const char *field, const char *val);
-int sb_send_file(sb_Stream *st, const char *filename);
+int sb_send_file(sb_Stream *st, const char *filename, char using_cache);
 int sb_write(sb_Stream *st, const void *data, size_t len);
 int sb_vwritef(sb_Stream *st, const char *fmt, va_list args);
 int sb_writef(sb_Stream *st, const char *fmt, ...);
