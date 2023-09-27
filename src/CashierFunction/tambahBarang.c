@@ -39,7 +39,7 @@ int tambahBarang(sb_Event* e) {
 
     sqlite3_open("database/daftarBarang.db", &db);
     
-    if (!barcodeBarang[0])sprintf(strTemp, "SELECT lower(nama) FROM daftarBarang WHERE lower(nama) = lower('%s')", namaBarang, barcodeBarang);
+    if (!barcodeBarang[0]) sprintf(strTemp, "SELECT lower(nama) FROM daftarBarang WHERE lower(nama) = lower('%s')", namaBarang);
     else sprintf(strTemp, "SELECT lower(nama),barcode FROM daftarBarang WHERE lower(nama) = lower('%s') OR barcode = '%s'", namaBarang, barcodeBarang);
     
     sqlite3_exec(db, strTemp, tableExists, &checkDatabase, &errMsg);
