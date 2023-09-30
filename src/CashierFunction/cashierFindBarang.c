@@ -25,7 +25,7 @@ int cashierFindBarang(sb_Event* e) {
     
     sqlite3_open("database/daftarBarang.db", &db);
 
-    sprintf(strTemp, "SELECT nama,jumlah,modal,jual from daftarBarang where nama LIKE '%%%s%%' OR barcode = '%s'", inputBarang, inputBarang);
+    sprintf(strTemp, "SELECT nama,jumlah,modal,jual FROM daftarBarang WHERE jumlah > 0 AND nama LIKE '%%%s%%' OR barcode = '%s'", inputBarang, inputBarang);
 
     if (sqlite3_exec(db, strTemp, RowBack, &allrows, &errMsg) != SQLITE_OK) {
         freeRowBack(&allrows);
@@ -41,9 +41,15 @@ int cashierFindBarang(sb_Event* e) {
         return SB_RES_OK;
     }
 
-    sb_send_status(e->stream, 200, "OK");
-    sb_write(e->stream, allrows.rows, allrows.totalChar);
+    if (!allrows.totalChar) {
+        freeRowBack(&allrows);
+        sb_send_status(e->stream, 403, "Barang tersebut kosong/tidak tersedia di dalam database!");
+    } 
+    else {
+        sb_send_status(e->stream, 200, "OK");
+        sb_write(e->stream, allrows.rows, allrows.totalChar);
+    }
+
     sqlite3_close(db);
-    
     return SB_RES_OK;
 }
