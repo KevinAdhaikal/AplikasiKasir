@@ -84,6 +84,7 @@ async function refreshBarangKosong() {
         if (response.status == 200) {
             await response.text().then(data => {
                 data = data.split("\n");
+                $("#barangKosongTable").DataTable().clear().draw() // clear table
                 for (let a = 0; a < data.length - 1; a++) $("#barangKosongTable").DataTable().row.add([data[a]]).draw(false)
             })
         } else {
