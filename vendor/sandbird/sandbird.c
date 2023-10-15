@@ -625,6 +625,7 @@ int sb_send_file(sb_Stream *st, const char *filename, char using_cache) {
   fseek(fp, 0, SEEK_END);
   sz = ftell(fp);
   sprintf(buf, "%u", (unsigned) sz);
+  sb_send_header(st, "Content-Type", MIMETypes(filename));
   err = sb_send_header(st, "Content-Length", buf);
   if (err) goto fail;
   err = sb_stream_finalize_header(st);
