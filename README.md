@@ -36,7 +36,7 @@ Anda bisa mengetest AplikasiKasir di Android kalian, tetapi anda harus mengikuti
 9. lakukan ganti port, dan port nya harus di atas 1024, setelah itu lakukan save & exit dengan tekan CTRL + X dan Y dan Enter
 10. dan terakhir, lakukan build `bash build.sh`
 
-Jadi untuk non rooted user, harus memakai port yang sesuai anda set, contoh: `opt[0].port = "8081";`<br>
+Jadi untuk non rooted user, harus memakai port yang sesuai anda set, contoh: `opt[0].port = "8082";`<br>
 Berarti, untuk input URL ke Chrome, harus seperti ini: localhost:8081
 
 # Username & Password
