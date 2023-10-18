@@ -2,7 +2,8 @@
 #define UTILS_H_INCLUDED
 
 char** strsplit(const char* s, const char* delim, size_t* nb);
-void CatchMessage(char* dest, const char *message, ...);
+void static_string_format(char* dest, const char *message, ...);
+char* dynamic_string_format(const char *format, ...);
 char findStrLast(const char* str, const char* strFind);
 int findEmptyCRLFPosition(const char* str);
 int findCharNum(const char* str, char charFind);

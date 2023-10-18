@@ -2,7 +2,6 @@
 #include <string.h>
 #include <stdlib.h>
 
-#include "../../vendor/sandbird/sandbird.h"
 #include "../utils/utils.h"
 #include "../../vendor/sqlite3/sqlite3.h"
 #include "../sqliteFunction.h"
@@ -95,7 +94,7 @@ int teleTotalPembukuan(sb_Event* e) {
     sqlite3_close(db[0]);
     sqlite3_close(db[1]);
     
-    int retVal = sendMessage(resultMessage.value);
+    int retVal = sendMessage(resultMessage.value, NULL, NULL);
     if (retVal == 0) sb_send_status(e->stream, 403, "Tidak bisa terkoneksi ke telegram, apakah internet anda menyala?");
     else if (retVal == -1) sb_send_status(e->stream, 403, "Token Bot dan User ID yang kamu masukan itu salah! mohon masukan Token Bot dan User ID yang benar");
     else sb_send_status(e->stream, 200, "OK");

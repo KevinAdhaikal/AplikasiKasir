@@ -29,7 +29,7 @@ int GETFunction(sb_Event* e) {
         }
     }
 
-    CatchMessage(tempPath, "html%s", e->path);
+    static_string_format(tempPath, "html%s", e->path);
 
     if (sb_send_file(e->stream, tempPath, 1) == SB_ECANTOPEN) {
         sb_send_status(e->stream, 404, "Not Found");

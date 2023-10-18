@@ -35,7 +35,6 @@ async function load() {
 
         if (response.status == 200) {
             await response.json().then(data => {
-                console.log(data)
                 var barangTerjual = data["barangTerjual"]
                 var pengeluaran = data["pengeluaran"]
 
@@ -103,7 +102,6 @@ async function kirimKeTelegram() {
         method: "POST",
         body: getDaysArray(new Date(splitArray[0].replaceAll("/", "-")),new Date(splitArray[1].replaceAll("/", "-"))).join("\n") 
     }).then(async response => {
-        console.log(response.status)
         if (response.status == 200) {
             Swal.mixin({
                 toast: true,

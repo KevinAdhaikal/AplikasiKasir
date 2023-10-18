@@ -1,5 +1,36 @@
-async function load() {
-    await fetch("/pengaturan?pengaturanArgs=1", {
+$("input[data-type='currency']").on({
+    input: function() {
+        formatCurrency($(this));
+    }
+});
+
+function formatNumber(n) {
+    return n.replace(/\D/g, "").replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+}
+
+function formatCurrency(input) {
+    var input_val = input.val();
+    if (input_val === "") return;
+    var original_len = input_val.length;
+    var caret_pos = input.prop("selectionStart");
+    input_val = formatNumber(input_val);
+    input.val(input_val);
+    var updated_len = input_val.length;
+    caret_pos = updated_len - original_len + caret_pos;
+    input[0].setSelectionRange(caret_pos, caret_pos);
+}
+
+document.getElementById("jumlahNotifyStockBarangDibawahJumlah").addEventListener("keypress", function(e) {
+    if (!(e.keyCode >= 47 && e.keyCode <= 58)) e.preventDefault();
+})
+
+document.getElementById("jumlahNotifyStockBarangDibawahJumlah").addEventListener("input", function(e) {
+    if (Number(e.target.value) > 65535) e.target.value = "65535"
+    else if (Number(e.target.value) < 0) e.target.value = "0"
+})
+
+function load() {
+    fetch("/pengaturan?pengaturanArgs=1", {
         method: "POST"
     }).then(async response => {
         if (response.status == 200) {
@@ -8,34 +39,47 @@ async function load() {
                 $('#menggunakanTelegramBot').bootstrapToggle(data[0] == '1' ? 'on' : 'off')
                 document.getElementById("telegramBotToken").value = data[1]
                 document.getElementById("telegramUserID").value = data[2]
+                $("#blockBarangKosong").bootstrapToggle(data[3] == '1' ? 'on' : 'off')
+                $("#notifyBarangKosong").bootstrapToggle(data[4] == '1' ? 'on' : 'off')
+                $("#notifyKasir").bootstrapToggle(data[5] == '1' ? 'on' : 'off')
+                $("#isNotifyStockBarangDibawahJumlah").bootstrapToggle(data[6] == '1' ? 'on' : 'off')
+                document.getElementById("jumlahNotifyStockBarangDibawahJumlah").value = data[7];
             })
         }
     })
 }
 
-
-
-$('#menggunakanTelegramBot').on('change.bootstrapSwitch', function(e) {
+document.addEventListener('DOMContentLoaded', function() {
+    // reinitialize yang ada bootstrap toggle
+    document.getElementById("telegram-content").classList.add("active");
+    $('[data-toggle="toggle"]').bootstrapToggle();
+    document.getElementById("telegram-content").classList.remove("active");
     
-    if (e.target.checked) {
-        document.getElementById("telegramBotToken").disabled = false
-        document.getElementById("telegramUserID").disabled = false
-    }
-    else {
-        document.getElementById("telegramBotToken").disabled = true;
-        document.getElementById("telegramUserID").disabled = true;
-    }
+    load()
+    document.getElementById("telegramBotToken").focus()
 });
 
-window.onload = async function() {
-    await load()
-    document.getElementById("telegramBotToken").focus()
-}
+$('#menggunakanTelegramBot').on('change.bootstrapSwitch', function(e) {
+    if (e.target.checked) document.getElementById("boxTelegram").classList.remove("d-none")
+    else document.getElementById("boxTelegram").classList.add("d-none")
+});
+
+$('#isNotifyStockBarangDibawahJumlah').on('change.bootstrapSwitch', function(e) {
+    if (e.target.checked) document.getElementById("jumlahNotifyStockBarangDibawahJumlah").disabled = false
+    else document.getElementById("jumlahNotifyStockBarangDibawahJumlah").disabled = true
+});
 
 function terapkanPengaturan() {
     fetch("/pengaturan?pengaturanArgs=2", {
         method: "POST",
-        body: `${document.getElementById("menggunakanTelegramBot").checked ? '1' : '0'}\n${document.getElementById("telegramBotToken").value}\n${document.getElementById("telegramUserID").value}`
+        body: `${document.getElementById("menggunakanTelegramBot").checked ? '1' : '0'}
+${document.getElementById("telegramBotToken").value}
+${document.getElementById("telegramUserID").value}
+${document.getElementById("blockBarangKosong").checked ? '1' : '0'}
+${document.getElementById("notifyBarangKosong").checked ? '1' : '0'}
+${document.getElementById("notifyKasir").checked ? '1' : '0'}
+${document.getElementById("isNotifyStockBarangDibawahJumlah").checked ? '1' : '0'}
+${document.getElementById("jumlahNotifyStockBarangDibawahJumlah").value}`
     }).then(response => {
         if (response.status == 200) {
             Swal.mixin({

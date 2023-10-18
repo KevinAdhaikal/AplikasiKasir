@@ -76,11 +76,29 @@ char* formatCurrency(int num) {
     return resultStr;
 } // thanks ChatGPT
 
-void CatchMessage(char* dest, const char* message, ...) {
+void static_string_format(char* dest, const char* message, ...) {
     va_list ap;
     va_start(ap, message);
     vsnprintf(dest, 1024, message, ap);
     va_end(ap);
+}
+
+char* dynamic_string_format(const char *format, ...) {
+    va_list args;
+    va_start(args, format);
+    
+    // Calculate the length of the resulting string
+    int len = vsnprintf(NULL, 0, format, args) + 1;
+    
+    // Allocate memory for the resulting string
+    char *result = (char *)malloc(len * sizeof(char));
+    
+    // Reinitialize args and format the string
+    va_start(args, format);
+    vsnprintf(result, len, format, args);
+    va_end(args);
+    
+    return result;
 }
 
 char findStrLast(const char* str, const char* suffix) {

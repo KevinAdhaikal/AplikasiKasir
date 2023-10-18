@@ -31,15 +31,27 @@ void loadSettings() {
     sqlite3_open("database/settings.db", &db);
 
     sqlite3_exec(db, "CREATE TABLE IF NOT EXISTS settings (name TEXT, value TEXT)", 0, 0, NULL);
-    sqlite3_exec(db, "SELECT * from settings", RowBack, &row, NULL);
+    sqlite3_exec(db, "PRAGMA table_info(settings);", RowBack, &row, NULL);
 
-    if (!row.totalChar) {
-        freeRowBack(&row);
-        printf("[Config] Configuration not found, Creating...\n");
-        sqlite3_exec(db, "INSERT INTO settings (name, value) VALUES ('usingTelegram', 0), ('telegramTokenID', ''), ('telegramUserID', '')", 0, 0, NULL);
-        printf("[Config] Configuration has been created!\n");
-        sqlite3_exec(db, "SELECT * from settings", RowBack, &row, NULL);
+    if (row.rows[19] == '0') {
+        sqlite3_exec(db, "CREATE TABLE IF NOT EXISTS new_settings (name TEXT PRIMARY KEY, value TEXT)", 0, 0, NULL);
+        sqlite3_exec(db, "INSERT INTO new_settings (name, value) SELECT name, value FROM settings", 0, 0, NULL);
+        sqlite3_exec(db, "DROP TABLE IF EXISTS settings", 0, 0, NULL);
+        sqlite3_exec(db, "ALTER TABLE new_settings RENAME TO settings", 0, 0, NULL);
     }
+
+    freeRowBack(&row);
+
+    sqlite3_exec(db, "INSERT OR IGNORE INTO settings (name, value) VALUES ('usingTelegram', 0),"
+    "('telegramTokenID', ''),"
+    "('telegramUserID', ''),"
+    "('blockBarangKosong', 1),"
+    "('notifyBarangKosongTGram', 0),"
+    "('notifyKasirTGram', 1),"
+    "('isNotifyDibawahStockBarangTGram', 0),"
+    "('jumlahNotifyDibawahStockBarangTGram', 0)", 0, 0, NULL);
+
+    sqlite3_exec(db, "SELECT * from settings", RowBack, &row, NULL);
 
     char** strSplit = strsplit(row.rows, "\n", 0);
 
@@ -52,26 +64,32 @@ void loadSettings() {
         teleBot.userID = strsplit(valueSplit[1], ",", &teleBot.userIDsize);
         free(valueSplit);
     }
-    else if (isStr(strSplit[0], "usingTelegram|0", 1)) teleBot.usingTelegramBot = 0;
+    else teleBot.usingTelegramBot = 0;
+    
+    teleBot.notifyBarangKosongTGram = strSplit[4][24] - 48;
+    teleBot.notifyKasirTGram = strSplit[5][17] - 48;
+    teleBot.isNotifyBarangDibawahJumlah = strSplit[6][32] - 48;
+    teleBot.targetNotifyBarangDibawahJumlah = atoi(strSplit[7] + 36);
 
     free(strSplit);
     freeRowBack(&row);
     sqlite3_close(db);
 
-    printf("[Config] Configuration has been loaded!\n");
+    printf("[LOGS] Configuration has been loaded!\n");
     return;
 }
 
 int thread_handler(sb_Event* e) {
     if (e->type == SB_EV_REQUEST && isStr(e->method, "POST", 1)) {
-        char username[254];
-        char password[254];
-        sb_get_var(e->stream, "username", username, 255);
-        sb_get_var(e->stream, "password", password, 255);
-        if (isStr(username, "admin", 1) && isStr(password, "admin", 1)) {
+        char username[255];
+        char password[255];
+        sb_get_var(e->stream, "username", username, 254);
+        sb_get_var(e->stream, "password", password, 254);
+        if ((isStr(username, "admin", 1) && isStr(password, "admin", 1)) && teleBot.usingTelegramBot) {
             switch(sb_convert_var_to_int(e->stream, "teleArgs")) {
                 case 1: return teleTotalPembukuan(e);
                 case 2: return teleKasir(e);
+                default: return SB_RES_OK;
             }
         }
     }
@@ -96,7 +114,7 @@ int main() {
         system("mkdir database");
         printf("[LOGS] Database folder has been created!\n");
     } else closedir(dir);
-    
+
     memset(&teleBot, 0, sizeof(telegramBot));
     loadSettings();
 

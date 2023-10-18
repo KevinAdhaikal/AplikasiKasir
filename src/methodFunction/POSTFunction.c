@@ -17,8 +17,8 @@ int POSTFunction(sb_Event* e) {
     if (isStr(e->path, "/userLogin", 1)) {
         char username[20], password[20];
 
-        sb_get_var(e->stream, "username", username, 20);
-        sb_get_var(e->stream, "password", password, 20);
+        sb_get_var(e->stream, "username", username, 19);
+        sb_get_var(e->stream, "password", password, 19);
         
         if (isStr(username, "admin", 1) && isStr(password, "admin", 1)) sb_send_status(e->stream, 200, "OK");
         else sb_send_status(e->stream, 403, "Forbidden");
@@ -26,8 +26,8 @@ int POSTFunction(sb_Event* e) {
     else {
         char username[20], password[20];
 
-        sb_get_cookie(e->stream, "username", username, 20);
-        sb_get_cookie(e->stream, "password", password, 20);
+        sb_get_cookie(e->stream, "username", username, 19);
+        sb_get_cookie(e->stream, "password", password, 19);
 
         if (isStr(username, "admin", 1) && isStr(password, "admin", 1)) {
             if (isStr(e->path, "/checkLogin", 1)) sb_send_status(e->stream, 200, "OK");
@@ -37,6 +37,8 @@ int POSTFunction(sb_Event* e) {
             else if (isStr(e->path, "/infoBarang", 1)) infoBarang(e);
             else if (isStr(e->path, "/editBarang", 1)) editBarang(e);
             else if (isStr(e->path, "/cashierFindBarang", 1)) cashierFindBarang(e);
+            else if (isStr(e->path, "/cashierSettings", 1)) cashierSettings(e);
+            else if (isStr(e->path, "/cashierStockChecker", 1)) cashierStockChecker(e);
             else if (isStr(e->path, "/pembukuan", 1)) pembukuan(e);
             else if (isStr(e->path, "/dashboardLogic", 1)) dashboardLogic(e);
             else if (isStr(e->path, "/barangMasukLogic", 1)) barangMasukLogic(e);

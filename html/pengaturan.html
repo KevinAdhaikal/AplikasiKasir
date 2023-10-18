@@ -18,9 +18,13 @@
   <!-- iCheck for checkboxes and radio inputs -->
   <link rel="stylesheet" href="/plugins/bootstrap-toggle/bootstrap-toggle.min.css">
   <style type="text/css">
+    .brsmall {
+      display: block;
+      margin-bottom: 0.5;
+    }
     .br {
         display: block;
-        margin-bottom: 0em;
+        margin-bottom: 1em;
     }
       
     .brmedium {
@@ -36,8 +40,9 @@
       margin-right : 10px;
     }
     .a {
-    border-top: 1px solid grey;
-  }
+      border-top: 1px solid grey;
+    }
+    .normallabel { font-size: 1.1em } 
 
   </style>
 </head>
@@ -192,31 +197,59 @@
       <div class="container-fluid">
         <div class="row">
           <div class="col-md-12">
-            <div class="card card-primary">
-              <div class="card-header">
-                <h3 class="card-title">Pengaturan Telegram Bot</h3>
+            <div class="card card-primary card-tabs">
+              <div class="card-header p-0 pt-1">
+                <ul class="nav nav-tabs" id="custom-tabs-one-tab" role="tablist">
+                  <li class="nav-item">
+                    <a class="nav-link active" id="general-tabs" data-toggle="pill" href="#general-content" role="tab" aria-controls="general-content" aria-selected="true">General</a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link" id="telegram-tab" data-toggle="pill" href="#telegram-content" role="tab" aria-controls="telegram-content" aria-selected="false">Telegram</a>
+                  </li>
+                </ul>
               </div>
-              <!-- /.card-header -->
-              <!-- form start -->
               <div class="card-body">
-                <label class="space2">Memakai Telegram Bot</label>
-                <input type="checkbox" id="menggunakanTelegramBot" data-toggle="toggle" data-onstyle="success" data-offstyle="danger" data-width="40" data-height="0">
-                <span class="br"></span>
-                <div class="form-group">
-                  <label for="telegramBotToken">Telegram Bot Token</label>
-                  <input class="form-control" id="telegramBotToken" placeholder="Telegram Bot Token">
-                </div>
-                <div class="form-group">
-                  <label for="telegramUserID">Telegram User ID</label>
-                  <input class="form-control" id="telegramUserID" placeholder="Telegram User ID">
+                <div class="tab-content" id="custom-tabs-one-tabContent">
+                  <div class="tab-pane fade active show" id="general-content" role="tabpanel" aria-labelledby="general-tab">
+                    <label class="normallabel">Memblok barang kosong</label> <a>(Anda tidak akan tidak bisa menambahkan barang kosong di Kasir)</a>
+                    <br>
+                    <input type="checkbox" id="blockBarangKosong" data-toggle="toggle" data-onstyle="success" data-offstyle="danger" data-width="85" data-height="0">
+                  </div>
+                  <div class="tab-pane fade" id="telegram-content" role="tabpanel" aria-labelledby="telegram-tab">
+                    <label class="normallabel">Memakai Telegram Bot</label> <a>(Notifikasi menggunakan Telegram)</a>
+                    <br>
+                    <input type="checkbox" id="menggunakanTelegramBot" data-toggle="toggle" data-onstyle="success" data-offstyle="danger" data-width="85" data-height="0">
+                    <div id="boxTelegram">
+                      <hr>
+                      <div class="form-group">
+                        <label for="telegramBotToken" class="normallabel">Telegram Bot Token</label>
+                        <a>(Untuk membuat bot, Anda harus Connect ke <a href="https://t.me/BotFather">@BotFather</a>)</a>
+                        <span class="brsmall"></span>
+                        <input class="form-control" id="telegramBotToken" placeholder="Telegram Bot Token">
+                      </div>
+                      <div class="form-group">
+                        <label for="telegramUserID" class="normallabel">Telegram User ID</label>
+                        <a>(Untuk mendapatkan User ID Telegram Anda, Anda bisa menggunakan <a href="https://t.me/userinfobot">Bot ini</a>)</a>
+                        <input class="form-control" id="telegramUserID" placeholder="Telegram User ID">
+                      </div>
+                      <button class="btn btn-primary" id="testMessageButton" onclick="testMessage()">Test Message Telegram</button>
+                      <hr>
+                      <label class="normallabel">Notifikasi Barang Kosong</label> <a>(Anda akan mendapatkan Notifikasi jika ada barang yang Kosong)</a><br>
+                      <input type="checkbox" id="notifyBarangKosong" data-toggle="toggle" data-onstyle="success" data-offstyle="danger" data-width="85" data-height="0"><span class="brmedium"></span>
+                      <label class="normallabel">Notifikasi Kasir</label> <a>(Anda akan mendapatkan Notifikasi jika ada yang membeli Barang)</a><br>
+                      <input type="checkbox" id="notifyKasir" data-toggle="toggle" data-onstyle="success" data-offstyle="danger" data-width="85" data-height="0"><span class="brmedium"></span>
+                      <label class="normallabel">Notifikasi Stock Barang dibawah Jumlah</label> <a>(Anda akan mendapatkan Notifikasi jika Stock Barang dibawah Jumlah)</a><br>
+                      <input type="checkbox" id="isNotifyStockBarangDibawahJumlah" data-toggle="toggle" data-onstyle="success" data-offstyle="danger" data-width="85" data-height="0"><span class="brmedium"></span>
+                      <label class="normallabel">Target Notifikasi Stock Barang dibawah Jumlah</label> <a>(Berapa target Stock barang dibawah Jumlah, min: 0 max: 65535)</a><br>
+                      <div class="col-md-2 pl-0"><input type="number" class="form-control" id="jumlahNotifyStockBarangDibawahJumlah" step="1" max="65535"></div>
+                    </div>
+                  </div>
                 </div>
               </div>
-              <!-- /.card-body -->
               <div class="card-footer">
                 <button class="btn btn-success" onclick="terapkanPengaturan()">Terapkan Pengaturan</button>
-                <button class="btn btn-primary" onclick="testMessage()">Test Message Telegram</button>
               </div>
-            </div>
+            </div>            
           </div>
         </div>
         <!-- /.row -->
@@ -230,7 +263,7 @@
   <footer class="main-footer">
     <!-- To the right -->
     <div class="float-right d-none d-sm-inline">
-      <b>AplikasiKasir</b> v1.0, <strong><a href="https://github.com/KevinAdhaikal/AplikasiKasir">Kevin Adhaikal</a></strong>.
+      <b>AplikasiKasir</b> v1.5, <strong><a href="https://github.com/KevinAdhaikal/AplikasiKasir">Kevin Adhaikal</a></strong>.
     </div>
     <!-- Default to the left -->
     <strong>Copyright &copy; 2014-2021 <a href="https://adminlte.io">AdminLTE.io</a>.</strong> All rights reserved.

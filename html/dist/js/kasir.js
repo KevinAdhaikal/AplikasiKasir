@@ -1,3 +1,29 @@
+var isShowDialog = 0;
+var cashierSettings;
+var limitStock = 0;
+
+$("input[data-type='currency']").on({
+    input: function() {
+        formatCurrency($(this));
+    }
+});
+
+function formatNumber(n) {
+    return n.replace(/\D/g, "").replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+}
+
+function formatCurrency(input) {
+    var input_val = input.val();
+    if (input_val === "") return;
+    var original_len = input_val.length;
+    var caret_pos = input.prop("selectionStart");
+    input_val = formatNumber(input_val);
+    input.val(input_val);
+    var updated_len = input_val.length;
+    caret_pos = updated_len - original_len + caret_pos;
+    input[0].setSelectionRange(caret_pos, caret_pos);
+}
+
 function getCookie(cname) {
     let name = cname + "=";
     let decodedCookie = decodeURIComponent(document.cookie);
@@ -12,9 +38,15 @@ function getCookie(cname) {
       }
     }
     return "";
-} 
+}
 
-window.onload = function() {
+window.onload = async function() {
+    await fetch("/cashierSettings", {
+        method: "POST"
+    }).then(async response => {
+        await response.text().then(data => cashierSettings = data.split("\n").slice(0, -1).map(Number))
+
+    })
     document.getElementById("inputBarang").focus()
 }
 
@@ -25,17 +57,27 @@ $('#modal-editBarang').on('shown.bs.modal', function () {
     $('#jumlahBarang').focus();
 })
 
+$("#modal-editBarang").on('hidden.bs.modal', function() {
+    isShowDialog = 0;
+    $("#inputBarang").focus();
+})
+
 $('#modal-findBarang').on('hidden.bs.modal', function () {
+    isShowDialog = 0;
     $('#inputBarang').focus();
 })
 
-$(document).keydown(function(event) { 
-    if (event.keyCode == 27) { 
+
+$(document).keydown(function(event) {
+    if (event.keyCode == 27) {
       $('#modal-findBarang').modal("hide");
     }
-    else if (event.keyCode == 46) hapusSemuaBarang()
-    else if (event.keyCode == 119) pembayaranBarang()
-  });
+    if (!isShowDialog) {
+        if (event.keyCode == 46) hapusSemuaBarang()
+        else if (event.keyCode == 119) pembayaranBarang()
+    }
+    
+});
 
 $("#modal-pembayaranBarang").on("shown.bs.modal", function () {
     $("#tunaiUserInput").focus()
@@ -44,6 +86,7 @@ $("#modal-pembayaranBarang").on("shown.bs.modal", function () {
 
 $("#modal-pembayaranBarang").on("hidden.bs.modal", function () {
     $('#inputBarang').focus();
+    isShowDialog = 0;
 })
 
 $('#tunaiUserInput').keypress(function(e){
@@ -88,39 +131,64 @@ $("#kasirTable tbody").on('click', '.hapusBarangButton', function() {
     delete tempBarang[tableData[0]]
 });
 
-$("#kasirTable tbody").on("click", ".editBarang", function() {
+$("#kasirTable tbody").on("click", ".editBarang", async function() {
+    isShowDialog = 1;
+    
     var index = $(this).closest('tr').index();
     var tableData = $("#kasirTable").DataTable().rows(index).data()[0]
     document.getElementById("namaBarang").value = tableData[0]
     document.getElementById("jumlahBarang").value = tableData[1]
     document.getElementById("hargaModal").value = tableData[2]
     document.getElementById("hargaBarang").value = tableData[3].slice(2)
+
+    await fetch("/cashierStockChecker", {
+        method: "POST",
+        headers: {
+            inputBarang: tableData[0]
+        }
+    }).then(async response => {await response.text().then(data => {limitStock = Number(data)})})
+
     tempHarga = Number(tableData[3].replaceAll(".", ""))
+    document.getElementById("jumlahBarang").setAttribute("aria-invalid", "false");
+    document.getElementById("jumlahBarang").classList.remove("is-invalid")
+    document.getElementById("jumlahBarang-error").style.display = "none"
+        
     $("#modal-editBarang").modal("show")
     document.getElementById("jumlahBarang").focus()
-    document.getElementById("editBarangButton").setAttribute("onclick", `editBarang(${index})`);
+    if (cashierSettings[0]) document.getElementById("editBarangButton").setAttribute("onclick", `editBarang(${index}, ${limitStock})`);
+    else document.getElementById("editBarangButton").setAttribute("onclick", `editBarang(${index}, "")`);
+    isShowDialog = 1;
 })
 
-function editBarang(index) {
-    var total = [0, 0];
-    $("#kasirTable").DataTable().row(index).data([
-        document.getElementById("namaBarang").value,
-        document.getElementById("jumlahBarang").value,
-        Number(document.getElementById("hargaModal").value.replaceAll(".", "")),
-        "Rp" + document.getElementById("hargaBarang").value,
-        `<center>
-        <button type="button" class="btn btn-danger hapusBarangButton">Hapus</button>
-        <button type="button" class="btn btn-info editBarang">Edit</button>
-        </center>`
-    ]).draw()
-    for (let a = 0; a < $("#kasirTable").DataTable().rows().data().count() / 5; a++) {
-        total[0] += Number($("#kasirTable").DataTable().rows().data()[a][1].replaceAll(".", ""))
-        total[1] += Number($("#kasirTable").DataTable().rows().data()[a][3].slice(2).replaceAll(".", ""))
+async function editBarang(index, limitStock) {
+    if (limitStock && (Number(limitStock) - Number(document.getElementById("jumlahBarang").value.replaceAll(".", ""))) < 0) {
+        return Swal.fire({
+            icon: 'error',
+            title: 'Stock Barang tidak cukup',
+            text: `Barang Bernama "${document.getElementById("namaBarang").value}" tidak bisa diganti Jumlah Barang menjadi ${document.getElementById("jumlahBarang").value}, karena Barang tersebut stock nya tidak lebih dari Jumlah Barang yang Anda Input`,
+            confirmButtonText: "Okay"
+        })
+    } else {
+        var total = [0, 0];
+        $("#kasirTable").DataTable().row(index).data([
+            document.getElementById("namaBarang").value,
+            document.getElementById("jumlahBarang").value,
+            Number(document.getElementById("hargaModal").value.replaceAll(".", "")),
+            "Rp" + document.getElementById("hargaBarang").value,
+            `<center>
+            <button type="button" class="btn btn-danger hapusBarangButton">Hapus</button>
+            <button type="button" class="btn btn-primary editBarang">Edit</button>
+            </center>`
+        ]).draw()
+        for (let a = 0; a < $("#kasirTable").DataTable().rows().data().count() / 5; a++) {
+            total[0] += Number($("#kasirTable").DataTable().rows().data()[a][1].replaceAll(".", ""))
+            total[1] += Number($("#kasirTable").DataTable().rows().data()[a][3].slice(2).replaceAll(".", ""))
+        }
+    
+        $("#kasirTable").DataTable().columns().footer()[1].innerHTML = `Total Jumlah Barang: ${Intl.NumberFormat('id', {}).format((total[0]))}`
+        $("#kasirTable").DataTable().columns().footer()[3].innerHTML = `Total Harga: Rp${Intl.NumberFormat('id', {}).format((total[1]))}`
+        $("#modal-editBarang").modal("hide")
     }
-
-    $("#kasirTable").DataTable().columns().footer()[1].innerHTML = `Total Jumlah Barang: ${Intl.NumberFormat('id', {}).format((total[0]))}`
-    $("#kasirTable").DataTable().columns().footer()[3].innerHTML = `Total Harga: Rp${Intl.NumberFormat('id', {}).format((total[1]))}`
-    $("#modal-editBarang").modal("hide")
 }
 
 $('#jumlahBarang').keypress(function(e){
@@ -128,21 +196,20 @@ $('#jumlahBarang').keypress(function(e){
         e.preventDefault()
         document.getElementById("editBarangButton").click()
     }
-    else if ((e.keyCode >= 47 && e.keyCode <= 58)) {
-        e.target.value = Intl.NumberFormat('id', {}).format((e.target.value + e.key).replaceAll(".", ""));
-        document.getElementById("hargaBarang").value = Intl.NumberFormat('id', {}).format(Number(tempBarang[document.getElementById("namaBarang").value][0]) * Number(e.target.value.replaceAll(".", "")));
-        document.getElementById("hargaModal").value = Intl.NumberFormat("id", {}).format(Number(tempBarang[document.getElementById("namaBarang").value][1]) * Number(e.target.value.replaceAll(".", "")));
-        e.preventDefault();
-    } else return false
 })
 
-$('#jumlahBarang').keydown(function(e){
-    if (e.keyCode == 8) {
-        e.target.value = Intl.NumberFormat('id', {}).format(e.target.value.slice(0, -1).replaceAll(".", ""));
-        e.preventDefault();
-    }
+document.getElementById("jumlahBarang").addEventListener("input", function(e) {
     document.getElementById("hargaBarang").value = Intl.NumberFormat('id', {}).format(Number(tempBarang[document.getElementById("namaBarang").value][0]) * Number(e.target.value.replaceAll(".", "")));
     document.getElementById("hargaModal").value = Intl.NumberFormat("id", {}).format(Number(tempBarang[document.getElementById("namaBarang").value][1]) * Number(e.target.value.replaceAll(".", "")));
+    if ((Number(limitStock) - Number(e.target.value.replaceAll(".", ""))) < 0 && cashierSettings[0]) {
+        document.getElementById("jumlahBarang-error").style.display = null
+        document.getElementById("jumlahBarang").setAttribute("aria-invalid", "true");
+        document.getElementById("jumlahBarang").classList.add("is-invalid")
+    } else {
+        document.getElementById("jumlahBarang").setAttribute("aria-invalid", "false");
+        document.getElementById("jumlahBarang").classList.remove("is-invalid")
+        document.getElementById("jumlahBarang-error").style.display = "none"
+    }
 })
 
 function hapusSemuaBarang() {
@@ -177,13 +244,21 @@ function hapusSemuaBarang() {
 }
 
 function tambahBarangKasir(namaBarang) {
-    console.log(tempBarang)
-    console.log(tempFindBarang)
     var tableData = $("#kasirTable").DataTable().rows().data()
     var total = [0,0];
 
     for (let a = 0; a < tableData.count() / 5; a++) {
         if (Object.keys(tempBarang)[a] == namaBarang) {
+            if ((Number(tempFindBarang[namaBarang][2]) - Number(tableData[a][1].replaceAll(".", ""))) <= 0 && cashierSettings[0]) {
+                document.getElementById("inputBarang").value = ""
+                return Swal.fire({
+                    icon: 'error',
+                    title: 'Barang Kosong',
+                    text: `Barang Bernama "${namaBarang}" tidak bisa ditambahkan ke Kasir, karena Barang tersebut sudah kosong`,
+                    confirmButtonText: "Okay"
+                  })
+            }
+
             $("#kasirTable").DataTable().row(a).data([
                 namaBarang,
                 Intl.NumberFormat('id', {}).format((Number(tableData[a][1].replaceAll(".", "")) + 1)),
@@ -191,7 +266,7 @@ function tambahBarangKasir(namaBarang) {
                 "Rp" + Intl.NumberFormat('id', {}).format((Number(tempFindBarang[namaBarang][0]) * (Number(tableData[a][1].replaceAll(".", "")) + 1))),
                 `<center>
                 <button type="button" class="btn btn-danger hapusBarangButton">Hapus</button>
-                <button type="button" class="btn btn-info editBarang">Edit</button>
+                <button type="button" class="btn btn-primary editBarang">Edit</button>
                 </center>`
             ]).draw(false)
 
@@ -207,11 +282,21 @@ function tambahBarangKasir(namaBarang) {
             return tempFindBarang = {}
         }
     }
+
+    if (Number(tempFindBarang[namaBarang][2]) <= 0 && cashierSettings[0]) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Barang Kosong',
+            text: `Barang Bernama "${namaBarang}" tidak bisa ditambahkan ke Kasir, karena Barang tersebut sudah kosong`,
+            confirmButtonText: "Okay"
+          })
+          return tempFindBarang = {}
+    }
     
     $("#kasirTable").DataTable().row.add([namaBarang, "1", Number(tempFindBarang[namaBarang][1]), "Rp" + Intl.NumberFormat('id', {}).format(tempFindBarang[namaBarang][0]), `
     <center>
     <button type="button" class="btn btn-danger hapusBarangButton">Hapus</button>
-    <button type="button" class="btn btn-info editBarang">Edit</button>
+    <button type="button" class="btn btn-primary editBarang">Edit</button>
     </center>`]).draw()
 
     for (let b = 0; b < $("#kasirTable").DataTable().rows().data().count() / 5; b++) {
@@ -243,6 +328,15 @@ async function findBarang(val) {
                     var tableData = $("#kasirTable").DataTable().rows().data()
                     for (let a = 0; a < tableData.count() / 5; a++) {
                         if (Object.keys(tempBarang)[a] == data[0]) {
+                            if ((Number(data[1]) - Number(tableData[a][1].replaceAll(".", ""))) <= 0 && cashierSettings[0]) {
+                                document.getElementById("inputBarang").value = ""
+                                return Swal.fire({
+                                    icon: 'error',
+                                    title: 'Barang Kosong',
+                                    text: `Barang Bernama "${data[0]}" tidak bisa ditambahkan ke Kasir, karena Barang tersebut sudah kosong`,
+                                    confirmButtonText: "Okay"
+                                  })
+                            }
                             $("#kasirTable").DataTable().row(a).data([
                                 data[0],
                                 Intl.NumberFormat('id', {}).format((Number(tableData[a][1].replaceAll(".", "")) + 1)),
@@ -250,7 +344,7 @@ async function findBarang(val) {
                                 "Rp" + Intl.NumberFormat('id', {}).format((Number(data[3].replaceAll(".", "")) * (Number(tableData[a][1].replaceAll(".", "")) + 1))),
                                 `<center>
                                 <button type="button" class="btn btn-danger hapusBarangButton">Hapus</button>
-                                <button type="button" class="btn btn-info editBarang">Edit</button>
+                                <button type="button" class="btn btn-primary editBarang">Edit</button>
                                 </center>`
                             ]).draw(false)
 
@@ -267,12 +361,21 @@ async function findBarang(val) {
                         }
                     }
 
+                    if (Number(data[1]) <= 0 && cashierSettings[0]) {
+                        return Swal.fire({
+                            icon: 'error',
+                            title: 'Barang Kosong',
+                            text: `Barang Bernama "${data[0]}" tidak bisa ditambahkan ke Kasir, karena Barang tersebut sudah kosong`,
+                            confirmButtonText: "Okay"
+                          })
+                    }
+
                     tempBarang[data[0]] = []
                     tempBarang[data[0]][0] = Number(data[3].replaceAll(".", ""))
                     tempBarang[data[0]][1] = Number(data[2].replaceAll(".", ""))
                     $("#kasirTable").DataTable().row.add([data[0], '1', Number(data[2]), "Rp" + Intl.NumberFormat('id', {}).format((data[3])), `<center>
                     <button type="button" class="btn btn-danger hapusBarangButton">Hapus</button>
-                    <button type="button" class="btn btn-info editBarang">Edit</button>
+                    <button type="button" class="btn btn-primary editBarang">Edit</button>
                     </center>`]).draw(false)
                     var temp = $("#kasirTable").DataTable().columns().footer()[0].innerHTML.split(": ")
                     temp[1] = Intl.NumberFormat('id', {}).format(Number(temp[1].replaceAll(".", "")) + 1);
@@ -287,6 +390,7 @@ async function findBarang(val) {
                     document.getElementById("inputBarang").blur()
                     $("#cariBarang").DataTable().clear().draw()
                     $("#modal-findBarang").modal("show")
+                    isShowDialog = 1;
                     for (let a = 0; a < data.length - 1; a++) {
                         var result = data[a].split("|")
                         result[1] = Intl.NumberFormat("id", {}).format(Number(result[1]))
@@ -294,7 +398,7 @@ async function findBarang(val) {
                         tempFindBarang[result[0]] = []
                         tempFindBarang[result[0]][0] = Number(result[3].replaceAll(".", ""))
                         tempFindBarang[result[0]][1] = Number(result[2].replaceAll(".", ""))
-                        console.log(tempFindBarang[result[0]])
+                        tempFindBarang[result[0]][2] = Number(result[1].replaceAll(".", ""))
                         $("#cariBarang").DataTable().row.add(result.concat(`<center><button type="button" class="btn btn-info" onclick="tambahBarangKasir('${result[0]}')">Tambah Barang</button></center>`)).draw(false)
                     }
                 } else {
@@ -336,6 +440,7 @@ function pembayaranBarang() {
             title: "Mohon input barang terlebih dahhulu!"
         })
     }
+    isShowDialog = 1;
     document.getElementById("totalHargaText").innerText = $("#kasirTable").DataTable().columns().footer()[3].innerHTML.split(": ")[1]
     document.getElementById("kembalianUangText").innerText = "Rp0"
     document.getElementById("tunaiUserInput").value = ""
@@ -384,8 +489,11 @@ async function bayarFunction() {
         }
     })
 
-    fetch(`${window.location.protocol}//${window.location.hostname}:8081/?username=${getCookie("username")}&password=${getCookie("password")}&teleArgs=2`, {
-        method: "POST",
-        body: resultData.slice(0, -1)
-    })
+    if (cashierSettings[1]) {
+        fetch(`${window.location.protocol}//${window.location.hostname}:8081/?username=${getCookie("username")}&password=${getCookie("password")}&teleArgs=2`, {
+            method: "POST",
+            body: resultData.slice(0, -1)
+        })
+    }
+    
 }

@@ -8,6 +8,8 @@ int hapusDaftarBarang(sb_Event* e);
 int infoBarang(sb_Event* e);
 int editBarang(sb_Event* e);
 int cashierFindBarang(sb_Event* e);
+int cashierSettings(sb_Event* e);
+int cashierStockChecker(sb_Event* e);
 int pembukuan(sb_Event* e);
 int dashboardLogic(sb_Event* e);
 int barangMasukLogic(sb_Event* e);

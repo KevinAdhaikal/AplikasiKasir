@@ -1,15 +1,22 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "../../vendor/sandbird/sandbird.h"
 #include "../utils/utils.h"
 #include "../teleFunction/teleFunction.h"
 #include "../telegramClient/telegramClient.h"
 #include "../../vendor/str/str.h"
+#include "../funcVarPub.h"
 
 #include "teleFunction.h"
 
 int teleKasir(sb_Event* e) {
+    if (!teleBot.notifyKasirTGram) {
+        sb_send_header(e->stream, "Access-Control-Allow-Origin", "*");
+        sb_send_status(e->stream, 200, "OK");
+    
+        return SB_RES_OK;
+    }
+
     char* formatCurrency0;
     char* formatCurrency1;
     char* formatCurrency2;
@@ -60,7 +67,7 @@ int teleKasir(sb_Event* e) {
     free(formatCurrency2);
     free(formatCurrency3);
 
-    sendMessage(totalString.value);
+    sendMessage(totalString.value, "", "");
     str_finalize(&totalString);
 
     sb_send_header(e->stream, "Access-Control-Allow-Origin", "*");

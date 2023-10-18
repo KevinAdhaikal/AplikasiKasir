@@ -24,11 +24,25 @@ int RowBack(void* data, int argc, char** argv, char** colName) {
     }
     for (int a = 0; a < argc; a++) {
         if (!rowData->rows) {
+            if (!argv[a]) {
+                rowData->rows = malloc(6);
+                strcpy(rowData->rows, "NULL");
+                rowData->rows[4] = '|';
+                rowData->totalChar += 5;
+                continue;
+            }
             rowData->rows = malloc(strlen(argv[a]) + 2);
             strcpy(rowData->rows, argv[a]);
             rowData->rows[strlen(argv[a])] = '|';
             rowData->totalChar += strlen(argv[a]) + 1;
         } else {
+            if (!argv[a]) {
+                rowData->rows = realloc(rowData->rows, (rowData->totalChar + 6) * 2);
+                strcpy(rowData->rows + rowData->totalChar, "NULL");
+                rowData->rows[4 + rowData->totalChar] = '|';
+                rowData->totalChar += 5;
+                continue;
+            }
             rowData->rows = realloc(rowData->rows, (strlen(argv[a]) + rowData->totalChar + 2) * 2);
             strcpy(rowData->rows + rowData->totalChar, argv[a]);
             rowData->rows[strlen(argv[a]) + rowData->totalChar] = '|';
@@ -40,6 +54,7 @@ int RowBack(void* data, int argc, char** argv, char** colName) {
     rowData->rows[rowData->totalChar] = '\0';
     return 0;
 }
+
 
 int RowBackPlus(void* data, int argc, char** argv, char** colName) {
     for (int a = 0; a < argc; a++) {
@@ -80,3 +95,9 @@ int sqlBackExec(sb_Event* e, sqlite3* db, char* tempString, int (*callback)(void
 
     return 1;
 }
+
+int sqlTOF(void* data, int argc, char** argv, char** colName) {
+    *(char*)data = 1;
+    return 1;
+}
+

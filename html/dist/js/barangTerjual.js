@@ -8,31 +8,30 @@ var tempPembukuan = [0, 0, 0];
 
 async function mergeFunction() {
     var dataTable = $("#barangTerjualTable").DataTable().rows().data();
-    for (let a = 0; a < dataTable.count() / 6; a++) {
-        if (mergeArray[dataTable[a][1]]) {
-            mergeArray[dataTable[a][1]] = [Object.keys(mergeArray).indexOf(dataTable[a][1]),
-            dataTable[a][1],
-            Intl.NumberFormat('id', {}).format(Number(dataTable[a][2].replaceAll(".", "")) + Number(mergeArray[dataTable[a][1]][2].replaceAll(".", ""))),
-            Intl.NumberFormat('id', {}).format(Number(dataTable[a][3].slice(2).replaceAll(".", "")) + Number(mergeArray[dataTable[a][1]][3].replaceAll(".", ""))),
-            Intl.NumberFormat('id', {}).format(Number(dataTable[a][4].slice(2).replaceAll(".", "")) + Number(mergeArray[dataTable[a][1]][4].replaceAll(".", "")))]
+    for (let a = 0; a < dataTable.count() / 7; a++) {
+        if (mergeArray[dataTable[a][2]]) {
+            mergeArray[dataTable[a][2]] = [Object.keys(mergeArray).indexOf(dataTable[a][2]),
+            dataTable[a][2],
+            Intl.NumberFormat('id', {}).format(Number(dataTable[a][3].replaceAll(".", "")) + Number(mergeArray[dataTable[a][2]][2].replaceAll(".", ""))),
+            Intl.NumberFormat('id', {}).format(Number(dataTable[a][4].slice(2).replaceAll(".", "")) + Number(mergeArray[dataTable[a][2]][3].replaceAll(".", ""))),
+            Intl.NumberFormat('id', {}).format(Number(dataTable[a][5].slice(2).replaceAll(".", "")) + Number(mergeArray[dataTable[a][2]][4].replaceAll(".", "")))]
         } else {
-            mergeArray[dataTable[a][1]] = [0, dataTable[a][1], dataTable[a][2], dataTable[a][3].slice(2), dataTable[a][4].slice(2)]
-            mergeArray[dataTable[a][1]][0] = Object.keys(mergeArray).indexOf(dataTable[a][1])
+            mergeArray[dataTable[a][2]] = [0, dataTable[a][2], dataTable[a][3], dataTable[a][4].slice(2), dataTable[a][5].slice(2)]
+            mergeArray[dataTable[a][2]][0] = Object.keys(mergeArray).indexOf(dataTable[a][2])
         }
     }
     await $("#barangTerjualTable").DataTable().clear().draw()
 
     for (let a = 0; a < Object.keys(mergeArray).length; a++) {
         var name = Object.keys(mergeArray)[a]
-        $("#barangTerjualTable").DataTable().row.add([mergeArray[name][0], mergeArray[name][1], mergeArray[name][2], "Rp" + mergeArray[name][3], "Rp" + mergeArray[name][4], `<center>
+        console.log(mergeArray[name])
+        $("#barangTerjualTable").DataTable().row.add([mergeArray[name][0], '-', mergeArray[name][1], mergeArray[name][2], "Rp" + mergeArray[name][3], "Rp" + mergeArray[name][4], `<center>
         <button type="button" class="btn btn-danger" onclick="hapusBarangTerjualMerge('${name}', '${document.getElementById("tanggalBarangTerjual").value}', ${a})">Hapus</button>
         </center>`]).draw()
     }
     
-    $("#barangTerjualTable").DataTable().columns().footer()[1].innerHTML = `Total: ${Object.keys(mergeArray).length}`
+    $("#barangTerjualTable").DataTable().columns().footer()[2].innerHTML = `Total: ${Object.keys(mergeArray).length}`
     mergeArray = {}
-
-    console.log($("#barangTerjualTable").DataTable().rows().data())
 }
 
 async function load(dateValue) {
@@ -48,26 +47,25 @@ async function load(dateValue) {
         if (response.status == 200) {
             await response.text().then(data => {
                 data = data.split("\n");
-                $("#barangTerjualTable").DataTable().columns().footer()[1].innerHTML = `Total: ${data.length - 1}`
+                $("#barangTerjualTable").DataTable().columns().footer()[2].innerHTML = `Total: ${data.length - 1}`
                 for (let a = 0; a < data.length - 1; a++) {
                     data[a] = data[a].split("|")
-                    data[a][2] = Intl.NumberFormat('id', {}).format(Number(data[a][2].replaceAll(".", "")))
-                    data[a][3] = "Rp" + Intl.NumberFormat('id', {}).format(Number(data[a][3].replaceAll(".", "")))
+                    data[a][3] = Intl.NumberFormat('id', {}).format(Number(data[a][3].replaceAll(".", "")))
                     data[a][4] = "Rp" + Intl.NumberFormat('id', {}).format(Number(data[a][4].replaceAll(".", "")))
-                    data[a][5] = `<center>
+                    data[a][5] = "Rp" + Intl.NumberFormat('id', {}).format(Number(data[a][5].replaceAll(".", "")))
+                    data[a][6] = `<center>
                     <button type="button" class="btn btn-danger" onclick="hapusBarangTerjual(${data[a][0]}, '${dateValue ? dateValue.replaceAll("-", "_") : ""}')">Hapus</button>
                     </center>`
 
-                    tempPembukuan[0] += Number(data[a][2].replaceAll(".", ""))
-                    tempPembukuan[1] += Number(data[a][3].replaceAll(".", "").slice(2))
-                    tempPembukuan[2] += Number(data[a][4].replaceAll(".", "").slice(2))
+                    tempPembukuan[0] += Number(data[a][3].replaceAll(".", ""))
+                    tempPembukuan[1] += Number(data[a][4].replaceAll(".", "").slice(2))
+                    tempPembukuan[2] += Number(data[a][5].replaceAll(".", "").slice(2))
                 }
-                console.log(data)
                 $("#barangTerjualTable").DataTable().rows.add(data.slice(0, -1)).draw(false)
                 if (!dateValue) document.getElementById("tanggalBarangTerjual").value = data[data.length - 1]
-                $("#barangTerjualTable").DataTable().columns().footer()[2].innerHTML = `Total: ${Intl.NumberFormat('id', {}).format(tempPembukuan[0])}`
-                $("#barangTerjualTable").DataTable().columns().footer()[3].innerHTML = `Total: Rp${Intl.NumberFormat('id', {}).format(tempPembukuan[1])}`
-                $("#barangTerjualTable").DataTable().columns().footer()[4].innerHTML = `Total: Rp${Intl.NumberFormat('id', {}).format(tempPembukuan[2])}` 
+                $("#barangTerjualTable").DataTable().columns().footer()[3].innerHTML = `Total: ${Intl.NumberFormat('id', {}).format(tempPembukuan[0])}`
+                $("#barangTerjualTable").DataTable().columns().footer()[4].innerHTML = `Total: Rp${Intl.NumberFormat('id', {}).format(tempPembukuan[1])}`
+                $("#barangTerjualTable").DataTable().columns().footer()[5].innerHTML = `Total: Rp${Intl.NumberFormat('id', {}).format(tempPembukuan[2])}` 
             })
             tempPembukuan = [0, 0, 0]
         } else {
@@ -131,10 +129,10 @@ function hapusBarangTerjual(id, dateValue) {
                     })
 
                     var barangTerjualData = $("#barangTerjualTable").DataTable().row(function ( idx, data, node ) {return data[0] == id ? true : false;});
-                    $("#barangTerjualTable").DataTable().columns().footer()[1].innerHTML = "Total: " + Intl.NumberFormat('id', {}).format(Number($("#barangTerjualTable").DataTable().columns().footer()[1].innerHTML.split(": ")[1].replaceAll(".", "")) - 1)
-                    $("#barangTerjualTable").DataTable().columns().footer()[2].innerHTML = "Total: " + Intl.NumberFormat('id', {}).format(Number($("#barangTerjualTable").DataTable().columns().footer()[2].innerHTML.split(": ")[1].replaceAll(".", "") - barangTerjualData.data()[2].replaceAll(".", "")))
-                    $("#barangTerjualTable").DataTable().columns().footer()[3].innerHTML = "Total: Rp" + Intl.NumberFormat('id', {}).format(Number($("#barangTerjualTable").DataTable().columns().footer()[3].innerHTML.split(": Rp")[1].replaceAll(".", "") - barangTerjualData.data()[3].slice(2).replaceAll(".", "")))
+                    $("#barangTerjualTable").DataTable().columns().footer()[2].innerHTML = "Total: " + Intl.NumberFormat('id', {}).format(Number($("#barangTerjualTable").DataTable().columns().footer()[2].innerHTML.split(": ")[1].replaceAll(".", "")) - 1)
+                    $("#barangTerjualTable").DataTable().columns().footer()[3].innerHTML = "Total: " + Intl.NumberFormat('id', {}).format(Number($("#barangTerjualTable").DataTable().columns().footer()[3].innerHTML.split(": ")[1].replaceAll(".", "") - barangTerjualData.data()[3].replaceAll(".", "")))
                     $("#barangTerjualTable").DataTable().columns().footer()[4].innerHTML = "Total: Rp" + Intl.NumberFormat('id', {}).format(Number($("#barangTerjualTable").DataTable().columns().footer()[4].innerHTML.split(": Rp")[1].replaceAll(".", "") - barangTerjualData.data()[4].slice(2).replaceAll(".", "")))
+                    $("#barangTerjualTable").DataTable().columns().footer()[5].innerHTML = "Total: Rp" + Intl.NumberFormat('id', {}).format(Number($("#barangTerjualTable").DataTable().columns().footer()[5].innerHTML.split(": Rp")[1].replaceAll(".", "") - barangTerjualData.data()[5].slice(2).replaceAll(".", "")))
                     barangTerjualData.remove().draw()
                     
                     //load(dateValue ? dateValue.replaceAll("-", "_") : "");
@@ -190,10 +188,10 @@ function hapusBarangTerjualMerge(namaBarang, valueDate, id) {
                         title: "Barang Terjual tersebut berhasil dihapus!"
                     })
                     var barangTerjualData = $("#barangTerjualTable").DataTable().row(function ( idx, data, node ) {return data[0] == id ? true : false;});
-                    $("#barangTerjualTable").DataTable().columns().footer()[1].innerHTML = "Total: " + Intl.NumberFormat('id', {}).format(Number($("#barangTerjualTable").DataTable().columns().footer()[1].innerHTML.split(": ")[1].replaceAll(".", "")) - 1)
-                    $("#barangTerjualTable").DataTable().columns().footer()[2].innerHTML = "Total: " + Intl.NumberFormat('id', {}).format(Number($("#barangTerjualTable").DataTable().columns().footer()[2].innerHTML.split(": ")[1].replaceAll(".", "") - barangTerjualData.data()[2].replaceAll(".", "")))
-                    $("#barangTerjualTable").DataTable().columns().footer()[3].innerHTML = "Total: Rp" + Intl.NumberFormat('id', {}).format(Number($("#barangTerjualTable").DataTable().columns().footer()[3].innerHTML.split(": Rp")[1].replaceAll(".", "") - barangTerjualData.data()[3].slice(2).replaceAll(".", "")))
+                    $("#barangTerjualTable").DataTable().columns().footer()[2].innerHTML = "Total: " + Intl.NumberFormat('id', {}).format(Number($("#barangTerjualTable").DataTable().columns().footer()[2].innerHTML.split(": ")[1].replaceAll(".", "")) - 1)
+                    $("#barangTerjualTable").DataTable().columns().footer()[3].innerHTML = "Total: " + Intl.NumberFormat('id', {}).format(Number($("#barangTerjualTable").DataTable().columns().footer()[3].innerHTML.split(": ")[1].replaceAll(".", "") - barangTerjualData.data()[3].replaceAll(".", "")))
                     $("#barangTerjualTable").DataTable().columns().footer()[4].innerHTML = "Total: Rp" + Intl.NumberFormat('id', {}).format(Number($("#barangTerjualTable").DataTable().columns().footer()[4].innerHTML.split(": Rp")[1].replaceAll(".", "") - barangTerjualData.data()[4].slice(2).replaceAll(".", "")))
+                    $("#barangTerjualTable").DataTable().columns().footer()[5].innerHTML = "Total: Rp" + Intl.NumberFormat('id', {}).format(Number($("#barangTerjualTable").DataTable().columns().footer()[5].innerHTML.split(": Rp")[1].replaceAll(".", "") - barangTerjualData.data()[5].slice(2).replaceAll(".", "")))
                     barangTerjualData.remove().draw()
                 }
                 else {

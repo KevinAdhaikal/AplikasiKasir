@@ -24,6 +24,7 @@ int tambahBarang(sb_Event* e) {
     sb_get_header(e->stream, "barcodeBarang", barcodeBarang, 254);
     sb_get_header(e->stream, "hargaJual", hargaJual, 10);
 
+    
     for (int a = 0; a < strlen(jumlahBarang); a++) if (!isdigit(jumlahBarang[a])) {
         sb_send_status(e->stream, 403, "Jumlah barang tidak berbentuk nomor! Mohon input Jumlah barang yang benar");
         return SB_RES_OK;
@@ -39,7 +40,7 @@ int tambahBarang(sb_Event* e) {
 
     sqlite3_open("database/daftarBarang.db", &db);
     
-    if (!barcodeBarang[0]) sprintf(strTemp, "SELECT lower(nama) FROM daftarBarang WHERE lower(nama) = lower('%s')", namaBarang);
+    if (!barcodeBarang[0])sprintf(strTemp, "SELECT lower(nama) FROM daftarBarang WHERE lower(nama) = lower('%s')", namaBarang, barcodeBarang);
     else sprintf(strTemp, "SELECT lower(nama),barcode FROM daftarBarang WHERE lower(nama) = lower('%s') OR barcode = '%s'", namaBarang, barcodeBarang);
     
     sqlite3_exec(db, strTemp, tableExists, &checkDatabase, &errMsg);

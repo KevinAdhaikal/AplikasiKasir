@@ -34,10 +34,10 @@
 		<Unit filename="src/CashierFunction/barangMasukLogic.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="src/CashierFunction/cashierFindBarang.c">
+		<Unit filename="src/CashierFunction/cashierFunction.h" />
+		<Unit filename="src/CashierFunction/cashierLogic.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="src/CashierFunction/cashierFunction.h" />
 		<Unit filename="src/CashierFunction/daftarBarang.c">
 			<Option compilerVar="CC" />
 		</Unit>

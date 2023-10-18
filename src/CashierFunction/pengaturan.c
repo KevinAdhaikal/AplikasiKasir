@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <ctype.h>
 
 #include "../funcVarPub.h"
 #include "../../vendor/sandbird/sandbird.h"
@@ -26,25 +27,26 @@ int pengaturan(sb_Event* e) {
             freeRowBack(&row);
             sqlite3_close(db);
             break;
-            // check configurasi dan mengirimkan ke Client
         }
         case 2: {
             sb_Body bodyClient = {0};
             sqlite3_open("database/settings.db", &db);
             sb_get_body(e->stream, &bodyClient);
-            char** valueSplit = strsplit(bodyClient.data, "\n", 0);
+            size_t valueLen;
+            char** valueSplit = strsplit(bodyClient.data, "\n", &valueLen);
             free(bodyClient.data);
-            
-            if (!strlen(valueSplit[0])) {
-                sb_send_status(e->stream, 403, "Memakai Telegram Bot tidak boleh kosong!");
+
+            if (valueLen < 7) {
+                free(valueSplit);
+                sb_send_status(e->stream, 403, "Invalid Value");
+                sqlite3_close(db);
                 return SB_RES_OK;
             }
-            if (!valueSplit[1][0] && valueSplit[0][1] == '1') {
-                sb_send_status(e->stream, 403, "Telegram Token ID tidak boleh kosong!");
-                return SB_RES_OK;
-            }
-            if (!valueSplit[2][0] && valueSplit[0][1] == '1') {
-                sb_send_status(e->stream, 403, "Telegram User ID tidak boleh kosong!");
+
+            if (atoi(valueSplit[7]) > 65535) {
+                free(valueSplit);
+                sb_send_status(e->stream, 403, "Tidak bisa lebih dari 65535");
+                sqlite3_close(db);
                 return SB_RES_OK;
             }
 
@@ -53,7 +55,7 @@ int pengaturan(sb_Event* e) {
                 free(teleBot.userID);
             }
 
-            sprintf(tempString, "UPDATE settings SET value = '%s' WHERE name = 'usingTelegram'", valueSplit[0]);
+            sprintf(tempString, "UPDATE settings SET value = '%c' WHERE name = 'usingTelegram'", valueSplit[0][0]);
             sqlite3_exec(db, tempString, 0, 0, NULL);
             
             if (valueSplit[0][0] == '1') {
@@ -65,19 +67,50 @@ int pengaturan(sb_Event* e) {
                 sprintf(tempString, "UPDATE settings SET value = '%s' WHERE name = 'telegramUserID'", valueSplit[2]);
                 sqlite3_exec(db, tempString, 0, 0, NULL);
             } else teleBot.usingTelegramBot = 0;
+
+            sprintf(tempString, "UPDATE settings SET value = '%c' WHERE name = 'blockBarangKosong'", valueSplit[3][0]);
+            sqlite3_exec(db, tempString, 0, 0, NULL);
+            sprintf(tempString, "UPDATE settings SET value = '%c' WHERE name = 'notifyBarangKosongTGram'", valueSplit[4][0]);
+            sqlite3_exec(db, tempString, 0, 0, NULL);
+            if (isdigit(valueSplit[4][0])) teleBot.notifyBarangKosongTGram = atoi(&valueSplit[4][0]); 
+            sprintf(tempString, "UPDATE settings SET value = '%c' WHERE name = 'notifyKasirTGram'", valueSplit[5][0]);
+            sqlite3_exec(db, tempString, 0, 0, NULL);
+            if (isdigit(valueSplit[5][0])) teleBot.notifyKasirTGram = atoi(&valueSplit[5][0]);
+            sprintf(tempString, "UPDATE settings SET value = '%c' WHERE name = 'isNotifyDibawahStockBarangTGram'", valueSplit[6][0]);
+            sqlite3_exec(db, tempString, 0, 0, NULL);
+            if (isdigit(valueSplit[6][0])) teleBot.isNotifyBarangDibawahJumlah = atoi(&valueSplit[6][0]); 
+            sprintf(tempString, "UPDATE settings SET value = '%d' WHERE name = 'jumlahNotifyDibawahStockBarangTGram'", atoi(valueSplit[7]));
+            sqlite3_exec(db, tempString, 0, 0, NULL);
             
+            for (int a = 0; a < 5; a++) {
+                if (valueSplit[7][a]) {
+                    if (!isdigit(valueSplit[7][a])) goto JUMP;
+                } else break;
+            }
+            
+            teleBot.targetNotifyBarangDibawahJumlah = atoi(valueSplit[7]); 
+
+            JUMP:
             free(valueSplit);
             sqlite3_close(db);
             sb_send_status(e->stream, 200, "OK");
+            
             break;
+            // simpan konfigurasi
         }
         case 3: {
-            int sendRet = sendMessage("Hello World from AplikasiKasir");
+            char token[256];
+            char userid[512];
+            sb_get_header(e->stream, "teleToken", token, 255);
+            sb_get_header(e->stream, "teleID", userid, 511);
+
+            int sendRet = sendMessage("Hello World from AplikasiKasir", token, userid);
             if (!sendRet) sb_send_status(e->stream, 403, "Tidak bisa terkoneksi ke telegram, apakah internet anda menyala?");
             else if (sendRet == -1) sb_send_status(e->stream, 403, "Token Bot dan User ID yang kamu masukan itu salah! mohon masukan Token Bot dan User ID yang benar");
             else sb_send_status(e->stream, 200, "OK");
-            // telegram testing
+            
             break;
+            // telegram testing
         }
     }
     return SB_RES_OK;

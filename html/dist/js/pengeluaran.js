@@ -1,5 +1,118 @@
 var tempPengeluaran = 0;
 
+$("input[data-type='currency']").on({
+    input: function() {
+        formatCurrency($(this));
+    }
+});
+
+function formatNumber(n) {
+    return n.replace(/\D/g, "").replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+}
+
+function formatCurrency(input) {
+    var input_val = input.val();
+    if (input_val === "") return;
+    var original_len = input_val.length;
+    var caret_pos = input.prop("selectionStart");
+    input_val = formatNumber(input_val);
+    input.val(input_val);
+    var updated_len = input_val.length;
+    caret_pos = updated_len - original_len + caret_pos;
+    input[0].setSelectionRange(caret_pos, caret_pos);
+}
+
+$('#modal-tambahPengeluaran').on('shown.bs.modal', function () {
+    $('#descPengeluaran').focus();
+})
+
+$('#descPengeluaran').keypress(function(e){
+    if (e.keyCode == 13) {
+        e.preventDefault()
+        document.getElementById("uangPengeluaran").focus()
+    }
+})
+
+$('#uangPengeluaran').keypress(function(e){
+    if (e.keyCode == 13) {
+        e.preventDefault()
+        document.getElementById("tambahPengeluaranButton").click()
+    }
+})
+async function tambahPengeluaran() {
+    if (!document.getElementById("descPengeluaran").value) {
+        Swal.mixin({
+            toast: true,
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 3000,
+          }).fire({
+            icon: 'error',
+            title: "Deskripsi Pengeluaran tidak boleh kosong!"
+        })
+    }
+    else if (!document.getElementById("uangPengeluaran").value) {
+        Swal.mixin({
+            toast: true,
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 3000,
+          }).fire({
+            icon: 'error',
+            title: "Uang Pengeluaran tidak boleh kosong!"
+        })
+    }
+    fetch("/pembukuan?pembukuanArgs=4", {
+        method: "POST",
+        headers: {
+            "descPengeluaran": document.getElementById("descPengeluaran").value,
+            "uangPengeluaran": document.getElementById("uangPengeluaran").value.replaceAll(".", "")
+        }
+    }).then(response => {
+        if (response.status == 200) {
+            Swal.mixin({
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 3000,
+              }).fire({
+                icon: 'success',
+                title: "Pengeluaran tersebut berhasil ditambahkan ke dalam database!"
+            })
+            load()
+            document.getElementById("descPengeluaran").value = ""
+            document.getElementById("uangPengeluaran").value = ""
+            $("#modal-tambahPengeluaran").modal("hide")
+        } else {
+            Swal.mixin({
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 3000,
+              }).fire({
+                icon: 'error',
+                title: response.statusText
+            })
+        }
+    })
+}
+
+function getCookie(cname) {
+    let name = cname + "=";
+    let decodedCookie = decodeURIComponent(document.cookie);
+    let ca = decodedCookie.split(';');
+    for(let i = 0; i <ca.length; i++) {
+      let c = ca[i];
+      while (c.charAt(0) == ' ') {
+        c = c.substring(1);
+      }
+      if (c.indexOf(name) == 0) {
+        return c.substring(name.length, c.length);
+      }
+    }
+    return "";
+}
+
 async function load(dateValue) {
     await $("#pengeluaranTable").DataTable().clear().draw()
     fetch("/pembukuan?pembukuanArgs=5", dateValue ? {
@@ -14,19 +127,19 @@ async function load(dateValue) {
             response.text().then(data => {
                 data = data.split("\n")
 
-                $("#pengeluaranTable").DataTable().columns().footer()[1].innerHTML = `Total: ${data.length - 1}`
+                $("#pengeluaranTable").DataTable().columns().footer()[2].innerHTML = `Total: ${data.length - 1}`
 
                 for (let a = 0; a < data.length - 1; a++) {
                     data[a] = data[a].split("|");
-                    data[a][2] = "Rp" + Intl.NumberFormat('id', {}).format(Number(data[a][2].replaceAll(".", "")))
-                    data[a][3] = `<center>
+                    data[a][3] = "Rp" + Intl.NumberFormat('id', {}).format(Number(data[a][3].replaceAll(".", "")))
+                    data[a][4] = `<center>
                     <button type="button" class="btn btn-danger" onclick="hapusPengeluaran(${data[a][0]}, '${dateValue ? dateValue.replaceAll("-", "_") : ""}')">Hapus</button>
                     </center>`
-                    tempPengeluaran += Number(Number(data[a][2].replaceAll(".", "").slice(2)))
+                    tempPengeluaran += Number(Number(data[a][3].replaceAll(".", "").slice(2)))
                 }
 
                 $("#pengeluaranTable").DataTable().rows.add(data.slice(0, -1)).draw(false)
-                $("#pengeluaranTable").DataTable().columns().footer()[2].innerHTML = `Total: Rp${Intl.NumberFormat('id', {}).format(tempPengeluaran)}`
+                $("#pengeluaranTable").DataTable().columns().footer()[3].innerHTML = `Total: Rp${Intl.NumberFormat('id', {}).format(tempPengeluaran)}`
                 if (!dateValue) document.getElementById("tanggalPengeluaran").value = data[data.length - 1]
                 tempPengeluaran = 0;
             })
@@ -94,8 +207,8 @@ async function hapusPengeluaran(id, dateValue) {
                         title: "Pengeluaran tersebut berhasil dihapuskan dalam database!"
                     })
                     var pengeluaranData = $("#pengeluaranTable").DataTable().row(function ( idx, data, node ) {return data[0] == id ? true : false;});
-                    $("#pengeluaranTable").DataTable().columns().footer()[1].innerHTML = "Total: " + Intl.NumberFormat('id', {}).format(Number($("#pengeluaranTable").DataTable().columns().footer()[1].innerHTML.split(": ")[1].replaceAll(".", "")) - 1)
-                    $("#pengeluaranTable").DataTable().columns().footer()[2].innerHTML = "Total: Rp" + Intl.NumberFormat('id', {}).format(Number($("#pengeluaranTable").DataTable().columns().footer()[2].innerHTML.split(": Rp")[1].replaceAll(".", "") - pengeluaranData.data()[2].slice(2).replaceAll(".", "")))
+                    $("#pengeluaranTable").DataTable().columns().footer()[2].innerHTML = "Total: " + Intl.NumberFormat('id', {}).format(Number($("#pengeluaranTable").DataTable().columns().footer()[2].innerHTML.split(": ")[1].replaceAll(".", "")) - 1)
+                    $("#pengeluaranTable").DataTable().columns().footer()[3].innerHTML = "Total: Rp" + Intl.NumberFormat('id', {}).format(Number($("#pengeluaranTable").DataTable().columns().footer()[3].innerHTML.split(": Rp")[1].replaceAll(".", "") - pengeluaranData.data()[3].slice(2).replaceAll(".", "")))
                     pengeluaranData.remove().draw()
                 }
                 else {
