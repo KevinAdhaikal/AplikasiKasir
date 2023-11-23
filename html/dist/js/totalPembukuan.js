@@ -26,10 +26,11 @@ async function load() {
     $("#barangTerjualTable").DataTable().clear().draw()
     $("#pengeluaranTable").DataTable().clear().draw()
     var splitArray = document.getElementById("tanggalPembukuan").value.split(" - ")
+    var dateArray = [splitArray[0].split("/"), splitArray[1].split("/")]
 
     await fetch("/pembukuan?pembukuanArgs=7", {
         method: "POST",
-        body: getDaysArray(new Date(splitArray[0].replaceAll("/", "-")),new Date(splitArray[1].replaceAll("/", "-"))).join("\n") 
+        body: getDaysArray(new Date(`${dateArray[0][2]}-${dateArray[0][1]}-${dateArray[0][0]}`),new Date(`${dateArray[1][2]}-${dateArray[1][1]}-${dateArray[1][0]}`)).join("\n") 
     }).then(async response => {
         var tempData = [0, 0, 0]
 
@@ -46,7 +47,7 @@ async function load() {
                         tempData[2] += Number(valueSplit[3])
                     }
 
-                    $("#barangTerjualTable").DataTable().row.add([Object.keys(barangTerjual)[a].replaceAll("_", "/"), Intl.NumberFormat('id', {}).format(tempData[0]), "Rp" + Intl.NumberFormat('id', {}).format(tempData[1]), "Rp" + Intl.NumberFormat('id', {}).format(tempData[2]), "Rp" + Intl.NumberFormat('id', {}).format(tempData[2] - tempData[1])]).draw()
+                    $("#barangTerjualTable").DataTable().row.add([`<a href="barangTerjual.html?tanggal=${Object.keys(barangTerjual)[a]}">${Object.keys(barangTerjual)[a].replaceAll("_", "/")}</a>`, Intl.NumberFormat('id', {}).format(tempData[0]), "Rp" + Intl.NumberFormat('id', {}).format(tempData[1]), "Rp" + Intl.NumberFormat('id', {}).format(tempData[2]), "Rp" + Intl.NumberFormat('id', {}).format(tempData[2] - tempData[1])]).draw()
                     tempArray[0] += tempData[2]
                     tempData[0] = 0
                     tempData[1] = 0
@@ -59,12 +60,11 @@ async function load() {
                         tempData[2] += Number(valueSplit[1])
                     }
 
-                    $("#pengeluaranTable").DataTable().row.add([Object.keys(pengeluaran)[a].replaceAll("_", "/"), "Rp" + Intl.NumberFormat('id', {}).format(tempData[2])]).draw()
+                    $("#pengeluaranTable").DataTable().row.add([`<a href="pengeluaran.html?tanggal=${Object.keys(pengeluaran)[a]}">${Object.keys(pengeluaran)[a].replaceAll("_", "/")}</a>`, "Rp" + Intl.NumberFormat('id', {}).format(tempData[2])]).draw()
                     tempArray[1] += tempData[2]
                     tempData[2] = 0
                 }
             })
-
 
             $("#totalBarangTerjual").text("Rp" + Intl.NumberFormat('id', {}).format(tempArray[0]))
             $("#totalPengeluaran").text("Rp" + Intl.NumberFormat('id', {}).format(tempArray[1]))
@@ -88,7 +88,7 @@ async function load() {
 window.onload = async function() {
     $('#tanggalPembukuan').daterangepicker({
         locale: {
-          format: 'YYYY/MM/DD',
+          format: 'DD/MM/YYYY',
         },
         startDate: new Date(),
         endDate: new Date()

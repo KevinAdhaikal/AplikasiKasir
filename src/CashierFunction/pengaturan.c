@@ -4,7 +4,9 @@
 #include <string.h>
 #include <stdlib.h>
 #include <ctype.h>
+#include <pthread.h>
 
+#include "../alarmFunction/alarmFunction.h"
 #include "../funcVarPub.h"
 #include "../../vendor/sandbird/sandbird.h"
 #include "../sqliteFunction.h"
@@ -36,7 +38,8 @@ int pengaturan(sb_Event* e) {
             char** valueSplit = strsplit(bodyClient.data, "\n", &valueLen);
             free(bodyClient.data);
 
-            if (valueLen < 7) {
+            // melakukan pengecekan data dari client
+            if (valueLen < 9) {
                 free(valueSplit);
                 sb_send_status(e->stream, 403, "Invalid Value");
                 sqlite3_close(db);
@@ -50,11 +53,29 @@ int pengaturan(sb_Event* e) {
                 return SB_RES_OK;
             }
 
+            for (int a = 0; a < strlen(valueSplit[7]); a++) {
+                if (!isdigit(valueSplit[7][a])) {
+                    sb_send_status(e->stream, 403, "Value tersebut tidak berbentuk nomor!");
+                    return SB_RES_OK;
+                }
+            }
+
+            if (!isdigit(valueSplit[0][0]) || !isdigit(valueSplit[3][0]) || !isdigit(valueSplit[4][0]) || !isdigit(valueSplit[5][0]) || !isdigit(valueSplit[6][0]) || !isdigit(valueSplit[8][0])) {
+                sb_send_status(e->stream, 403, "Value tersebut tidak berbentuk nomor");
+                return SB_RES_OK;
+            }
+
+            if (valueSplit[8][0] == '1' && !is_valid_time_format(valueSplit[9])) {
+                sb_send_status(e->stream, 403, "Value jam tersebut tidak valid!");
+                return SB_RES_OK;
+            }
+
             if (teleBot.usingTelegramBot) {
                 free(teleBot.tokenBot);
                 free(teleBot.userID);
             }
 
+            // setting telegram
             sprintf(tempString, "UPDATE settings SET value = '%c' WHERE name = 'usingTelegram'", valueSplit[0][0]);
             sqlite3_exec(db, tempString, 0, 0, NULL);
             
@@ -68,20 +89,69 @@ int pengaturan(sb_Event* e) {
                 sqlite3_exec(db, tempString, 0, 0, NULL);
             } else teleBot.usingTelegramBot = 0;
 
+            // setting block barang kosong
             sprintf(tempString, "UPDATE settings SET value = '%c' WHERE name = 'blockBarangKosong'", valueSplit[3][0]);
             sqlite3_exec(db, tempString, 0, 0, NULL);
+
+            // setting notify barang kosong
             sprintf(tempString, "UPDATE settings SET value = '%c' WHERE name = 'notifyBarangKosongTGram'", valueSplit[4][0]);
             sqlite3_exec(db, tempString, 0, 0, NULL);
-            if (isdigit(valueSplit[4][0])) teleBot.notifyBarangKosongTGram = atoi(&valueSplit[4][0]); 
+            teleBot.notifyBarangKosongTGram = atoi(&valueSplit[4][0]);
+
+            // setting notify kasir
             sprintf(tempString, "UPDATE settings SET value = '%c' WHERE name = 'notifyKasirTGram'", valueSplit[5][0]);
             sqlite3_exec(db, tempString, 0, 0, NULL);
-            if (isdigit(valueSplit[5][0])) teleBot.notifyKasirTGram = atoi(&valueSplit[5][0]);
+            teleBot.notifyKasirTGram = atoi(&valueSplit[5][0]);
+
+            // setting jika notify dibawah stock barang
             sprintf(tempString, "UPDATE settings SET value = '%c' WHERE name = 'isNotifyDibawahStockBarangTGram'", valueSplit[6][0]);
             sqlite3_exec(db, tempString, 0, 0, NULL);
-            if (isdigit(valueSplit[6][0])) teleBot.isNotifyBarangDibawahJumlah = atoi(&valueSplit[6][0]); 
-            sprintf(tempString, "UPDATE settings SET value = '%d' WHERE name = 'jumlahNotifyDibawahStockBarangTGram'", atoi(valueSplit[7]));
+            teleBot.isNotifyBarangDibawahJumlah = atoi(&valueSplit[6][0]); 
+
+            // setting jumlah notify dibawah stock barang
+            sprintf(tempString, "UPDATE settings SET value = %d WHERE name = 'jumlahNotifyDibawahStockBarangTGram'", atoi(valueSplit[7]));
             sqlite3_exec(db, tempString, 0, 0, NULL);
-            
+
+            // setting jika memakai notify alarm pembukuan
+            sprintf(tempString, "UPDATE settings SET value = '%c' WHERE name = 'isNotifyAlarmPembukuan'", valueSplit[8][0]);
+            sqlite3_exec(db, tempString, 0, 0, NULL);
+            teleBot.isNotifyAlarmPembukuan = atoi(&valueSplit[8][0]);
+
+            // setting waktu notify alarm pembukuan
+            sprintf(tempString, "UPDATE settings SET value = '%s' WHERE name = 'waktuNotifyAlarmPembukuan'", valueSplit[9]);
+            sqlite3_exec(db, tempString, 0, 0, NULL);
+
+            sprintf(tempString, "UPDATE settings SET value = '%c' WHERE name = 'isAutoRefreshBarangTotalTerjual'", valueSplit[10][0]);
+            sqlite3_exec(db, tempString, 0, 0, NULL);
+
+            sprintf(tempString, "UPDATE settings SET value = '%c' WHERE name = 'AutoSelectFilterDate'", valueSplit[11][0]);
+            sqlite3_exec(db, tempString, 0, 0, NULL);
+
+            if (teleBot.isNotifyAlarmPembukuan) {
+                int to_second = convertToSeconds(valueSplit[9]);
+                
+                if (teleThreadInfo.isAlarmPembukuanRun) {
+                    #ifdef _WIN32
+                    TerminateThread(tele_thread[0], 0);
+                    #else
+                    pthread_cancel(tele_thread[0]);
+                    #endif
+                }
+                #ifdef _WIN32
+                tele_thread[0] = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)pembukuanAlarm, &to_second, 0, NULL);
+                #else
+                pthread_create(&tele_thread[0], NULL, pembukuanAlarm, &to_second);
+                #endif
+            } else {
+                if (teleThreadInfo.isAlarmPembukuanRun) {
+                    #ifdef _WIN32
+                    TerminateThread(tele_thread, 0);
+                    #else
+                    pthread_cancel(tele_thread[0]);
+                    #endif
+                }
+            }
+
             for (int a = 0; a < 5; a++) {
                 if (valueSplit[7][a]) {
                     if (!isdigit(valueSplit[7][a])) goto JUMP;
@@ -111,6 +181,16 @@ int pengaturan(sb_Event* e) {
             
             break;
             // telegram testing
+        }
+        case 4: {
+            SQLRow row = {0};
+            sqlite3_open("database/settings.db", &db);
+            sqlite3_exec(db, "SELECT value FROM settings where name IN ('isAutoRefreshBarangTotalTerjual', 'AutoSelectFilterDate')", RowBack, &row, NULL);
+            sb_write(e->stream, row.rows, row.totalChar);
+            freeRowBack(&row);
+            sqlite3_close(db);
+            // Mendapatkan konfigurasi (Dashboard)
+            break;
         }
     }
     return SB_RES_OK;

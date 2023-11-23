@@ -169,7 +169,11 @@ window.onload = async function() {
             }, 0);
         }
     })
-    await load()
+    if (window.location.href.indexOf("?tanggal=") != -1) {
+        document.getElementById("tanggalPengeluaran").value = window.location.href.slice(window.location.href.indexOf("?tanggal=") + 9).replaceAll("_", "-")
+        await load(window.location.href.slice(window.location.href.indexOf("?tanggal=") + 9))
+    } else await load()
+    
 }
 
 async function hapusPengeluaran(id, dateValue) {

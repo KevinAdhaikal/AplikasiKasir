@@ -7,6 +7,7 @@
 #include "../sqliteFunction.h"
 #include "../../vendor/str/str.h"
 #include "../telegramClient/telegramClient.h"
+#include "../funcVarPub.h"
 
 #include "teleFunction.h"
 
@@ -52,18 +53,18 @@ int teleTotalPembukuan(sb_Event* e) {
             formatCurrency2 = formatCurrency(atoi(valueSplit[1]));
             formatCurrency3 = formatCurrency(tempInt);
             formatCurrency4 = formatCurrency(atoi(valueSplit[3]));
-            
-            str_append_format(&resultMessage, 
-            "Tanggal %s\nTotal Jumlah Barang: %s\nTotal Harga Modal: Rp%s\nTotal Harga Jual: Rp%s\nTotal Keuntungan: Rp%s\n", 
+
+            str_append_format(&resultMessage,
+            "Tanggal %s\nTotal Jumlah Barang: %s\nTotal Harga Modal: Rp%s\nTotal Harga Jual: Rp%s\nTotal Keuntungan: Rp%s\n",
             stringSplit[a],
-            formatCurrency1, 
+            formatCurrency1,
             formatCurrency2,
-            formatCurrency3, 
+            formatCurrency3,
             formatCurrency4);
 
             free(formatCurrency1);
             free(formatCurrency2);
-            
+
             free(formatCurrency4);
             free(valueSplit);
 
@@ -93,9 +94,9 @@ int teleTotalPembukuan(sb_Event* e) {
 
     sqlite3_close(db[0]);
     sqlite3_close(db[1]);
-    
+
     int retVal = sendMessage(resultMessage.value, NULL, NULL);
-    if (retVal == 0) sb_send_status(e->stream, 403, "Tidak bisa terkoneksi ke telegram, apakah internet anda menyala?");
+    if (retVal == 0) sb_send_status(e->stream, 403, " bisa terkoneksi ke telegram, apakah internet anda menyala?");
     else if (retVal == -1) sb_send_status(e->stream, 403, "Token Bot dan User ID yang kamu masukan itu salah! mohon masukan Token Bot dan User ID yang benar");
     else sb_send_status(e->stream, 200, "OK");
     sb_send_header(e->stream, "Access-Control-Allow-Origin", "*");

@@ -3,6 +3,8 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <ctype.h>
+#include <unistd.h>
+#include <time.h>
 
 #include "utils.h"
 
@@ -86,18 +88,18 @@ void static_string_format(char* dest, const char* message, ...) {
 char* dynamic_string_format(const char *format, ...) {
     va_list args;
     va_start(args, format);
-    
+
     // Calculate the length of the resulting string
     int len = vsnprintf(NULL, 0, format, args) + 1;
-    
+
     // Allocate memory for the resulting string
     char *result = (char *)malloc(len * sizeof(char));
-    
+
     // Reinitialize args and format the string
     va_start(args, format);
     vsnprintf(result, len, format, args);
     va_end(args);
-    
+
     return result;
 }
 
@@ -146,28 +148,6 @@ char includeStr(const char* str, const unsigned char* toFind, int len) {
 	return 0;
 }
 
-char isValidDate(int day, int month, int year) {
-    if (year < 0 || month < 1 || month > 12) return 0;
-    int maxDays;
-
-    switch (month) {
-        case 2:
-            maxDays = ((year % 4 == 0 && year % 100 != 0) || (year % 400 == 0)) ? 29 : 28;
-            break;
-        case 4:
-        case 6:
-        case 9:
-        case 11:
-            maxDays = 30;
-            break;
-        default:
-            maxDays = 31;
-            break;
-    }
-
-    return (day >= 1 && day <= maxDays);
-}
-
 void cropString(char* dst, const char* s, int len) {
     while(len--) {
         *dst = *s;
@@ -210,4 +190,95 @@ char *urlEncode(const char *str) {
     encodedStr[j] = '\0'; // Null-terminate the encoded string
 
     return encodedStr;
+} // thanks ChatGPT
+
+char is_valid_time_format(const char *str) {
+    if (strlen(str) > 5) return 0;
+
+    int hour, minute;
+    if (sscanf(str, "%d:%d", &hour, &minute) != 2) return 0;
+
+    // Memeriksa batas waktu yang valid
+    if (hour < 0 || hour > 24 || minute < 0 || minute >= 60) return 0;
+
+    return hour < 24;
+} // thanks ChatGPT
+
+#include <stdio.h>
+#include <string.h>
+
+int is_valid_date(char *date) {
+    int day, month, year;
+    if (sscanf(date, "%d_%d_%d", &day, &month, &year) != 3) {
+        return 0;  // if sscanf does not parse 3 values, the format is incorrect
+    }
+
+    if (year < 0) return 0;  // year cannot be negative
+    if (month < 1 || month > 12) return 0;  // month has to be in the range 1-12
+    if (day < 1) return 0;  // day cannot be less than 1
+    if (month == 2) {
+        if ((year % 4 == 0 && year % 100 != 0) || (year % 400 == 0)) return (day <= 29);  // February in a leap year can have 29 days
+        else return (day <= 28);  // February in a non-leap year can have 28 days
+    } else if (month == 4 || month == 6 || month == 9 || month == 11) return (day <= 30);  // April, June, September, November have 30 days
+    else return (day <= 31);  // All other months have 31 days
+} // thanks ChatGPT
+
+int convertToSeconds(char *timeStr) {
+    char *ptr;
+    int hour, minute, totalSeconds;
+    // Mengonversi string menjadi bilangan bulat
+    hour = strtol(timeStr, &ptr, 10);
+    minute = strtol(ptr + 1, NULL, 10); // Menambah 1 untuk mengabaikan titik dua (:)
+
+    // Mengonversi waktu ke detik
+    totalSeconds = hour * 3600 + minute * 60;
+
+    return totalSeconds;
+} // thanks ChatGPT
+
+int date_to_days(int year, int month) {
+    struct tm time_info = {0};
+    time_info.tm_year = year - 1900;
+    time_info.tm_mon = month;
+    time_info.tm_mday = 0;
+
+    mktime(&time_info);
+
+    return time_info.tm_mday;
+} // thanks ChatGPT
+
+// Function to format date as a string
+char* formatDate(void* data_date) {
+    struct tm* date = (struct tm*)data_date;
+    char* result = (char*)malloc(12);
+    snprintf(result, 12, "%d_%d_%d\n", date->tm_mday, date->tm_mon + 1, date->tm_year + 1900);
+    return result;
+} // thanks ChatGPT
+
+char* dateRange(void* startDate_void, void* endDate_void) {
+    struct tm startDate = *(struct tm*)startDate_void;
+    struct tm endDate = *(struct tm*)endDate_void;
+
+    time_t current = mktime(&startDate);
+    time_t end = mktime(&endDate);
+
+    char* result = (char*)malloc(1); // Allocate memory for an empty string
+    result[0] = '\0'; // Initialize as an empty string
+
+    while (current <= end) {
+        struct tm *currentDate = localtime(&current);
+        char* formattedDate = formatDate(currentDate);
+
+        // Resize the result string to accommodate the new date
+        result = (char*)realloc(result, strlen(result) + strlen(formattedDate) + 1);
+
+        // Concatenate the formatted date to the result string
+        strcat(result, formattedDate);
+
+        free(formattedDate); // Free memory allocated for formattedDate
+
+        current += 86400; // Add 1 day (in seconds)
+    }
+
+    return result;
 } // thanks ChatGPT

@@ -67,7 +67,7 @@ int teleKasir(sb_Event* e) {
     free(formatCurrency2);
     free(formatCurrency3);
 
-    sendMessage(totalString.value, "", "");
+    sendMessage(totalString.value, NULL, NULL);
     str_finalize(&totalString);
 
     sb_send_header(e->stream, "Access-Control-Allow-Origin", "*");

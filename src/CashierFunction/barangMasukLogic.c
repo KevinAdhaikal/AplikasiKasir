@@ -34,6 +34,10 @@ int barangMasukLogic(sb_Event* e) {
             sqlite3_open("database/barangMasuk.db", &db);
 
             if (tanggalBarangMasuk[0]) {
+                if (!is_valid_date(tanggalBarangMasuk)) {
+                    sb_send_status(e->stream, 403, "Tanggal tidak valid!");
+                    return SB_RES_OK;
+                }
                 sprintf(tempString, "SELECT name from pragma_table_info('barangMasuk_%s') where name = 'waktu'", tanggalBarangMasuk);
                 sqlite3_exec(db, tempString, sqlTOF, &is_exist, NULL);
                 if (is_exist) sprintf(tempString, "SELECT rowid,waktu,nama,jumlah,harga from barangMasuk_%s", tanggalBarangMasuk);
@@ -139,7 +143,14 @@ int barangMasukLogic(sb_Event* e) {
 
             sqlite3_open("database/barangMasuk.db", &db);
 
-            if (tanggalBarangMasuk[0]) sprintf(tempString, "SELECT jumlah FROM barangMasuk_%s where rowid='%d'", tanggalBarangMasuk, atoi(barangMasukID));
+            if (tanggalBarangMasuk[0]) {
+                if (!is_valid_date(tanggalBarangMasuk)) {
+                    sb_send_status(e->stream, 403, "Tanggal tidak valid!");
+                    return SB_RES_OK;
+                }
+                sprintf(tempString, "SELECT jumlah FROM barangMasuk_%s where rowid='%d'", tanggalBarangMasuk, atoi(barangMasukID));
+            }
+            
             else sprintf(tempString, "SELECT jumlah FROM barangMasuk_%d_%d_%d WHERE rowid='%d'", timeinfo->tm_mday, timeinfo->tm_mon + 1, timeinfo->tm_year + 1900, atoi(barangMasukID));
 
             gotoPos = 4;

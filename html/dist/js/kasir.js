@@ -67,6 +67,9 @@ $('#modal-findBarang').on('hidden.bs.modal', function () {
     $('#inputBarang').focus();
 })
 
+$("#modal-findBarang").on("shown.bs.modal", function() {
+    $('#cariBarang').DataTable().columns.adjust()
+})
 
 $(document).keydown(function(event) {
     if (event.keyCode == 27) {
@@ -389,7 +392,6 @@ async function findBarang(val) {
                 } else if (data.length > 2) {
                     document.getElementById("inputBarang").blur()
                     $("#cariBarang").DataTable().clear().draw()
-                    $("#modal-findBarang").modal("show")
                     isShowDialog = 1;
                     for (let a = 0; a < data.length - 1; a++) {
                         var result = data[a].split("|")
@@ -401,6 +403,8 @@ async function findBarang(val) {
                         tempFindBarang[result[0]][2] = Number(result[1].replaceAll(".", ""))
                         $("#cariBarang").DataTable().row.add(result.concat(`<center><button type="button" class="btn btn-info" onclick="tambahBarangKasir('${result[0]}')">Tambah Barang</button></center>`)).draw(false)
                     }
+                    $("#modal-findBarang").modal("show")
+                    
                 } else {
                     Swal.mixin({
                         toast: true,

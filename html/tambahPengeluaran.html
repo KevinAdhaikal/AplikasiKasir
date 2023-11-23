@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>AplikasiKasir | Tambah Barang</title>
+  <title>AplikasiKasir | Tambah Pengeluaran</title>
 
   <!-- Google Font: Source Sans Pro -->
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
@@ -65,7 +65,7 @@
             </a>
           </li>
           <li class="nav-item">
-            <a href="#" class="nav-link active">
+            <a href="#" class="nav-link">
               <i class="nav-icon fas fa-solid fa-box"></i>
               <p>
                 Barang
@@ -74,7 +74,7 @@
             </a>
             <ul class="nav nav-treeview">
               <li class="nav-item">
-                <a href="#" class="nav-link active">
+                <a href="./tambahBarang.html" class="nav-link">
                   <i class="fas fa-solid fa-plus nav-icon"></i>
                   <p>Tambah Barang</p>
                 </a>
@@ -153,7 +153,7 @@
       <div class="container-fluid">
         <div class="row mb-2">
           <div class="col-sm-6">
-            <h1 class="m-0">Tambah Barang</h1>
+            <h1 class="m-0">Tambah Pengeluaran</h1>
           </div><!-- /.col -->
         </div><!-- /.row -->
       </div><!-- /.container-fluid -->
@@ -164,104 +164,42 @@
     <div class="content">
       <div class="container-fluid">
         <div class="row">
-          <div class="col-12">
+          <div class="col-md">
             <!-- general form elements -->
             <div class="card card-primary">
               <div class="card-header">
-                <h3 class="card-title">Tambah Barang</h3>
+                <h3 class="card-title">Tambah Pengeluaran</h3>
               </div>
               <!-- /.card-header -->
               <!-- form start -->
               <div class="card-body">
                 <div class="form-group">
-                  <label for="namaBarang">Nama Barang</label>
+                  <label for="descPengeluaran">Deskripsi Pengeluaran</label>
                   <div class="input-group">
                     <div class="input-group-prepend">
-                      <span class="input-group-text"><i class="fa-solid fa-box"></i></span>
+                      <span class="input-group-text"><i class="fas fa-solid fa-pen-to-square"></i></span>
                     </div>
-                    <input type="text" class="form-control" id="namaBarang" placeholder="Nama Barang" autocomplete="off">
-                  </div>
-                  <div class="custom-control custom-checkbox">
-                    <input class="custom-control-input" type="checkbox" id="resetNamaBarang">
-                    <label for="resetNamaBarang" class="custom-control-label">Otomatis reset Nama Barang</label>
+                    <input type="text" class="form-control" id="descPengeluaran" placeholder="Deskripsi Pengeluaran" autocomplete="off">
                   </div>
                 </div>
                 <div class="form-group">
-                  <label for="jumlahBarang">Jumlah Barang</label>
-                  <div class="input-group">
-                    <div class="input-group-prepend">
-                      <span class="input-group-text"><i class="fa-solid fa-boxes-stacked"></i></span>
-                    </div>
-                    <input type="text" class="form-control" id="jumlahBarang" placeholder="Jumlah Barang" autocomplete="off" data-type="currency">
-                  </div>
-                  <div class="custom-control custom-checkbox">
-                    <input class="custom-control-input" type="checkbox" id="resetJumlahBarang">
-                    <label for="resetJumlahBarang" class="custom-control-label">Otomatis reset Jumlah Barang</label>
-                  </div>
-                </div>
-                <div class="form-group">
-                  <label for="hargaModal">Harga Modal</label>
+                  <label for="uangPengeluaran">Uang Pengeluaran</label>
                   <div class="input-group">
                     <div class="input-group-prepend">
                       <span class="input-group-text">Rp</span>
                     </div>
-                    <input type="text" class="form-control" id="hargaModal" placeholder="Harga Modal" autocomplete="off" data-type="currency">
-                  </div>
-                  <div class="custom-control custom-checkbox">
-                    <input class="custom-control-input" type="checkbox" id="resetHargaModal">
-                    <label for="resetHargaModal" class="custom-control-label">Otomatis reset Harga Modal</label>
-                  </div>
-                </div>
-                <div class="row">
-                  <div class="col-sm-10">
-                    <div class="form-group">
-                      <label for="hargaJual">Harga Jual</label>
-                      <div class="input-group">
-                        <div class="input-group-prepend">
-                          <span class="input-group-text">Rp</span>
-                        </div>
-                        <input type="text" class="form-control" id="hargaJual" placeholder="Harga Jual" autocomplete="off" data-type="currency">
-                      </div>
-                      <div class="custom-control custom-checkbox">
-                        <input class="custom-control-input" type="checkbox" id="resetHargaJual">
-                        <label for="resetHargaJual" class="custom-control-label">Otomatis reset Harga Jual</label>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="col-sm-2">
-                    <div class="form-group">
-                      <label for="persenModal">Persen Jual</label>
-                      <div class="input-group">
-                        <input type="text" class="form-control" id="persenJual" placeholder="Persen Jual" autocomplete="off">
-                        <div class="input-group-prepend">
-                          <span class="input-group-text">%</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div class="form-group">
-                  <label for="barcodeBarang">Barcode Barang</label>
-                  <div class="input-group">
-                    <div class="input-group-prepend">
-                      <span class="input-group-text"><i class="fa-solid fa-barcode"></i></span>
-                    </div>
-                    <input type="text" class="form-control" id="barcodeBarang" placeholder="Barcode Barang" autocomplete="off">
-                  </div>
-                  <div class="custom-control custom-checkbox">
-                    <input class="custom-control-input" type="checkbox" id="resetBarcodeBarang">
-                    <label for="resetBarcodeBarang" class="custom-control-label">Otomatis reset Barcode Barang</label>
+                    <input type="text" class="form-control" id="uangPengeluaran" placeholder="Uang Pengeluaran" autocomplete="off">
                   </div>
                 </div>
               </div>
               <!-- /.card-body -->
     
               <div class="card-footer">
-                <button class="btn btn-success" id="TambahBarangButton" onclick="tambahBarang()">Tambah Barang</button>
+                <button class="btn btn-success" id="tambahPengeluaranButton" onclick="tambahPengeluaran()">Tambahkan Pengeluaran</button>
               </div>
             </div>
             <!-- /.card -->
-          </div>
+          </div>    
         </div>
         <!-- /.row -->
       </div><!-- /.container-fluid -->
@@ -291,10 +229,12 @@
 <!-- AdminLTE App -->
 <script src="dist/js/adminlte.min.js"></script>
 <!-- SweetAlert2 -->
-<script src="plugins/sweetalert2/sweetalert2.min.js"></script>
+<script src="../../plugins/sweetalert2/sweetalert2.min.js"></script>
 <!-- My Script -->
 <script src="dist/js/AplikasiKasir.js"></script>
-<!-- TambahBarang Script -->
-<script src="dist/js/TambahBarang.js"></script>
+<!-- Tambah Pengeluaran -->
+<script src="dist/js/tambahPengeluaran.js"></script>
+<!-- Font Awesome Script-->
+
 </body>
 </html>

@@ -28,7 +28,6 @@ int POSTFunction(sb_Event* e) {
 
         sb_get_cookie(e->stream, "username", username, 19);
         sb_get_cookie(e->stream, "password", password, 19);
-
         if (isStr(username, "admin", 1) && isStr(password, "admin", 1)) {
             if (isStr(e->path, "/checkLogin", 1)) sb_send_status(e->stream, 200, "OK");
             else if (isStr(e->path, "/tambahBarang", 1)) tambahBarang(e);

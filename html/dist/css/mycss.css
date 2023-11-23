@@ -6,7 +6,7 @@
     display: block;
     margin-bottom: 1em;
 }
-  
+
 .brmedium {
     display: block;
     margin-bottom: 1em;
@@ -18,6 +18,9 @@
 }
 .space2 {
   margin-right : 10px;
+}
+.space {
+	margin-right: 5px;
 }
 .a {
   border-top: 1px solid grey;

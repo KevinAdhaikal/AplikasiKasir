@@ -94,7 +94,10 @@ window.onload = async function() {
             }, 0);
         }
     })
-    await load()
+    if (window.location.href.indexOf("?tanggal=") != -1) {
+        document.getElementById("tanggalBarangTerjual").value = window.location.href.slice(window.location.href.indexOf("?tanggal=") + 9).replaceAll("_", "-")
+        await load(window.location.href.slice(window.location.href.indexOf("?tanggal=") + 9))
+    } else await load()
 }
 
 function hapusBarangTerjual(id, dateValue) {
@@ -134,8 +137,6 @@ function hapusBarangTerjual(id, dateValue) {
                     $("#barangTerjualTable").DataTable().columns().footer()[4].innerHTML = "Total: Rp" + Intl.NumberFormat('id', {}).format(Number($("#barangTerjualTable").DataTable().columns().footer()[4].innerHTML.split(": Rp")[1].replaceAll(".", "") - barangTerjualData.data()[4].slice(2).replaceAll(".", "")))
                     $("#barangTerjualTable").DataTable().columns().footer()[5].innerHTML = "Total: Rp" + Intl.NumberFormat('id', {}).format(Number($("#barangTerjualTable").DataTable().columns().footer()[5].innerHTML.split(": Rp")[1].replaceAll(".", "") - barangTerjualData.data()[5].slice(2).replaceAll(".", "")))
                     barangTerjualData.remove().draw()
-                    
-                    //load(dateValue ? dateValue.replaceAll("-", "_") : "");
                 }
                 else {
                     Swal.mixin({

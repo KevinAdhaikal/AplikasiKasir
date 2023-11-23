@@ -4,19 +4,29 @@
 #include <string.h>
 #include <stdlib.h>
 #include <dirent.h>
-#include <pthread.h>
 
-#include "utils/utils.h"
-#include "../vendor/sandbird/sandbird.h"
-#include "methodFunction/methodFunction.h"
-#include "../vendor/sqlite3/sqlite3.h"
-#include "../vendor/str/str.h"
-#include "teleFunction/teleFunction.h"
+#ifdef _WIN32
+#include <windows.h>
+#else
+#include <pthread.h>
+#endif
 
 #include "sqliteFunction.h"
 #include "funcVarPub.h"
+#include "utils/utils.h"
+#include "methodFunction/methodFunction.h"
+#include "teleFunction/teleFunction.h"
+#include "alarmFunction/alarmFunction.h"
 
+#include "../vendor/sandbird/sandbird.h"
+#include "../vendor/sqlite3/sqlite3.h"
+#include "../vendor/str/str.h"
+
+#ifdef _WIN32
+HANDLE serverThread;
+#else
 pthread_t serverThread;
+#endif
 
 void* runServer(void* ptr) {
     for (;;) {
@@ -49,10 +59,13 @@ void loadSettings() {
     "('notifyBarangKosongTGram', 0),"
     "('notifyKasirTGram', 1),"
     "('isNotifyDibawahStockBarangTGram', 0),"
-    "('jumlahNotifyDibawahStockBarangTGram', 0)", 0, 0, NULL);
+    "('jumlahNotifyDibawahStockBarangTGram', 0),"
+    "('isNotifyAlarmPembukuan', 0),"
+    "('waktuNotifyAlarmPembukuan', 0),"
+    "('isAutoRefreshBarangTotalTerjual', 0),"
+    "('AutoSelectFilterDate', 0)", 0, 0, NULL);
 
     sqlite3_exec(db, "SELECT * from settings", RowBack, &row, NULL);
-
     char** strSplit = strsplit(row.rows, "\n", 0);
 
     if (isStr(strSplit[0], "usingTelegram|1", 1)) {
@@ -70,6 +83,16 @@ void loadSettings() {
     teleBot.notifyKasirTGram = strSplit[5][17] - 48;
     teleBot.isNotifyBarangDibawahJumlah = strSplit[6][32] - 48;
     teleBot.targetNotifyBarangDibawahJumlah = atoi(strSplit[7] + 36);
+    teleBot.isNotifyAlarmPembukuan = atoi(strSplit[8] + 23);
+
+    if (teleBot.isNotifyAlarmPembukuan) {
+        int to_second = convertToSeconds(strSplit[9] + 26);
+        #ifdef _WIN32
+        tele_thread[0] = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)pembukuanAlarm, &to_second, 0, NULL);
+        #else
+        pthread_create(&tele_thread[0], NULL, pembukuanAlarm, &to_second);
+        #endif
+    }
 
     free(strSplit);
     freeRowBack(&row);
@@ -85,7 +108,12 @@ int thread_handler(sb_Event* e) {
         char password[255];
         sb_get_var(e->stream, "username", username, 254);
         sb_get_var(e->stream, "password", password, 254);
-        if ((isStr(username, "admin", 1) && isStr(password, "admin", 1)) && teleBot.usingTelegramBot) {
+        if ((isStr(username, "admin", 1) && isStr(password, "admin", 1))) {
+            if (!teleBot.usingTelegramBot) {
+                sb_send_status(e->stream, 403, "Anda belum menyalakan Telegram di Setting! Mohon nyalakan Telegram di Setting");
+                sb_send_header(e->stream, "Access-Control-Allow-Origin", "*");
+                return SB_RES_OK;
+            }
             switch(sb_convert_var_to_int(e->stream, "teleArgs")) {
                 case 1: return teleTotalPembukuan(e);
                 case 2: return teleKasir(e);
@@ -99,7 +127,7 @@ int thread_handler(sb_Event* e) {
 int event_handler(sb_Event *e) {
     if (e->type == SB_EV_REQUEST) {
         printf("[%s] %s\n", e->method, e->path);
-        if (includeStr(e->path, "./", strlen(e->path))) return SB_RES_CLOSE;
+        if (includeStr(e->path, "../", strlen(e->path))) return SB_RES_CLOSE;
         if (!strcmp(e->method, "POST")) return POSTFunction(e);
         else if (!strcmp(e->method, "GET")) return GETFunction(e);
         else return SB_RES_CLOSE;
@@ -137,7 +165,11 @@ int main() {
 
     srv[1] = sb_new_server(&opt[1]);
 
+    #ifdef _WIN32
+    serverThread = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)runServer, srv[1], 0, NULL);
+    #else
     pthread_create(&serverThread, NULL, runServer, srv[1]);
+    #endif
     printf("[LOGS] AplikasiKasir run at port %s!\n", opt[0].port);
     runServer(srv[0]);
     return 0;

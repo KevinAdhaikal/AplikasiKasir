@@ -145,6 +145,10 @@ int pembukuan(sb_Event* e) {
                     freeRowBack(&row);
                 }
             } else {
+                if (!is_valid_date(tanggalPembukuan)) {
+                    sb_send_status(e->stream, 403, "Tanggal tidak valid!");
+                    return SB_RES_OK;
+                }
                 sprintf(tempString, "SELECT EXISTS (SELECT name FROM sqlite_master WHERE type='table' AND name='barangTerjual_%s');", tanggalPembukuan);
                 if (!sqlBackExec(e, db, tempString, sqlReturnInt, &isTrue)) return SB_RES_OK;
 
@@ -176,7 +180,6 @@ int pembukuan(sb_Event* e) {
         }
         case 3: {
             char idBarang[11];
-            char tanggalPembukuan[32];
             char namaBarang[255];
             int totalJumlah = 0;
 
@@ -190,6 +193,10 @@ int pembukuan(sb_Event* e) {
             }
 
             if (tanggalPembukuan[0]) {
+                if (!is_valid_date(tanggalPembukuan)) {
+                    sb_send_status(e->stream, 403, "Tanggal tidak valid!");
+                    return SB_RES_OK;
+                }
                 if (namaBarang[0]) {
                     sprintf(tempString, "SELECT jumlah FROM barangTerjual_%s WHERE nama='%s'", tanggalPembukuan, namaBarang);
                     sqlite3_open("database/pembukuan.db", &db);
@@ -328,6 +335,10 @@ int pembukuan(sb_Event* e) {
             sb_get_header(e->stream, "tanggalPengeluaran", tanggalPengeluaran, 31);
 
             if (tanggalPengeluaran[0]) {
+                if (!is_valid_date(tanggalPengeluaran)) {
+                    sb_send_status(e->stream, 403, "Tanggal tidak valid!");
+                    return SB_RES_OK;
+                }
                 sprintf(tempString, "SELECT name from pragma_table_info('pengeluaran_%s') where name = 'waktu'", tanggalPengeluaran);
                 sqlite3_exec(db, tempString, sqlTOF, &is_exist, NULL);
                 if (is_exist) sprintf(tempString, "SELECT rowid,waktu,desc,uang FROM pengeluaran_%s", tanggalPengeluaran);
@@ -372,7 +383,13 @@ int pembukuan(sb_Event* e) {
             }
 
             sqlite3_open("database/pengeluaran.db", &db);
-            if (tanggalPengeluaran[0]) sprintf(tempString, "DELETE FROM pengeluaran_%s where rowid=%s", tanggalPengeluaran, rowPengeluaran);
+            if (tanggalPengeluaran[0]) {
+                if (!is_valid_date(tanggalPengeluaran)) {
+                    sb_send_status(e->stream, 403, "Tanggal tidak valid!");
+                    return SB_RES_OK;
+                }
+                sprintf(tempString, "DELETE FROM pengeluaran_%s where rowid=%s", tanggalPengeluaran, rowPengeluaran);
+            }
             else sprintf(tempString, "DELETE FROM pengeluaran_%d_%d_%d where rowid=%s", timeinfo->tm_mday, timeinfo->tm_mon + 1, timeinfo->tm_year + 1900, rowPengeluaran);
 
             if (!sqlNormalExec(e, db, tempString)) return SB_RES_OK;
@@ -392,20 +409,19 @@ int pembukuan(sb_Event* e) {
             sb_send_status(e->stream, 200, "OK");
 
             for (int a = 0; a < splitCount; a++) {
+                if (!is_valid_date(valueSplit[a])) {
+                    sb_send_status(e->stream, 403, "Tanggal tidak valid!");
+                    cJSON_Delete(resultJSON);
+                    cJSON_Delete(tempArray);
+                    cJSON_Delete(tempObject);
+                    return SB_RES_OK;
+                }
+                
                 sqlite3_open("database/pembukuan.db", &db);
                 sprintf(tempString, "SELECT * FROM barangTerjual_%s", valueSplit[a]);
 
-                if (sqlite3_exec(db, tempString, RowBack, &row, &errMsg) != SQLITE_OK) {
+                if (sqlite3_exec(db, tempString, RowBack, &row, NULL) != SQLITE_OK) {
                     freeRowBack(&row);
-                    if (!isStr(errMsg, "no such table", 0)) {
-                        sb_send_status(e->stream, 403, "Ada yang salah pada AplikasiKasir, harap hubungi Pemilik");
-                        printf("[ERROR] Something wrong in SQLite at pembukuanLogic.c: %s\n", errMsg);
-                        sqlite3_free(errMsg);
-                        sqlite3_close(db);
-                        free(bodyData.data);
-                        return SB_RES_OK;
-                    }
-                    sqlite3_free(errMsg);
                     sqlite3_close(db);
                 } else {
                     if (row.totalChar) {
@@ -429,17 +445,8 @@ int pembukuan(sb_Event* e) {
                 sqlite3_open("database/pengeluaran.db", &db);
                 sprintf(tempString, "SELECT * FROM pengeluaran_%s", valueSplit[a]);
 
-                if (sqlite3_exec(db, tempString, RowBack, &row, &errMsg) != SQLITE_OK) {
+                if (sqlite3_exec(db, tempString, RowBack, &row, NULL) != SQLITE_OK) {
                     freeRowBack(&row);
-                    if (!isStr(errMsg, "no such table", 0)) {
-                        sb_send_status(e->stream, 403, "Ada yang salah pada AplikasiKasir, harap hubungi Pemilik");
-                        printf("[ERROR] Something wrong in SQLite at pembukuanLogic.c: %s\n", errMsg);
-                        sqlite3_free(errMsg);
-                        sqlite3_close(db);
-                        free(bodyData.data);
-                        return SB_RES_OK;
-                    }
-                    sqlite3_free(errMsg);
                     sqlite3_close(db);
                 } else {
                     if (row.totalChar) {

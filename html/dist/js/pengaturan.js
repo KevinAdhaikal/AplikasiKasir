@@ -8,6 +8,22 @@ function formatNumber(n) {
     return n.replace(/\D/g, "").replace(/\B(?=(\d{3})+(?!\d))/g, ".");
 }
 
+function convertTime(inputTime) {
+    var timeArray = inputTime.split(':');
+    var hours = parseInt(timeArray[0], 10);
+    var minutes = parseInt(timeArray[1], 10);
+    var convertedTime = '';
+
+    if (hours < 12 && inputTime.indexOf('PM') > -1) {
+        hours = hours + 12;
+    } else if (hours === 12 && inputTime.indexOf('AM') > -1) {
+        hours = 0;
+    }
+
+    convertedTime = ('0' + hours).slice(-2) + ':' + ('0' + minutes).slice(-2);
+    return convertedTime
+}
+
 function formatCurrency(input) {
     var input_val = input.val();
     if (input_val === "") return;
@@ -36,6 +52,7 @@ function load() {
         if (response.status == 200) {
             await response.text().then(data => {
                 data = data.split("\n")
+
                 $('#menggunakanTelegramBot').bootstrapToggle(data[0] == '1' ? 'on' : 'off')
                 document.getElementById("telegramBotToken").value = data[1]
                 document.getElementById("telegramUserID").value = data[2]
@@ -44,6 +61,10 @@ function load() {
                 $("#notifyKasir").bootstrapToggle(data[5] == '1' ? 'on' : 'off')
                 $("#isNotifyStockBarangDibawahJumlah").bootstrapToggle(data[6] == '1' ? 'on' : 'off')
                 document.getElementById("jumlahNotifyStockBarangDibawahJumlah").value = data[7];
+                $("#isNotifyAlarmPembukuan").bootstrapToggle(data[8] == '1' ? 'on' : 'off');
+                document.getElementById('waktuNotifyAlarmPembukuan').value = data[9];
+                $("#isAutoRefreshBarangTotalTerjual").bootstrapToggle(data[10] == '1' ? 'on' : 'off')
+                document.getElementById("AutoSetFilterDate_date_select").selectedIndex = Number(data[11])
             })
         }
     })
@@ -64,9 +85,26 @@ $('#menggunakanTelegramBot').on('change.bootstrapSwitch', function(e) {
     else document.getElementById("boxTelegram").classList.add("d-none")
 });
 
+$('#isNotifyAlarmPembukuan').on('change.bootstrapSwitch', function(e) {
+    if (e.target.checked) {
+        document.getElementById("isNotifyAlarmPembukuan_div").classList.remove("d-none")
+        document.getElementById("waktuNotifyAlarmPembukuan").disabled = false
+    }
+    else {
+        document.getElementById("isNotifyAlarmPembukuan_div").classList.add("d-none")
+        document.getElementById("waktuNotifyAlarmPembukuan").disabled = true
+    }
+});
+
 $('#isNotifyStockBarangDibawahJumlah').on('change.bootstrapSwitch', function(e) {
-    if (e.target.checked) document.getElementById("jumlahNotifyStockBarangDibawahJumlah").disabled = false
-    else document.getElementById("jumlahNotifyStockBarangDibawahJumlah").disabled = true
+    if (e.target.checked) {
+        document.getElementById("isNotifyStockBarangDibawahJumlah_div").classList.remove("d-none")
+        document.getElementById("jumlahNotifyStockBarangDibawahJumlah").disabled = false
+    }
+    else {
+        document.getElementById("isNotifyStockBarangDibawahJumlah_div").classList.add("d-none")
+        document.getElementById("jumlahNotifyStockBarangDibawahJumlah").disabled = true
+    }
 });
 
 function terapkanPengaturan() {
@@ -79,7 +117,11 @@ ${document.getElementById("blockBarangKosong").checked ? '1' : '0'}
 ${document.getElementById("notifyBarangKosong").checked ? '1' : '0'}
 ${document.getElementById("notifyKasir").checked ? '1' : '0'}
 ${document.getElementById("isNotifyStockBarangDibawahJumlah").checked ? '1' : '0'}
-${document.getElementById("jumlahNotifyStockBarangDibawahJumlah").value}`
+${document.getElementById("jumlahNotifyStockBarangDibawahJumlah").value}
+${document.getElementById("isNotifyAlarmPembukuan").checked ? '1' : '0'}
+${convertTime(document.getElementById('waktuNotifyAlarmPembukuan').value)}
+${document.getElementById("isAutoRefreshBarangTotalTerjual").checked ? '1' : '0'}
+${document.getElementById("AutoSetFilterDate_date_select").selectedIndex}`
     }).then(response => {
         if (response.status == 200) {
             Swal.mixin({

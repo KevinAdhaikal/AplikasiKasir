@@ -89,7 +89,8 @@ int sendMessage(void* message, const char* token, const char* userid) {
         WSAStartup(MAKEWORD(2, 2), &wsaData);
     #endif
 
-    if (!token && !userid) {
+    if (token != NULL && userid != NULL) {
+        printf("using here!\n");
         size_t id_len;
         char** split_id = strsplit(userid, ",", &id_len);
 
@@ -139,7 +140,7 @@ int sendMessage(void* message, const char* token, const char* userid) {
     }
 
     for (int a = 0; a < teleBot.userIDsize; a++) {
-        connect_server(&sockfd);
+        if(!connect_server(&sockfd)) return 0;
 
         struct TLSContext *context = tls_create_context(0, TLS_V12);
         tls_make_exportable(context, 1);
@@ -182,6 +183,7 @@ int sendMessage(void* message, const char* token, const char* userid) {
 }
 
 void* sendMessageThread(void* message) {
+    if (!teleBot.usingTelegramBot) return NULL;
     unsigned char read_buffer[0xFFFF];
     unsigned char client_message[0xFFFF];
 
@@ -193,7 +195,7 @@ void* sendMessageThread(void* message) {
     #endif
 
     for (int a = 0; a < teleBot.userIDsize; a++) {
-        connect_server(&sockfd);
+        if(!connect_server(&sockfd)) return NULL;
 
         struct TLSContext *context = tls_create_context(0, TLS_V12);
         tls_make_exportable(context, 1);
@@ -232,4 +234,6 @@ void* sendMessageThread(void* message) {
     }
 
     free(message);
+
+    return NULL;
 }

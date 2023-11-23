@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>AplikasiKasir | Tambah Barang</title>
+  <title>AplikasiKasir | Tambah Barang Masuk</title>
 
   <!-- Google Font: Source Sans Pro -->
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
@@ -13,6 +13,12 @@
   <link rel="stylesheet" href="dist/css/adminlte.min.css">
   <!-- SweetAlert2 -->
   <link rel="stylesheet" href="/plugins/sweetalert2-theme-bootstrap-4/bootstrap-4.min.css">
+  <!-- IonIcons -->
+  <link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
+  <!-- DataTables -->
+  <link rel="stylesheet" href="plugins/datatables-bs4/css/dataTables.bootstrap4.min.css">
+  <link rel="stylesheet" href="plugins/datatables-responsive/css/responsive.bootstrap4.min.css">
+  <link rel="stylesheet" href="plugins/datatables-buttons/css/buttons.bootstrap4.min.css">
 </head>
 <body class="hold-transition sidebar-mini layout-fixed layout-footer-fixed sidebar-collapse">
 <div class="wrapper">
@@ -65,7 +71,7 @@
             </a>
           </li>
           <li class="nav-item">
-            <a href="#" class="nav-link active">
+            <a href="#" class="nav-link">
               <i class="nav-icon fas fa-solid fa-box"></i>
               <p>
                 Barang
@@ -74,7 +80,7 @@
             </a>
             <ul class="nav nav-treeview">
               <li class="nav-item">
-                <a href="#" class="nav-link active">
+                <a href="./tambahBarang.html" class="nav-link">
                   <i class="fas fa-solid fa-plus nav-icon"></i>
                   <p>Tambah Barang</p>
                 </a>
@@ -153,7 +159,7 @@
       <div class="container-fluid">
         <div class="row mb-2">
           <div class="col-sm-6">
-            <h1 class="m-0">Tambah Barang</h1>
+            <h1 class="m-0">Tambah Barang Masuk</h1>
           </div><!-- /.col -->
         </div><!-- /.row -->
       </div><!-- /.container-fluid -->
@@ -168,96 +174,57 @@
             <!-- general form elements -->
             <div class="card card-primary">
               <div class="card-header">
-                <h3 class="card-title">Tambah Barang</h3>
+                <h3 class="card-title">Tambah Barang Masuk</h3>
               </div>
               <!-- /.card-header -->
               <!-- form start -->
               <div class="card-body">
-                <div class="form-group">
-                  <label for="namaBarang">Nama Barang</label>
-                  <div class="input-group">
-                    <div class="input-group-prepend">
-                      <span class="input-group-text"><i class="fa-solid fa-box"></i></span>
-                    </div>
-                    <input type="text" class="form-control" id="namaBarang" placeholder="Nama Barang" autocomplete="off">
-                  </div>
-                  <div class="custom-control custom-checkbox">
-                    <input class="custom-control-input" type="checkbox" id="resetNamaBarang">
-                    <label for="resetNamaBarang" class="custom-control-label">Otomatis reset Nama Barang</label>
-                  </div>
-                </div>
-                <div class="form-group">
-                  <label for="jumlahBarang">Jumlah Barang</label>
-                  <div class="input-group">
-                    <div class="input-group-prepend">
-                      <span class="input-group-text"><i class="fa-solid fa-boxes-stacked"></i></span>
-                    </div>
-                    <input type="text" class="form-control" id="jumlahBarang" placeholder="Jumlah Barang" autocomplete="off" data-type="currency">
-                  </div>
-                  <div class="custom-control custom-checkbox">
-                    <input class="custom-control-input" type="checkbox" id="resetJumlahBarang">
-                    <label for="resetJumlahBarang" class="custom-control-label">Otomatis reset Jumlah Barang</label>
-                  </div>
-                </div>
-                <div class="form-group">
-                  <label for="hargaModal">Harga Modal</label>
-                  <div class="input-group">
-                    <div class="input-group-prepend">
-                      <span class="input-group-text">Rp</span>
-                    </div>
-                    <input type="text" class="form-control" id="hargaModal" placeholder="Harga Modal" autocomplete="off" data-type="currency">
-                  </div>
-                  <div class="custom-control custom-checkbox">
-                    <input class="custom-control-input" type="checkbox" id="resetHargaModal">
-                    <label for="resetHargaModal" class="custom-control-label">Otomatis reset Harga Modal</label>
-                  </div>
-                </div>
-                <div class="row">
-                  <div class="col-sm-10">
-                    <div class="form-group">
-                      <label for="hargaJual">Harga Jual</label>
+                <div class="col-12">
+                  <label for="namaBarang">Nama/Barcode Barang</label>
+                  <div class="form-group row">
+                    <div class="col-sm-10">
                       <div class="input-group">
                         <div class="input-group-prepend">
-                          <span class="input-group-text">Rp</span>
+                          <span class="input-group-text"><i class="fa-solid fa-box"></i></span>
                         </div>
-                        <input type="text" class="form-control" id="hargaJual" placeholder="Harga Jual" autocomplete="off" data-type="currency">
-                      </div>
-                      <div class="custom-control custom-checkbox">
-                        <input class="custom-control-input" type="checkbox" id="resetHargaJual">
-                        <label for="resetHargaJual" class="custom-control-label">Otomatis reset Harga Jual</label>
+                        <input type="text" class="form-control" id="namaBarcodeBarang" placeholder="Nama/Barcode Barang" autocomplete="off">
                       </div>
                     </div>
+                    <div class="col-sm-2">
+                      <center>
+                        <button type="button" class="btn btn-primary btn-block" id="checkBarangButton" onclick="checkBarang(document.getElementById('namaBarcodeBarang').value)">Check Barang (Enter)</button>
+                      </center>
+                    </div>
                   </div>
-                  <div class="col-sm-2">
+                  <div class="form-group">
                     <div class="form-group">
-                      <label for="persenModal">Persen Jual</label>
+                      <label for="namaBarang">Jumlah Barang</label>
                       <div class="input-group">
-                        <input type="text" class="form-control" id="persenJual" placeholder="Persen Jual" autocomplete="off">
                         <div class="input-group-prepend">
-                          <span class="input-group-text">%</span>
+                          <span class="input-group-text"><i class="fa-solid fa-box"></i></span>
                         </div>
+                        <input type="text" class="form-control" id="jumlahBarang" placeholder="Jumlah Barang" autocomplete="off" disabled>
                       </div>
                     </div>
                   </div>
-                </div>
-                <div class="form-group">
-                  <label for="barcodeBarang">Barcode Barang</label>
-                  <div class="input-group">
-                    <div class="input-group-prepend">
-                      <span class="input-group-text"><i class="fa-solid fa-barcode"></i></span>
+                  <div class="form-group">
+                    <div class="form-group">
+                      <label for="namaBarang">Harga Barang (Dari Faktur)</label>
+                      <div class="input-group">
+                        <div class="input-group-prepend">
+                          <span class="input-group-text"><i class="fa-solid fa-box"></i></span>
+                        </div>
+                        <input type="text" class="form-control" id="hargaBarang" placeholder="Harga Barang (Dari Faktur)" autocomplete="off" disabled>
+                      </div>
                     </div>
-                    <input type="text" class="form-control" id="barcodeBarang" placeholder="Barcode Barang" autocomplete="off">
-                  </div>
-                  <div class="custom-control custom-checkbox">
-                    <input class="custom-control-input" type="checkbox" id="resetBarcodeBarang">
-                    <label for="resetBarcodeBarang" class="custom-control-label">Otomatis reset Barcode Barang</label>
                   </div>
                 </div>
               </div>
               <!-- /.card-body -->
     
               <div class="card-footer">
-                <button class="btn btn-success" id="TambahBarangButton" onclick="tambahBarang()">Tambah Barang</button>
+                <button class="btn btn-success" id="TambahBarangButton" onclick="barangMasuk()" disabled>Tambah Barang Masuk</button>
+                <button class="btn btn-danger" id="TambahBarangButton" onclick="resetSemuaInput()">Reset Semua Input</button>
               </div>
             </div>
             <!-- /.card -->
@@ -265,6 +232,41 @@
         </div>
         <!-- /.row -->
       </div><!-- /.container-fluid -->
+      <div class="modal fade" id="modal-findBarang">
+        <div class="modal-dialog modal-xl modal-dialog-centered">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h4 class="modal-title">Cari Barang</h4>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <table id="cariBarang" class="table table-bordered table-hover">
+                <thead>
+                <tr>
+                  <th>Nama Barang</th>
+                  <th>Action Button</th>
+                </tr>
+                </thead>
+                <tbody>
+                </tbody>
+                <tfoot>
+                <tr>
+                  <th>Nama Barang</th>
+                  <th>Action Button</th>
+                </tr>
+                </tfoot>
+              </table>
+            </div>
+            <div class="modal-footer justify-content-between">
+              <button type="button" class="btn btn-default" data-dismiss="modal">Close (Esc)</button>
+            </div>
+          </div>
+          <!-- /.modal-content -->
+        </div>
+        <!-- /.modal-dialog -->
+      </div>
     </div>
     <!-- /.content -->
   </div>
@@ -291,10 +293,39 @@
 <!-- AdminLTE App -->
 <script src="dist/js/adminlte.min.js"></script>
 <!-- SweetAlert2 -->
-<script src="plugins/sweetalert2/sweetalert2.min.js"></script>
+<script src="../../plugins/sweetalert2/sweetalert2.min.js"></script>
 <!-- My Script -->
 <script src="dist/js/AplikasiKasir.js"></script>
-<!-- TambahBarang Script -->
-<script src="dist/js/TambahBarang.js"></script>
+<!-- DataTables  & Plugins -->
+<script src="plugins/datatables/jquery.dataTables.min.js"></script>
+<script src="plugins/datatables-bs4/js/dataTables.bootstrap4.min.js"></script>
+<script src="plugins/datatables-responsive/js/dataTables.responsive.min.js"></script>
+<script src="plugins/datatables-responsive/js/responsive.bootstrap4.min.js"></script>
+<script src="plugins/datatables-buttons/js/dataTables.buttons.min.js"></script>
+<script src="plugins/datatables-buttons/js/buttons.bootstrap4.min.js"></script>
+<script src="plugins/jszip/jszip.min.js"></script>
+<script src="plugins/pdfmake/pdfmake.min.js"></script>
+<script src="plugins/pdfmake/vfs_fonts.js"></script>
+<script src="plugins/datatables-buttons/js/buttons.html5.min.js"></script>
+<script src="plugins/datatables-buttons/js/buttons.print.min.js"></script>
+<script src="plugins/datatables-buttons/js/buttons.colVis.min.js"></script>
+<!-- Font Awesome Script-->
+<script src="dist/js/tambahBarangMasuk.js"></script>
+<script>
+  $("#cariBarang").DataTable({
+      scrollCollapse: true,
+      paging:         false,
+      fixedColumns: {
+          left: 1,
+          right: 1
+      },
+      "bInfo" : false,
+      "ordering": false,
+      "responsive": true, "lengthChange": false, "autoWidth": false, "searching": true
+    }).buttons().container().appendTo('#cariBarang_wrapper .col-md-6:eq(0)');
+  $(window).resize(function() {
+    $('#cariBarang').DataTable().columns.adjust()
+  });
+</script>
 </body>
 </html>

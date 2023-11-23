@@ -50,6 +50,7 @@ async function mainPage() {
                     </center>`
                     data[a][5] = data[a][5] ? data[a][5] : "Tidak Ada"
                 }
+		console.log(data)
                 $("#daftarBarangTable").DataTable().rows.add(data.slice(0, -1)).draw(false)
                 data = ""
             })

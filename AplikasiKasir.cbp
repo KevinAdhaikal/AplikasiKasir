@@ -62,6 +62,10 @@
 		<Unit filename="src/CashierFunction/tambahBarang.c">
 			<Option compilerVar="CC" />
 		</Unit>
+		<Unit filename="src/alarmFunction/alarmFunction.h" />
+		<Unit filename="src/alarmFunction/pembukuanAlarm.c">
+			<Option compilerVar="CC" />
+		</Unit>
 		<Unit filename="src/externStruct.c">
 			<Option compilerVar="CC" />
 		</Unit>
