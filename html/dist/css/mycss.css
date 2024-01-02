@@ -1,0 +1,28 @@
+.brsmall {
+    display: block;
+    margin-bottom: 0.5;
+}
+.br {
+    display: block;
+    margin-bottom: 1em;
+}
+
+.brmedium {
+    display: block;
+    margin-bottom: 1em;
+}
+  
+.brlarge {
+    display: block;
+    margin-bottom: 2em;
+}
+.space2 {
+  margin-right : 10px;
+}
+.space {
+	margin-right: 5px;
+}
+.a {
+  border-top: 1px solid grey;
+}
+.normallabel { font-size: 1.1em } 
