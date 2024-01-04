@@ -114,9 +114,21 @@ int findEmptyCRLFPosition(const char* str) {
 }
 
 int findCharNum(const char* str, char charFind) {
-    for (int a = 0; a < strlen(str); a++) {
+    int str_len = strlen(str);
+    for (int a = 0; a < str_len; a++) {
         if (str[a] == charFind) return a;
     }
+    return -1;
+}
+
+int findStrNum(const char* haystack, const char* needle) {
+    const char* position = strstr(haystack, needle);
+    
+    if (position != NULL) {
+        const char* extraChar = position + strlen(needle);
+        if (*extraChar == '\0' || *extraChar == '.') return position - haystack;
+    }
+
     return -1;
 }
 
@@ -131,10 +143,11 @@ const char* MIMETypes(const char* nameFile) {
 }
 
 char isStr(const char* str, unsigned char* toFind, char isEndLine) {
-    for (int a = 0; a < strlen(toFind); a++) {
+    int string_len = strlen(toFind);
+    for (int a = 0; a < string_len; a++) {
         if (str[a] != toFind[a]) return 0;
     }
-    if (str[strlen(toFind)] != '\0' && isEndLine) return 0;
+    if (str[string_len] != '\0' && isEndLine) return 0;
     return 1;
 }
 
@@ -203,9 +216,6 @@ char is_valid_time_format(const char *str) {
 
     return hour < 24;
 } // thanks ChatGPT
-
-#include <stdio.h>
-#include <string.h>
 
 int is_valid_date(char *date) {
     char extra;

@@ -12,7 +12,7 @@ function logOut() {
         if (result.isConfirmed) {
             document.cookie = `username=; Max-Age=0`
             document.cookie = `password=; Max-Age=0`
-            location.replace("/login.html")
+            location.replace("/dashboard")
         }
     })
 }

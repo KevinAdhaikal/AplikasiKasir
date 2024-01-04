@@ -499,6 +499,7 @@ handle_request:
         e.type = SB_EV_REQUEST;
         e.method = method;
         if (path[strlen(path) - 1] == '/') path[strlen(path) - 1] = '\0';
+        path[findStrNum(path, ".html")] = '\0';
         e.path = path;
         err = sb_stream_emit(st, &e);
         if (err) return err;
@@ -593,7 +594,7 @@ int sb_send_header(sb_Stream *st, const char *field, const char *val) {
 }
 
 
-int sb_send_file(sb_Stream *st, const char *filename, char using_cache) {
+int sb_send_file(sb_Stream *st, const char *filename, char using_cache, const char* custom_mime_type) {
   int err;
   char buf[32];
   size_t sz;
@@ -625,7 +626,7 @@ int sb_send_file(sb_Stream *st, const char *filename, char using_cache) {
   fseek(fp, 0, SEEK_END);
   sz = ftell(fp);
   sprintf(buf, "%u", (unsigned) sz);
-  sb_send_header(st, "Content-Type", MIMETypes(filename));
+  sb_send_header(st, "Content-Type", custom_mime_type != NULL ? custom_mime_type : MIMETypes(filename));
   err = sb_send_header(st, "Content-Length", buf);
   if (err) goto fail;
   err = sb_stream_finalize_header(st);

@@ -13,6 +13,7 @@ char includeStr(const char* str, const unsigned char* toFind, int len);
 int findEmptyNewlinePosition(const char* str);
 void cropString(char* dst, const char* s, int len);
 int checkString(int numStrings, ...);
+int findStrNum(const char* haystack, const char* needle);
 char* formatCurrency(int num); // thanks ChatGPT
 char *urlEncode(const char *str); // thanks ChatGPT
 int is_valid_date(char *date); // thanks ChatGPT

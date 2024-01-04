@@ -155,7 +155,7 @@ int dashboardLogic(sb_Event* e) {
     sqlite3_finalize(statement);
     sqlite3_close(db);
 
-    sb_write(e->stream, rowBack.rows, rowBack.totalChar - 1);
+    sb_write(e->stream, rowBack.rows, rowBack.totalChar);
     freeRowBack(&rowBack);
 
     return SB_RES_OK;

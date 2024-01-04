@@ -68,7 +68,7 @@
     await fetch("/checkLogin", {
         method: "POST"
     }).then(response => {
-        if (response.status == 200) location.replace("/index.html")
+        if (response.status == 200) location.replace("/dashboard")
     })
   }
 
@@ -92,7 +92,7 @@
       if (value.status == 200) {
         document.cookie = `username=${document.getElementById("username").value};`
         document.cookie = `password=${document.getElementById("password").value};`
-        location.replace("/index.html")
+        location.replace("/dashboard")
       }
       else {
         document.getElementById("username").focus()
