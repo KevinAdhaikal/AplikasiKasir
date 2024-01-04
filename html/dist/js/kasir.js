@@ -41,7 +41,7 @@ function getCookie(cname) {
 }
 
 window.onload = async function() {
-    await fetch("/cashierSettings", {
+    await fetch("/?api_args=8", {
         method: "POST"
     }).then(async response => {
         await response.text().then(data => cashierSettings = data.split("\n").slice(0, -1).map(Number))
@@ -144,7 +144,7 @@ $("#kasirTable tbody").on("click", ".editBarang", async function() {
     document.getElementById("hargaModal").value = tableData[2]
     document.getElementById("hargaBarang").value = tableData[3].slice(2)
 
-    await fetch("/cashierStockChecker", {
+    await fetch("/?api_args=9", {
         method: "POST",
         headers: {
             inputBarang: tableData[0]
@@ -317,7 +317,7 @@ function tambahBarangKasir(namaBarang) {
 }
 
 async function findBarang(val) {
-    await fetch("/cashierFindBarang", {
+    await fetch("/?api_args=7", {
         method: "POST",
         headers: {
             inputBarang: val
@@ -469,7 +469,7 @@ async function bayarFunction() {
         resultData += `${tableRow[a][0]}|${tableRow[a][1].replaceAll(".", "")}|${tableRow[a][2]}|${tableRow[a][3].slice(2).replaceAll(".", "")}\n`
     }
     
-    await fetch("/pembukuan?pembukuanArgs=1", {
+    await fetch("/?api_args=10&pembukuanArgs=1", {
         method: "POST",
         body: resultData.slice(0, -1)
     }).then(response => {

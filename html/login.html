@@ -65,7 +65,7 @@
 <!-- Login App -->
 <script>
   window.onload = async function() {
-    await fetch("/checkLogin", {
+    await fetch("/?api_args=1", {
         method: "POST"
     }).then(response => {
         if (response.status == 200) location.replace("/dashboard")
@@ -86,14 +86,13 @@
     }
   })
   async function loginFunction() {
-    await fetch(`/userLogin?username=${document.getElementById("username").value}&password=${document.getElementById("password").value}`, {
+    document.cookie = `username=${document.getElementById("username").value};`
+    document.cookie = `password=${document.getElementById("password").value};`
+    
+    await fetch(`/?api_args=1`, {
       method: "POST"
     }).then(value => {
-      if (value.status == 200) {
-        document.cookie = `username=${document.getElementById("username").value};`
-        document.cookie = `password=${document.getElementById("password").value};`
-        location.replace("/dashboard")
-      }
+      if (value.status == 200) location.replace("/dashboard")
       else {
         document.getElementById("username").focus()
         Swal.mixin({

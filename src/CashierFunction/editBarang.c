@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stdint.h>
 #include <ctype.h>
 
 #include "../../vendor/sqlite3/sqlite3.h"
@@ -26,19 +27,30 @@ int editBarang(sb_Event* e) {
     sb_get_header(e->stream, "hargaJual", hargaJual, 10);
     sb_get_header(e->stream, "barcodeBarang", barcodeBarang, 254);
 
-    for (int a = 0; a < strlen(barangID); a++) if (!isdigit(barangID[a])) {
+    uint16_t str_len = strlen(barangID);
+
+    for (uint16_t a = 0; a < str_len; a++) if (!isdigit(barangID[a])) {
         sb_send_status(e->stream, 403, "ID Barang tidak berbentuk nomor! Mohon input ID Barang yang benar");
         return SB_RES_OK;
     }
-    for (int a = 0; a < strlen(jumlahBarang); a++) if (!isdigit(jumlahBarang[a])) {
+
+    str_len = strlen(jumlahBarang);
+
+    for (uint16_t a = 0; a < str_len; a++) if (!isdigit(jumlahBarang[a])) {
         sb_send_status(e->stream, 403, "Jumlah Barang tidak berbentuk nomor! Mohon input Jumlah Barang yang benar");
         return SB_RES_OK;
     }
-    for (int a = 0; a < strlen(hargaModal); a++) if (!isdigit(hargaModal[a])) {
+
+    str_len = strlen(hargaModal);
+
+    for (uint16_t a = 0; a < str_len; a++) if (!isdigit(hargaModal[a])) {
         sb_send_status(e->stream, 403, "Harga Modal tidak berbentuk nomor! Mohon input Harga Barang yang benar");
         return SB_RES_OK;
     }
-    for (int a = 0; a < strlen(hargaJual); a++) if (!isdigit(hargaJual[a])) {
+    
+    str_len = strlen(hargaJual);
+
+    for (uint16_t a = 0; a < str_len; a++) if (!isdigit(hargaJual[a])) {
         sb_send_status(e->stream, 403, "Harga Jual tidak berbentuk nomor! Mohon input Harga Barang yang benar");
         return SB_RES_OK;
     }

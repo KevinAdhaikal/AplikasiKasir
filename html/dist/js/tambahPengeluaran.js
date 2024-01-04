@@ -3,7 +3,7 @@ window.onload = function() {
 }
 
 async function tambahPengeluaran() {
-    fetch("/pembukuan?pembukuanArgs=4", {
+    fetch("/?api_args=10&pembukuanArgs=4", {
         method: "POST",
         headers: {
             "descPengeluaran": document.getElementById("descPengeluaran").value,

@@ -46,7 +46,7 @@ document.getElementById("jumlahNotifyStockBarangDibawahJumlah").addEventListener
 })
 
 function load() {
-    fetch("/pengaturan?pengaturanArgs=1", {
+    fetch("/?api_args=13&pengaturanArgs=1", {
         method: "POST"
     }).then(async response => {
         if (response.status == 200) {
@@ -108,7 +108,7 @@ $('#isNotifyStockBarangDibawahJumlah').on('change.bootstrapSwitch', function(e) 
 });
 
 function terapkanPengaturan() {
-    fetch("/pengaturan?pengaturanArgs=2", {
+    fetch("/?api_args=13&pengaturanArgs=2", {
         method: "POST",
         body: `${document.getElementById("menggunakanTelegramBot").checked ? '1' : '0'}
 ${document.getElementById("telegramBotToken").value}
@@ -138,7 +138,7 @@ ${document.getElementById("AutoSetFilterDate_date_select").selectedIndex}`
 }
 
 function testMessage() {
-    fetch("/pengaturan?pengaturanArgs=3", {
+    fetch("/?api_args=13&pengaturanArgs=3", {
         method: "POST",
         headers: {
             "teleToken": document.getElementById("telegramBotToken").value,

@@ -36,7 +36,7 @@ async function mergeFunction() {
 
 async function load(dateValue) {
     await $("#barangTerjualTable").DataTable().clear().draw()
-    await fetch("/pembukuan?pembukuanArgs=2", dateValue ? {
+    await fetch("/?api_args=10&pembukuanArgs=2", dateValue ? {
         method: "POST",
         headers: {
             tanggalPembukuan: dateValue.replaceAll("-", "_")
@@ -112,7 +112,7 @@ function hapusBarangTerjual(id, dateValue) {
         denyButtonText: `Tidak (Esc)`,
       }).then(async result => {
         if (result.isConfirmed) {
-            fetch(`/pembukuan?pembukuanArgs=3&idBarang=${id}`, dateValue ? {
+            fetch(`/?api_args=10&pembukuanArgs=3&idBarang=${id}`, dateValue ? {
                 method: "POST",
                 headers: {
                     "tanggalPembukuan": dateValue.replaceAll("-", "_")
@@ -166,7 +166,7 @@ function hapusBarangTerjualMerge(namaBarang, valueDate, id) {
         denyButtonText: `Tidak (Esc)`,
       }).then(async result => {
         if (result.isConfirmed) {
-            fetch(`/pembukuan?pembukuanArgs=3`, valueDate ? {
+            fetch(`/?api_args=10&pembukuanArgs=3`, valueDate ? {
                 method: "POST",
                 headers: {
                     "tanggalPembukuan": valueDate.replaceAll("-", "_"),

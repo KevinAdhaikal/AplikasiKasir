@@ -23,7 +23,7 @@ function formatCurrency(input) {
 }
 
 async function mainPage() {
-    await fetch("/daftarBarang", {
+    await fetch("/?api_args=3", {
         method: "POST"
     }).then(async response => {
         if (response.status == 403) {
@@ -159,7 +159,7 @@ async function hapusDaftarBarang(id) {
         denyButtonText: `Tidak (Esc)`,
       }).then(async result => {
         if (result.isConfirmed) {
-            await fetch("/hapusDaftarBarang", {
+            await fetch("/?api_args=4", {
                 method: "POST",
                 headers: {
                     "IDNumber": id
@@ -201,7 +201,7 @@ async function editBarang(id) {
     else if (parseInt(document.getElementById("hargaModal").value) < 1) {document.getElementById("hargaModal").focus(); return Swal.mixin({toast: true,position: 'top-end',showConfirmButton: false,timer: 3000}).fire({icon: 'error',title: 'Harga Modal tidak bisa di isi dengan 0 mohon isi harga dengan benar!'})}
     else if (parseInt(document.getElementById("hargaJual").value) < 1) {document.getElementById("hargaJual").focus(); return Swal.mixin({toast: true,position: 'top-end',showConfirmButton: false,timer: 3000}).fire({icon: 'error',title: 'Harga Jual tidak bisa di isi dengan 0 mohon isi harga dengan benar!'})}
 
-    await fetch("/editBarang", {
+    await fetch("/?api_args=6", {
         method: "POST",
         headers: {
             "barangID": id,

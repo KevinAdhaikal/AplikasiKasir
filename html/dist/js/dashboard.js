@@ -21,7 +21,7 @@ function dmyyyy(date) {
 }
 
 async function dashboardLoad() {
-    await fetch("/dashboardLogic?dashboardType=1", {
+    await fetch("/?api_args=11&dashboardType=1", {
         method: "POST"
     }).then(async response => {
         if (response.status == 200) {
@@ -45,7 +45,7 @@ async function dashboardLoad() {
             })
         }
     })
-    await fetch("/dashboardLogic?dashboardType=2", {
+    await fetch("/?api_args=11&dashboardType=2", {
         method: "POST"
     }).then(async response => {
         if (response.status == 200) {
@@ -64,7 +64,7 @@ async function dashboardLoad() {
             })
         }
     })
-    await fetch("/pengaturan?pengaturanArgs=4", {
+    await fetch("/?api_args=13&pengaturanArgs=4", {
         method: "POST"
     }).then(async response => {
         if (response.status == 200) {
@@ -184,7 +184,7 @@ document.getElementById("date_select").addEventListener("change", async function
 
 async function refreshBarangKosong() {
     $("#barangKosongTable").DataTable().clear().draw()
-    await fetch("/dashboardLogic?dashboardType=3", {
+    await fetch("/?api_args=11&dashboardType=3", {
         method: "POST"
     }).then(async response => {
         if (response.status == 200) {
@@ -209,7 +209,7 @@ async function refreshBarangKosong() {
 async function refreshBarangTotalTerjual() {
     $("#barangTotalTerjualTable").DataTable().clear().draw()
     var dateSplit = document.getElementById("dateBarangSeringTerjual").value.split(" - ")
-    await fetch("/dashboardLogic?dashboardType=4", {
+    await fetch("/?api_args=11&dashboardType=4", {
         method: "POST",
         headers: {
             startDate: dateSplit[0].replaceAll("/", "_"),

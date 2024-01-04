@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stdint.h>
 #include <ctype.h>
 
 #include "../../vendor/sandbird/sandbird.h"
@@ -24,7 +25,8 @@ int hapusDaftarBarang(sb_Event* e) {
         sb_send_status(e->stream, 403, "Mohon input ID Barang yang benar!");
         return SB_RES_OK;
     }
-    for (int a = 0; a < strlen(IDNumber); a++) if (!isdigit(IDNumber[a])) {
+    uint8_t str_len = strlen(IDNumber);
+    for (uint8_t a = 0; a < str_len; a++) if (!isdigit(IDNumber[a])) {
         sb_send_status(e->stream, 403, "ID Barang tidak berbentuk nomor! Mohon input ID Barang yang benar");
         return SB_RES_OK;
     }

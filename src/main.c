@@ -7,6 +7,7 @@
 
 #ifdef _WIN32
 #include <windows.h>
+#include <tchar.h>
 #else
 #include <pthread.h>
 #endif

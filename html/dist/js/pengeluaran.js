@@ -62,7 +62,7 @@ async function tambahPengeluaran() {
             title: "Uang Pengeluaran tidak boleh kosong!"
         })
     }
-    fetch("/pembukuan?pembukuanArgs=4", {
+    fetch("/?api_args=10&pembukuanArgs=4", {
         method: "POST",
         headers: {
             "descPengeluaran": document.getElementById("descPengeluaran").value,
@@ -115,7 +115,7 @@ function getCookie(cname) {
 
 async function load(dateValue) {
     await $("#pengeluaranTable").DataTable().clear().draw()
-    fetch("/pembukuan?pembukuanArgs=5", dateValue ? {
+    fetch("/?api_args=10&pembukuanArgs=5", dateValue ? {
         "method": "POST",
         headers: {
             "tanggalPengeluaran": dateValue.replaceAll("-", "_")
@@ -188,7 +188,7 @@ async function hapusPengeluaran(id, dateValue) {
         denyButtonText: `Tidak (Esc)`,
       }).then(async result => {
         if (result.isConfirmed) {
-            await fetch("/pembukuan?pembukuanArgs=6", dateValue ? {
+            await fetch("/?api_args=10&pembukuanArgs=6", dateValue ? {
                 method: "POST",
                 headers: {
                     "rowPengeluaran": id,

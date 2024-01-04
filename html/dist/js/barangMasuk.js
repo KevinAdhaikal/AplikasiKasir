@@ -24,7 +24,7 @@ function formatCurrency(input) {
 
 async function load(dateValue) {
     await $("#barangMasukTable").DataTable().clear().draw()
-    await fetch("barangMasukLogic?barangMasukArgs=1", dateValue ? {
+    await fetch("/?api_args=12&barangMasukArgs=1", dateValue ? {
         method: "POST",
         headers: {
             tanggalBarangMasuk: dateValue.replaceAll("-", "_")
@@ -80,7 +80,7 @@ async function deleteBarangMasuk(id, nama, tanggal) {
         denyButtonText: `Tidak (Esc)`,
     }).then(async result => {
         if (result.isConfirmed) {
-            fetch("barangMasukLogic?barangMasukArgs=4", tanggal ? {
+            fetch("/?api_args=12&barangMasukArgs=4", tanggal ? {
                 method: "POST",
                 headers: {
                     barangMasukID: id,
@@ -156,7 +156,7 @@ async function tambahBarangMasuk(index) {
 }
 
 function checkBarang(namaBarang) {
-    fetch("barangMasukLogic?barangMasukArgs=2", {
+    fetch("/?api_args=12&barangMasukArgs=2", {
         method: "POST",
         headers: {
             findBarang: namaBarang
@@ -239,7 +239,7 @@ function resetSemuaInput() {
 }
 
 async function barangMasuk() {
-    await fetch("barangMasukLogic?barangMasukArgs=3", {
+    await fetch("/?api_args=12&barangMasukArgs=3", {
         method: "POST",
         headers: {
             namaBarang: document.getElementById("namaBarcodeBarang").value,

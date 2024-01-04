@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stdint.h>
 #include <ctype.h>
 
 #include "../../vendor/sqlite3/sqlite3.h"
@@ -24,7 +25,8 @@ int infoBarang(sb_Event* e) {
         sb_send_status(e->stream, 403, "Mohon input ID Barang yang benar!");
         return SB_RES_OK;
     }
-    for (int a = 0; a < strlen(barangID); a++) if (!isdigit(barangID[a])) {
+    uint8_t str_len = strlen(barangID);
+    for (uint8_t a = 0; a < str_len; a++) if (!isdigit(barangID[a])) {
         sb_send_status(e->stream, 403, "ID Barang tidak berbentuk nomor! Mohon input ID Barang yang benar");
         return SB_RES_OK;
     }

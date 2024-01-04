@@ -1,5 +1,5 @@
 window.onload = async function() {
-    await fetch("/infoBarang", {
+    await fetch("/?api_args=5", {
         method: "POST",
         headers: {
             "barangID": window.location.search.substr(1).slice(9)
@@ -124,7 +124,7 @@ async function editBarang() {
     else if (parseInt(document.getElementById("hargaModal").value) < 1) {document.getElementById("hargaModal").focus(); return Swal.mixin({toast: true,position: 'top-end',showConfirmButton: false,timer: 3000}).fire({icon: 'error',title: 'Harga Modal tidak bisa di isi dengan 0 mohon isi harga dengan benar!'})}
     else if (parseInt(document.getElementById("hargaJual").value) < 1) {document.getElementById("hargaJual").focus(); return Swal.mixin({toast: true,position: 'top-end',showConfirmButton: false,timer: 3000}).fire({icon: 'error',title: 'Harga Jual tidak bisa di isi dengan 0 mohon isi harga dengan benar!'})}
 
-    await fetch("/editBarang", {
+    await fetch("/?api_args=6", {
         method: "POST",
         headers: {
             "barangID": window.location.search.substr(1).slice(9),

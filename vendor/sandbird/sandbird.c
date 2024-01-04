@@ -698,9 +698,10 @@ int sb_get_body(sb_Stream *st, sb_Body *body) {
   int findEmptyCRLF = findEmptyCRLFPosition(st->recv_buf.s) + 4;
   body->sizeData = st->recv_buf.len - findEmptyCRLF;
   body->data = malloc(body->sizeData + 1);
-  body->data = strcpy(body->data, st->recv_buf.s + findEmptyCRLF);
+  strcpy(body->data, st->recv_buf.s + findEmptyCRLF);
   return SB_ESUCCESS;
 }
+
 
 int sb_get_var(sb_Stream *st, const char *name, char *dst, size_t len) {
   const char *q, *s = NULL;

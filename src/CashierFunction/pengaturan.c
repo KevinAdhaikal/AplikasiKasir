@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stdint.h>
 #include <ctype.h>
 #include <pthread.h>
 
@@ -50,10 +51,13 @@ int pengaturan(sb_Event* e) {
 
             // melakukan pengecekan data dari client
             if (valueLen < 9) return send_error(e, "Invalid Value", valueSplit, db);
-            if (atoi(valueSplit[7]) > 65535) return send_error(e, "Tidak bisa lebih dari 65535", valueSplit, db);
-            for (int a = 0; a < strlen(valueSplit[7]); a++) {
+
+            uint32_t str_len = strlen(valueSplit[7]);
+            for (uint32_t a = 0; a < str_len; a++) {
                 if (!isdigit(valueSplit[7][a])) return send_error(e, "Value tersebut tidak berbentuk nomor!", valueSplit, db);
             }
+            if (atoi(valueSplit[7]) > 65535) return send_error(e, "Tidak bisa lebih dari 65535", valueSplit, db);
+
             if (!isdigit(valueSplit[0][0]) || !isdigit(valueSplit[3][0]) || !isdigit(valueSplit[4][0]) || !isdigit(valueSplit[5][0]) || !isdigit(valueSplit[6][0]) || !isdigit(valueSplit[8][0])) return send_error(e, "Value tersebut tidak berbentuk nomor!", valueSplit, db);
             if (valueSplit[8][0] == '1' && !is_valid_time_format(valueSplit[9])) return send_error(e, "Value jam tersebut tidak valid!", valueSplit, db);;
 

@@ -28,7 +28,7 @@ async function load() {
     var splitArray = document.getElementById("tanggalPembukuan").value.split(" - ")
     var dateArray = [splitArray[0].split("/"), splitArray[1].split("/")]
 
-    await fetch("/pembukuan?pembukuanArgs=7", {
+    await fetch("/?api_args=10&pembukuanArgs=7", {
         method: "POST",
         body: getDaysArray(new Date(`${dateArray[0][2]}-${dateArray[0][1]}-${dateArray[0][0]}`),new Date(`${dateArray[1][2]}-${dateArray[1][1]}-${dateArray[1][0]}`)).join("\n") 
     }).then(async response => {
