@@ -136,7 +136,7 @@ void statement_get_row(sqlite3_stmt* statement, SQLRow* row, char no_lf) {
         }
         row->rows[row->totalChar - 1] = '\n';
     }
-    if (row->totalChar) row->rows[no_lf == 1 ? row->totalChar-- : row->totalChar] = '\0';
+    if (row->totalChar) row->rows[no_lf == 1 ? --row->totalChar : row->totalChar] = '\0';
 } // thanks ChatGPT
 
 int statement_row_plus(sqlite3_stmt* statement) {

@@ -209,7 +209,7 @@ async function editBarang(id) {
             "jumlahBarang": document.getElementById("jumlahBarang").value.replaceAll(".", ""),
             "hargaModal": document.getElementById("hargaModal").value.replaceAll(".", ""),
             "hargaJual": document.getElementById("hargaJual").value.replaceAll(".", ""),
-            "barcodeBarang": document.getElementById("barcodeBarang").value,
+            "barcodeBarang": document.getElementById("barcodeBarang").value != "Tidak Ada" ? document.getElementById("barcodeBarang").value : "",
         }
     }).then(response => {
         if (response.status == 200) {

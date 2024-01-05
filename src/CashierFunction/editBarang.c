@@ -61,7 +61,7 @@ int editBarang(sb_Event* e) {
     sqlite3_bind_text(statement, 1, namaBarang, -1, SQLITE_STATIC);
     statement_get_row(statement, &checkRow, 1);
     sqlite3_finalize(statement);
-
+    
     if (checkRow.rows && !isStr(checkRow.rows, namaBarang, 1)) {
         freeRowBack(&checkRow);
         sb_send_status(e->stream, 403, "Nama Barang tersebut sudah ada, mohon ganti Nama Barang!");

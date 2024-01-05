@@ -23,8 +23,10 @@
   <link rel="stylesheet" href="/plugins/bootstrap-toggle/bootstrap-toggle.min.css">
   <!-- Custom CSS -->
   <link rel="stylesheet" href="/dist/css/mycss.css">
+  <!-- AdminLTE Docs CSS -->
+  <link rel="stylesheet" href="plugins/other-css/adminlte-docs.css">
 </head>
-<body class="hold-transition sidebar-mini layout-fixed layout-footer-fixed sidebar-collapse">
+<body id="bodyMain" class="hold-transition sidebar-mini layout-fixed layout-footer-fixed sidebar-collapse">
 <div class="wrapper">
 
   <!-- Navbar -->
@@ -33,6 +35,16 @@
     <ul class="navbar-nav">
       <li class="nav-item">
         <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
+      </li>
+    </ul>
+    <ul class="navbar-nav ml-auto">
+      <li class="nav-item">
+        <div class="theme-switch-wrapper nav-link">
+          <label class="theme-switch" for="dark_mode_checkbox">
+            <input type="checkbox" id="dark_mode_checkbox">
+            <span class="slider round"></span>
+          </label>
+        </div>
       </li>
     </ul>
   </nav>
@@ -283,6 +295,7 @@
 <script src="/plugins/datatables-buttons/js/buttons.print.min.js"></script>
 <script src="/plugins/datatables-buttons/js/buttons.colVis.min.js"></script>
 <script src="/dist/js/barangTerjual.js"></script>
+<script src="dist/js/darkmode.js"></script>
 <!-- moment -->
 <script src="../../plugins/moment/moment.min.js"></script>
 <!-- date picker -->
