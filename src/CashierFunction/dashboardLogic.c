@@ -144,6 +144,28 @@ int dashboardLogic(sb_Event* e) {
             return SB_RES_OK;
             // barang yang sering dibeli sama orang
         }
+        case 5: {
+            time(&rawtime);
+            rawtime -= 24 * 60 * 60; // mundur 1 hari kang
+            timeinfo = localtime(&rawtime);
+
+            sqlite3_open("database/pembukuan.db", &db);
+            sprintf(tempString, "SELECT SUM(jumlah), SUM(jual), SUM(jual) - SUM(modal) from barangTerjual_%d_%d_%d", timeinfo->tm_mday, timeinfo->tm_mon + 1, timeinfo->tm_year + 1900);
+
+            sqlite3_prepare_v2(db, tempString, -1, &statement, NULL);
+            statement_get_row(statement, &rowBack, 0);
+            sqlite3_finalize(statement);
+            sqlite3_close(db);
+
+            sb_write(e->stream, rowBack.rows, rowBack.totalChar);
+            freeRowBack(&rowBack);
+
+            sqlite3_open("database/pengeluaran.db", &db);
+            sprintf(tempString, "SELECT SUM(uang) from pengeluaran_%d_%d_%d", timeinfo->tm_mday, timeinfo->tm_mon + 1, timeinfo->tm_year + 1900);
+
+            // mengecek database kemarin
+            break;
+        }
         default: {
             return SB_RES_OK;
             break;

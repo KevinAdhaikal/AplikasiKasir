@@ -65,6 +65,7 @@ function load() {
                 document.getElementById('waktuNotifyAlarmPembukuan').value = data[9];
                 $("#isAutoRefreshBarangTotalTerjual").bootstrapToggle(data[10] == '1' ? 'on' : 'off')
                 document.getElementById("AutoSetFilterDate_date_select").selectedIndex = Number(data[11])
+                $("#perbedaanInfoHariIniDenganKemarin").bootstrapToggle(data[12] == '1' ? 'on' : 'off')
             })
         }
     })
@@ -121,7 +122,8 @@ ${document.getElementById("jumlahNotifyStockBarangDibawahJumlah").value}
 ${document.getElementById("isNotifyAlarmPembukuan").checked ? '1' : '0'}
 ${convertTime(document.getElementById('waktuNotifyAlarmPembukuan').value)}
 ${document.getElementById("isAutoRefreshBarangTotalTerjual").checked ? '1' : '0'}
-${document.getElementById("AutoSetFilterDate_date_select").selectedIndex}`
+${document.getElementById("AutoSetFilterDate_date_select").selectedIndex}
+${document.getElementById("perbedaanInfoHariIniDenganKemarin").checked ? '1' : '0'}`
     }).then(response => {
         if (response.status == 200) {
             Swal.mixin({
@@ -132,6 +134,16 @@ ${document.getElementById("AutoSetFilterDate_date_select").selectedIndex}`
               }).fire({
                 icon: 'success',
                 title: "Pengaturan berhasil di terapkan!"
+            })
+        } else {
+            Swal.mixin({
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 3000,
+              }).fire({
+                icon: 'error',
+                title: response.statusText
             })
         }
     })

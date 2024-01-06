@@ -20,7 +20,34 @@ function dmyyyy(date) {
     return [date.getDate(), date.getMonth() + 1, date.getFullYear()].join('/');
 }
 
+var pengaturan
+
 async function dashboardLoad() {
+    await fetch("/?api_args=13&pengaturanArgs=4", {
+        method: "POST"
+    }).then(async response => {
+        if (response.status == 200) {
+            await response.text().then(async data => {
+                data = data.split("\n")
+                pengaturan = data
+                if (data[1] == '1') {
+                    await loadDate(Number(data[0]), true)
+                    document.getElementById("date_select").selectedIndex = Number(data[0])
+                    await refreshBarangTotalTerjual()    
+                } else await loadDate(document.getElementById("date_select").selectedIndex, true)
+            })
+        } else {
+            Swal.mixin({
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 3000,
+              }).fire({
+                icon: 'error',
+                title: response.statusText
+            })
+        }
+    })
     await fetch("/?api_args=11&dashboardType=1", {
         method: "POST"
     }).then(async response => {
@@ -64,30 +91,37 @@ async function dashboardLoad() {
             })
         }
     })
-    await fetch("/?api_args=13&pengaturanArgs=4", {
-        method: "POST"
-    }).then(async response => {
-        if (response.status == 200) {
-            await response.text().then(async data => {
-                data = data.split("\n")
-                if (data[1] == '1') {
-                    await loadDate(Number(data[0]), true)
-                    document.getElementById("date_select").selectedIndex = Number(data[0])
-                    await refreshBarangTotalTerjual()    
-                } else await loadDate(document.getElementById("date_select").selectedIndex, true)
-            })
-        } else {
-            Swal.mixin({
-                toast: true,
-                position: 'top-end',
-                showConfirmButton: false,
-                timer: 3000,
-              }).fire({
-                icon: 'error',
-                title: response.statusText
-            })
-        }
-    })
+    if (pengaturan[2] == '1') {
+        await fetch("/?api_args=11&dashboardType=5", {
+            method: "POST"
+        }).then(async response => {
+            if (response.status == 200) {
+                await response.text().then(data => {
+                    document.getElementById("barangTerjualText").innerHTML = "Barang Terjual (Hari Ini / Kemarin)"
+                    document.getElementById("totalHargaJualText").innerHTML = "Total Harga Jual (Hari Ini / Kemarin)"
+                    document.getElementById("totalPengeluaranText").innerHTML = "Total Pengeluaran (Hari Ini / Kemarin)"
+                    document.getElementById("totalKeuntunganText").innerHTML = "Total Keuntungan (Hari Ini / Kemarin)"
+                    document.getElementById("totalPendapatanText").innerHTML = "Total Pendapatan (Hari Ini / Kemarin)"
+                    data = data.split("\n");
+                    data[0] = data[0].split("|")
+                    $("#barangTerjualID").text($("#barangTerjualID").text() + " / " + Intl.NumberFormat('id', {}).format(data[0][0]))
+                    $("#pendapatanHargaJualID").text($("#pendapatanHargaJualID").text() + " / Rp" + Intl.NumberFormat('id', {}).format(data[0][1]))
+                    $("#keuntunganID").text($("#keuntunganID").text() + " / Rp" + Intl.NumberFormat('id', {}).format(data[0][2]))
+                    $("#pengeluaranID").text($("#pengeluaranID").text() + " / Rp" + Intl.NumberFormat('id', {}).format(data[1]))
+                    $("#pendapatanID").text("Rp" + Intl.NumberFormat('id', {}).format(Number(Number($("#pendapatanHargaJualID").text().split(" / ")[0].slice(2).replaceAll(".", "")) - Number($("#pengeluaranID").text().split(" / ")[0].slice(2).replaceAll(".", "")))) + " / Rp" + Intl.NumberFormat('id', {}).format(Number(Number($("#pendapatanHargaJualID").text().split(" / ")[1].slice(2).replaceAll(".", "")) - Number($("#pengeluaranID").text().split(" / ")[1].slice(2).replaceAll(".", "")))))
+
+                    console.log($("#pendapatanHargaJualID").text().split(" / ")[1].slice(2))
+                    document.getElementById("barangTerjualText").innerHTML += ` <i class="${Number($("#barangTerjualID").text().split(" / ")[0].replaceAll(".", "")) > Number($("#barangTerjualID").text().split(" / ")[1].replaceAll(".", "")) ? "ion ion-android-arrow-up text-success" : "ion ion-android-arrow-down text-danger"}"></i>`
+                    document.getElementById("totalHargaJualText").innerHTML += ` <i class="${Number($("#pendapatanHargaJualID").text().split(" / ")[0].slice(2).replaceAll(".", "")) > Number($("#pendapatanHargaJualID").text().split(" / ")[1].slice(2).replaceAll(".", "")) ? "ion ion-android-arrow-up text-success" : "ion ion-android-arrow-down text-danger"}"></i>`
+                    document.getElementById("totalKeuntunganText").innerHTML += ` <i class="${Number($("#keuntunganID").text().split(" / ")[0].slice(2).replaceAll(".", "")) > Number($("#keuntunganID").text().split(" / ")[1].slice(2).replaceAll(".", "")) ? "ion ion-android-arrow-up text-success" : "ion ion-android-arrow-down text-danger"}"></i>`
+                    //document.getElementById("totalPengeluaranText").innerHTML += ` <i class="${Number($("#pengeluaranID").text().split(" / ")[0].slice(2).replaceAll(".", "")) > Number($("#pengeluaranID").text().split(" / ")[1].slice(2).replaceAll(".", "")) ? "ion ion-android-arrow-up text-success" : "ion ion-android-arrow-down text-danger"}"></i>`
+                    document.getElementById("totalPendapatanText").innerHTML += ` <i class="${Number($("#pendapatanID").text().split(" / ")[0].slice(2).replaceAll(".", "")) > Number($("#pendapatanID").text().split(" / ")[1].slice(2).replaceAll(".", "")) ? "ion ion-android-arrow-up text-success" : "ion ion-android-arrow-down text-danger"}"></i>`
+                })
+            }
+        })
+    } else {
+        $("#pendapatanID").text("Rp" + Intl.NumberFormat('id', {}).format(Number(Number($("#pendapatanHargaJualID").text().slice(2).replaceAll(".", "")) - Number($("#pengeluaranID").text().slice(2).replaceAll(".", "")))))
+    }
 }
 
 async function loadDate(target, is_first_load) {
@@ -240,6 +274,5 @@ async function refreshBarangTotalTerjual() {
 }
 window.onload = async function() {
     await dashboardLoad()
-    $("#pendapatanID").text("Rp" + Intl.NumberFormat('id', {}).format(Number(Number($("#pendapatanHargaJualID").text().slice(2).replaceAll(".", "")) - Number($("#pengeluaranID").text().slice(2).replaceAll(".", "")))))
     await refreshBarangKosong()
 }

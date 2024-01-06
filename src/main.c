@@ -64,7 +64,8 @@ void loadSettings() {
     "('isNotifyAlarmPembukuan', 0),"
     "('waktuNotifyAlarmPembukuan', 0),"
     "('isAutoRefreshBarangTotalTerjual', 0),"
-    "('AutoSelectFilterDate', 0)", 0, 0, NULL);
+    "('AutoSelectFilterDate', 0),"
+    "('perbedaanInfoHariIniDenganKemarin', 0)", 0, 0, NULL);
 
     sqlite3_exec(db, "SELECT * from settings", RowBack, &row, NULL);
     char** strSplit = strsplit(row.rows, "\n", 0);

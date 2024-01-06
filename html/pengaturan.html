@@ -226,7 +226,7 @@
                     <br>
                     <input type="checkbox" id="blockBarangKosong" data-toggle="toggle" data-onstyle="success" data-offstyle="danger" data-width="85" data-height="0">
                     <span class="brmedium"></span>
-                    <hr>
+                    <div class="border-bottom"></div><br>
                     <label class="normallabel">Otomatis Refresh Barang Total Terjual</label> <a>(Jika anda ke dashboard, Barang Total Terjual akan otomatis Refresh)</a>
                     <br>
                     <input type="checkbox" id="isAutoRefreshBarangTotalTerjual" data-toggle="toggle" data-onstyle="success" data-offstyle="danger" data-width="85" data-height="0">
@@ -239,13 +239,18 @@
                       <option>Per Bulan</option>
                       <option>Per Tahun</option>
                     </select>
+                    <span class="brmedium"></span>
+                    <label class="normallabel">Perbedaan Info Total Hari ini dengan Kemarin</label> <a>(Jika anda nyalakan fitur ini, anda akan melihat perbedaan info total hari ini dengan kemarin)</a>
+                    <br>
+                    <input type="checkbox" id="perbedaanInfoHariIniDenganKemarin" data-toggle="toggle" data-onstyle="success" data-offstyle="danger" data-width="85" data-height="0">
                   </div>
                   <div class="tab-pane fade" id="telegram-content" role="tabpanel" aria-labelledby="telegram-tab">
                     <label class="normallabel">Memakai Telegram Bot</label> <a>(Notifikasi menggunakan Telegram)</a>
                     <br>
                     <input type="checkbox" id="menggunakanTelegramBot" data-toggle="toggle" data-onstyle="success" data-offstyle="danger" data-width="85" data-height="0">
                     <div id="boxTelegram">
-                      <hr>
+                      <br>
+                      <div class="border-bottom"></div><br>
                       <div class="form-group">
                         <label for="telegramBotToken" class="normallabel">Telegram Bot Token</label>
                         <a>(Untuk membuat bot, Anda harus Connect ke <a href="https://t.me/BotFather">@BotFather</a>)</a>
@@ -258,7 +263,8 @@
                         <input class="form-control" id="telegramUserID" placeholder="Telegram User ID">
                       </div>
                       <button class="btn btn-primary" id="testMessageButton" onclick="testMessage()">Test Message Telegram</button>
-                      <hr>
+                      <br><br>
+                      <div class="border-bottom"></div><br>
                       <label class="normallabel">Notifikasi Barang Kosong</label> <a>(Anda akan mendapatkan Notifikasi jika ada barang yang Kosong)</a><br>
                       <input type="checkbox" id="notifyBarangKosong" data-toggle="toggle" data-onstyle="success" data-offstyle="danger" data-width="85" data-height="0"><span class="brmedium"></span>
                       <label class="normallabel">Notifikasi Kasir</label> <a>(Anda akan mendapatkan Notifikasi jika ada yang membeli Barang)</a><br>

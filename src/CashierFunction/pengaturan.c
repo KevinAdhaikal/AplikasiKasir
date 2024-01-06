@@ -56,6 +56,8 @@ int pengaturan(sb_Event* e) {
             for (uint32_t a = 0; a < str_len; a++) {
                 if (!isdigit(valueSplit[7][a])) return send_error(e, "Value tersebut tidak berbentuk nomor!", valueSplit, db);
             }
+
+            if (valueSplit[0][0] == '1' && (valueSplit[1][0] == '\0' || valueSplit[2][0] == '\0')) return send_error(e, "Telegram Bot Token dan Telegram User ID tidak boleh kosong!", valueSplit, db);
             if (atoi(valueSplit[7]) > 65535) return send_error(e, "Tidak bisa lebih dari 65535", valueSplit, db);
 
             if (!isdigit(valueSplit[0][0]) || !isdigit(valueSplit[3][0]) || !isdigit(valueSplit[4][0]) || !isdigit(valueSplit[5][0]) || !isdigit(valueSplit[6][0]) || !isdigit(valueSplit[8][0])) return send_error(e, "Value tersebut tidak berbentuk nomor!", valueSplit, db);
@@ -156,6 +158,12 @@ int pengaturan(sb_Event* e) {
             sqlite3_bind_text(statement, 1, &valueSplit[11][0], -1, SQLITE_STATIC);
             sqlite3_bind_text(statement, 2, "AutoSelectFilterDate", -1, SQLITE_STATIC);
             sqlite3_step(statement);
+            sqlite3_reset(statement);
+            sqlite3_clear_bindings(statement);
+
+            sqlite3_bind_text(statement, 1, &valueSplit[12][0], -1, SQLITE_STATIC);
+            sqlite3_bind_text(statement, 2, "perbedaanInfoHariIniDenganKemarin", -1, SQLITE_STATIC);
+            sqlite3_step(statement);
             sqlite3_finalize(statement);
 
             if (teleBot.isNotifyAlarmPembukuan) {
@@ -217,7 +225,7 @@ int pengaturan(sb_Event* e) {
             SQLRow row = {0};
             sqlite3_open("database/settings.db", &db);
 
-            sqlite3_prepare_v2(db, "SELECT value FROM settings where name IN ('isAutoRefreshBarangTotalTerjual', 'AutoSelectFilterDate')", -1, &statement, NULL);
+            sqlite3_prepare_v2(db, "SELECT value FROM settings where name IN ('isAutoRefreshBarangTotalTerjual', 'AutoSelectFilterDate', 'perbedaanInfoHariIniDenganKemarin')", -1, &statement, NULL);
             statement_get_row(statement, &row, 0);
             sqlite3_finalize(statement);
             sqlite3_close(db);
