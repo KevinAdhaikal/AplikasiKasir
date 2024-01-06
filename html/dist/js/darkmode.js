@@ -29,14 +29,14 @@ document.getElementById("dark_mode_checkbox").addEventListener("change", functio
     }
 })
 
-window.onload = function() {
-    if (getCookie("dark_mode")) {
-        document.getElementById("navbarMain").classList.add("navbar-dark")
-        document.getElementById("navbarMain").classList.remove("navbar-light")
-        document.getElementById("bodyMain").classList.add("dark-mode")
-    } else {
-        document.getElementById("navbarMain").classList.remove("navbar-dark")
-        document.getElementById("navbarMain").classList.add("navbar-light")
-        document.getElementById("bodyMain").classList.remove("dark-mode")
-    }
+if (getCookie("dark_mode")) {
+    document.getElementById("dark_mode_checkbox").checked = true;
+    document.getElementById("navbarMain").classList.add("navbar-dark")
+    document.getElementById("navbarMain").classList.remove("navbar-light")
+    document.getElementById("bodyMain").classList.add("dark-mode")
+} else {
+    document.getElementById("dark_mode_checkbox").checked = false;
+    document.getElementById("navbarMain").classList.remove("navbar-dark")
+    document.getElementById("navbarMain").classList.add("navbar-light")
+    document.getElementById("bodyMain").classList.remove("dark-mode")
 }

@@ -23,6 +23,7 @@ function formatCurrency(input) {
 }
 
 async function mainPage() {
+    console.log("test");
     await fetch("/?api_args=3", {
         method: "POST"
     }).then(async response => {
@@ -131,7 +132,7 @@ $('#barcodeBarang').keypress(function(e) {
     }
 })
 
-window.onload = function(){
+window.onload = function() {
     mainPage()
 }
 
