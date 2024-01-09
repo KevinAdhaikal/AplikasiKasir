@@ -104,17 +104,16 @@ async function dashboardLoad() {
                     document.getElementById("totalPendapatanText").innerHTML = "Total Pendapatan (Hari Ini / Kemarin)"
                     data = data.split("\n");
                     data[0] = data[0].split("|")
-                    $("#barangTerjualID").text($("#barangTerjualID").text() + " / " + Intl.NumberFormat('id', {}).format(data[0][0]))
-                    $("#pendapatanHargaJualID").text($("#pendapatanHargaJualID").text() + " / Rp" + Intl.NumberFormat('id', {}).format(data[0][1]))
-                    $("#keuntunganID").text($("#keuntunganID").text() + " / Rp" + Intl.NumberFormat('id', {}).format(data[0][2]))
-                    $("#pengeluaranID").text($("#pengeluaranID").text() + " / Rp" + Intl.NumberFormat('id', {}).format(data[1]))
+                    console.log(data)
+                    $("#barangTerjualID").text($("#barangTerjualID").text() + " / " + Intl.NumberFormat('id', {}).format(data[0][0] ? data[0][0] : 0))
+                    $("#pendapatanHargaJualID").text($("#pendapatanHargaJualID").text() + " / Rp" + Intl.NumberFormat('id', {}).format(data[0][1] ? data[0][1] : 0))
+                    $("#keuntunganID").text($("#keuntunganID").text() + " / Rp" + Intl.NumberFormat('id', {}).format(data[0][2] ? data[0][2] : 0))
+                    $("#pengeluaranID").text($("#pengeluaranID").text() + " / Rp" + Intl.NumberFormat('id', {}).format(data[1] ? data[1] : 0))
                     $("#pendapatanID").text("Rp" + Intl.NumberFormat('id', {}).format(Number(Number($("#pendapatanHargaJualID").text().split(" / ")[0].slice(2).replaceAll(".", "")) - Number($("#pengeluaranID").text().split(" / ")[0].slice(2).replaceAll(".", "")))) + " / Rp" + Intl.NumberFormat('id', {}).format(Number(Number($("#pendapatanHargaJualID").text().split(" / ")[1].slice(2).replaceAll(".", "")) - Number($("#pengeluaranID").text().split(" / ")[1].slice(2).replaceAll(".", "")))))
 
-                    console.log($("#pendapatanHargaJualID").text().split(" / ")[1].slice(2))
                     document.getElementById("barangTerjualText").innerHTML += ` <i class="${Number($("#barangTerjualID").text().split(" / ")[0].replaceAll(".", "")) > Number($("#barangTerjualID").text().split(" / ")[1].replaceAll(".", "")) ? "ion ion-android-arrow-up text-success" : "ion ion-android-arrow-down text-danger"}"></i>`
                     document.getElementById("totalHargaJualText").innerHTML += ` <i class="${Number($("#pendapatanHargaJualID").text().split(" / ")[0].slice(2).replaceAll(".", "")) > Number($("#pendapatanHargaJualID").text().split(" / ")[1].slice(2).replaceAll(".", "")) ? "ion ion-android-arrow-up text-success" : "ion ion-android-arrow-down text-danger"}"></i>`
                     document.getElementById("totalKeuntunganText").innerHTML += ` <i class="${Number($("#keuntunganID").text().split(" / ")[0].slice(2).replaceAll(".", "")) > Number($("#keuntunganID").text().split(" / ")[1].slice(2).replaceAll(".", "")) ? "ion ion-android-arrow-up text-success" : "ion ion-android-arrow-down text-danger"}"></i>`
-                    //document.getElementById("totalPengeluaranText").innerHTML += ` <i class="${Number($("#pengeluaranID").text().split(" / ")[0].slice(2).replaceAll(".", "")) > Number($("#pengeluaranID").text().split(" / ")[1].slice(2).replaceAll(".", "")) ? "ion ion-android-arrow-up text-success" : "ion ion-android-arrow-down text-danger"}"></i>`
                     document.getElementById("totalPendapatanText").innerHTML += ` <i class="${Number($("#pendapatanID").text().split(" / ")[0].slice(2).replaceAll(".", "")) > Number($("#pendapatanID").text().split(" / ")[1].slice(2).replaceAll(".", "")) ? "ion ion-android-arrow-up text-success" : "ion ion-android-arrow-down text-danger"}"></i>`
                 })
             }
