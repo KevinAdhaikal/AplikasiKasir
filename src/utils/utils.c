@@ -155,7 +155,6 @@ const char* MIMETypes(const char* nameFile) {
 
 char isStr(const char* str, const char* toFind, char isEndLine) {
     int string_len = strlen(toFind);
-    if (strlen(str) > string_len) return 0;
 
     for (int a = 0; a < string_len; a++) if (str[a] != toFind[a]) return 0;
     if (str[string_len] != '\0' && isEndLine) return 0;
