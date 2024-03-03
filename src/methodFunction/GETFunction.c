@@ -3,8 +3,10 @@
 #include <stdlib.h>
 
 #include "../../vendor/sandbird/sandbird.h"
-#include "methodFunction.h"
 #include "../utils/utils.h"
+#include "../../vendor/sqlite3/sqlite3.h"
+
+#include "methodFunction.h"
 
 int GETFunction(sb_Event* e) {
     char tempPath[1024];
@@ -17,13 +19,26 @@ int GETFunction(sb_Event* e) {
     }
 
     if (findCharNum(e->path, '.') == -1) {
-        char username[20];
-        char password[20];
+        sqlite3* db;
+        sqlite3_stmt* statement;
+        char username[65];
+        char password[65];
 
-        sb_get_cookie(e->stream, "username", username, 19);
-        sb_get_cookie(e->stream, "password", password, 19);
+        sb_get_cookie(e->stream, "username", username, 64);
+        sb_get_cookie(e->stream, "password", password, 64);
+
+        sqlite3_open("database/user.db", &db);
+        sqlite3_prepare_v2(db, "SELECT 1 FROM user_table WHERE username = ? AND password = ?", -1, &statement, NULL);
         
-        if ((!isStr(username, "admin", 1) || !isStr(password, "admin", 1)) && !isStr(e->path, "/login", 1)) {
+        sqlite3_bind_text(statement, 1, username, -1, SQLITE_STATIC);
+        sqlite3_bind_text(statement, 2, password, -1, SQLITE_STATIC);
+
+        char res = sqlite3_step(statement) != SQLITE_ROW;
+        
+        sqlite3_finalize(statement);
+        sqlite3_close(db);
+        
+        if (res && !isStr(e->path, "/login", 1)) {
             sb_send_status(e->stream, 302, "Found");
             sb_send_header(e->stream, "Location", "/login");
             return SB_RES_OK;

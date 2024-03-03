@@ -12,13 +12,32 @@
 #include "../CashierFunction/cashierFunction.h"
 
 int POSTFunction(sb_Event* e) {
-    char username[20], password[20];
+    sqlite3_stmt* statement;
+    sqlite3* db;
 
-    sb_get_cookie(e->stream, "username", username, 19);
-    sb_get_cookie(e->stream, "password", password, 19);
+    char username[65], password[65];
 
-    if (isStr(username, "admin", 1) && isStr(password, "admin", 1)) {
+    sb_get_cookie(e->stream, "username", username, 64);
+    sb_get_cookie(e->stream, "password", password, 64);
+
+    sqlite3_open("database/user.db", &db);
+    sqlite3_prepare_v2(db, "SELECT 1 FROM user_table WHERE username = ? AND password = ?", -1, &statement, NULL);
+    sqlite3_bind_text(statement, 1, username, -1, SQLITE_STATIC);
+    sqlite3_bind_text(statement, 2, password, -1, SQLITE_STATIC);
+    char res = sqlite3_step(statement) == SQLITE_ROW;
+    
+    sqlite3_finalize(statement);
+    sqlite3_close(db);
+
+    if (res) {
         switch(sb_convert_var_to_int(e->stream, "api_args")) {
+            case 0: {
+                // TEST ONLY
+                char data[1024];
+                sb_get_body_static(e->stream, data, 1024);
+                printf("%s\n", data);
+                break;
+            }
             case 1: {
                 sb_send_status(e->stream, 200, "OK");
                 break;
@@ -71,13 +90,28 @@ int POSTFunction(sb_Event* e) {
                 pengaturan(e);
                 break;
             }
+            case 14: {
+                dbBackup(e);
+                break;
+            }
+            case 15: {
+                dbImport(e);
+                break;
+            }
+            case 16: {
+                userLogic(e);
+                break;
+            }
+            case 17: {
+                roleLogic(e);
+                break;
+            }
             default: {
                 sb_send_status(e->stream, 404, "Not Found");
                 break;
             }
         }
     }
-
     else sb_send_status(e->stream, 403, "Forbidden");
 
     return SB_RES_OK;

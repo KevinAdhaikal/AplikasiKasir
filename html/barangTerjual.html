@@ -12,19 +12,18 @@
   <!-- Theme style -->
   <link rel="stylesheet" href="/dist/css/adminlte.min.css">
   <!-- SweetAlert2 -->
-  <link rel="stylesheet" href="/plugins/sweetalert2-theme-bootstrap-4/bootstrap-4.min.css">
+  <link rel="stylesheet" id="swal_css" href="plugins/sweetalert2/sweetalert2.min.css">
   <!-- DataTables -->
   <link rel="stylesheet" href="/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css">
   <link rel="stylesheet" href="/plugins/datatables-responsive/css/responsive.bootstrap4.min.css">
   <link rel="stylesheet" href="/plugins/datatables-buttons/css/buttons.bootstrap4.min.css">
   <!-- date picker -->
   <link rel="stylesheet" href="/plugins/jquery-ui/jquery-ui.min.css">
-  <!-- iCheck for checkboxes and radio inputs -->
-  <link rel="stylesheet" href="/plugins/bootstrap-toggle/bootstrap-toggle.min.css">
   <!-- Custom CSS -->
   <link rel="stylesheet" href="/dist/css/mycss.css">
   <!-- AdminLTE Docs CSS -->
   <link rel="stylesheet" href="plugins/other-css/adminlte-docs.css">
+  <link rel="stylesheet" href="plugins/toggle-switchy/toggle-switchy.css">
 </head>
 <body id="bodyMain" class="hold-transition sidebar-mini layout-fixed layout-footer-fixed sidebar-collapse">
 <div class="wrapper">
@@ -95,12 +94,7 @@
               </p>
             </a>
             <ul class="nav nav-treeview">
-              <li class="nav-item">
-                <a href="./tambahBarang" class="nav-link">
-                  <i class="fas fa-solid fa-plus nav-icon"></i>
-                  <p>Tambah Barang</p>
-                </a>
-              </li>
+              
               <li class="nav-item">
                 <a href="./daftarBarang" class="nav-link">
                   <i class="fas fa-solid fa-boxes-stacked nav-icon"></i>
@@ -192,10 +186,17 @@
                 <h3 class="card-title">Pengaturan Barang Terjual</h3>
               </div>
               <div class="card-body">
-                <label class="space2">Merge Barang Terjual</label>
-                <input type="checkbox" id="mergeBarangTerjual" data-toggle="toggle" data-onstyle="success" data-offstyle="danger" data-width="85" data-height="0">
-                <br>
-                <label class="col-form-label">Tanggal Barang Terjual (D/M/YYYY):</label>
+                <label>Merge Barang Terjual</label> <a>(Jika anda menyalakan ini dan tekan Terapkan, Barang Terjual yang ada di Table akan di Merge)</a>
+                <div class="brsmall"></div>
+                <label class="toggle-switchy" data-color="green" data-size="lg" data-style="rounded">
+                  <input checked type="checkbox" id="no_auto_close_modal">
+                  <span class="toggle">
+                    <span class="switch"></span>
+                  </span>
+                </label>
+                <div class="brmedium"></div>
+                <div class="brmedium border-bottom"></div>
+                <label>Tanggal Barang Terjual (D/M/YYYY)</label>
                 <div class="input-group">
                   <div class="input-group-prepend">
                     <span class="input-group-text">
@@ -299,17 +300,11 @@
 <script src="../../plugins/moment/moment.min.js"></script>
 <!-- date picker -->
 <script src="plugins/jquery-ui/jquery-ui.min.js"></script>
-<script src="plugins/bootstrap-toggle/bootstrap-toggle.min.js"></script>
 <script>
-  $('#mergeBarangTerjual').bootstrapToggle('off')
   $("#barangTerjualTable").DataTable({
-    paging: true,
     scrollCollapse: true,
     scrollX: true,
     scrollY: '500px',
-    "bInfo" : false,
-    "ordering": false,
-    "lengthChange": false, "autoWidth": false, "searching": true,
     "columnDefs": [
       {
           "targets": [2],

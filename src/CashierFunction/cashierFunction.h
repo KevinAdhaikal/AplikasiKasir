@@ -14,3 +14,7 @@ int pembukuan(sb_Event* e);
 int dashboardLogic(sb_Event* e);
 int barangMasukLogic(sb_Event* e);
 int pengaturan(sb_Event* e);
+int dbBackup(sb_Event* e);
+int dbImport(sb_Event* e);
+int userLogic(sb_Event* e);
+int roleLogic(sb_Event* e);

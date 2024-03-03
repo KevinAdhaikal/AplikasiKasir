@@ -23,14 +23,14 @@ function getCookie(cname) {
 
 async function load() {
     var tempArray = [0, 0]
-    $("#barangTerjualTable").DataTable().clear().draw()
-    $("#pengeluaranTable").DataTable().clear().draw()
+    $("#barangTerjualTable").DataTable().clear().draw(false)
+    $("#pengeluaranTable").DataTable().clear().draw(false)
     var splitArray = document.getElementById("tanggalPembukuan").value.split(" - ")
     var dateArray = [splitArray[0].split("/"), splitArray[1].split("/")]
 
     await fetch("/?api_args=10&pembukuanArgs=7", {
         method: "POST",
-        body: getDaysArray(new Date(`${dateArray[0][2]}-${dateArray[0][1]}-${dateArray[0][0]}`),new Date(`${dateArray[1][2]}-${dateArray[1][1]}-${dateArray[1][0]}`)).join("\n") 
+        body: getDaysArray(new Date(`${dateArray[0][2]}-${dateArray[0][1]}-${dateArray[0][0]}`),new Date(`${dateArray[1][2]}-${dateArray[1][1]}-${dateArray[1][0]}`)).join("\x01")
     }).then(async response => {
         var tempData = [0, 0, 0]
 
@@ -41,13 +41,13 @@ async function load() {
 
                 for (let a = 0; a < Object.keys(barangTerjual).length; a++) {
                     for (let b = 0; b < barangTerjual[Object.keys(barangTerjual)[a]].length; b++) {
-                        var valueSplit = barangTerjual[Object.keys(barangTerjual)[a]][b].split("|");
+                        var valueSplit = barangTerjual[Object.keys(barangTerjual)[a]][b].split("\x02");
                         tempData[0] += Number(valueSplit[1])
                         tempData[1] += Number(valueSplit[2])
                         tempData[2] += Number(valueSplit[3])
                     }
 
-                    $("#barangTerjualTable").DataTable().row.add([`<a href="barangTerjual.html?tanggal=${Object.keys(barangTerjual)[a]}">${Object.keys(barangTerjual)[a].replaceAll("_", "/")}</a>`, Intl.NumberFormat('id', {}).format(tempData[0]), "Rp" + Intl.NumberFormat('id', {}).format(tempData[1]), "Rp" + Intl.NumberFormat('id', {}).format(tempData[2]), "Rp" + Intl.NumberFormat('id', {}).format(tempData[2] - tempData[1])]).draw()
+                    $("#barangTerjualTable").DataTable().row.add([`<a href="barangTerjual.html?tanggal=${Object.keys(barangTerjual)[a]}">${Object.keys(barangTerjual)[a].replaceAll("_", "/")}</a>`, Intl.NumberFormat('id', {}).format(tempData[0]), "Rp" + Intl.NumberFormat('id', {}).format(tempData[1]), "Rp" + Intl.NumberFormat('id', {}).format(tempData[2]), "Rp" + Intl.NumberFormat('id', {}).format(tempData[2] - tempData[1])]).draw(false)
                     tempArray[0] += tempData[2]
                     tempData[0] = 0
                     tempData[1] = 0
@@ -56,11 +56,11 @@ async function load() {
 
                 for (let a = 0; a < Object.keys(pengeluaran).length; a++) {
                     for (let b = 0; b < pengeluaran[Object.keys(pengeluaran)[a]].length; b++) {
-                        var valueSplit = pengeluaran[Object.keys(pengeluaran)[a]][b].split("|");
+                        var valueSplit = pengeluaran[Object.keys(pengeluaran)[a]][b].split("\x02");
                         tempData[2] += Number(valueSplit[1])
                     }
 
-                    $("#pengeluaranTable").DataTable().row.add([`<a href="pengeluaran.html?tanggal=${Object.keys(pengeluaran)[a]}">${Object.keys(pengeluaran)[a].replaceAll("_", "/")}</a>`, "Rp" + Intl.NumberFormat('id', {}).format(tempData[2])]).draw()
+                    $("#pengeluaranTable").DataTable().row.add([`<a href="pengeluaran.html?tanggal=${Object.keys(pengeluaran)[a]}">${Object.keys(pengeluaran)[a].replaceAll("_", "/")}</a>`, "Rp" + Intl.NumberFormat('id', {}).format(tempData[2])]).draw(false)
                     tempArray[1] += tempData[2]
                     tempData[2] = 0
                 }
@@ -100,7 +100,7 @@ async function kirimKeTelegram() {
     var splitArray = document.getElementById("tanggalPembukuan").value.split(" - ")
     await fetch(`${window.location.protocol}//${window.location.hostname}:8081/?username=${getCookie("username")}&password=${getCookie("password")}&teleArgs=1`, {
         method: "POST",
-        body: getDaysArray(new Date(splitArray[0].replaceAll("/", "-")),new Date(splitArray[1].replaceAll("/", "-"))).join("\n") 
+        body: getDaysArray(new Date(splitArray[0].replaceAll("/", "-")),new Date(splitArray[1].replaceAll("/", "-"))).join("\x01")
     }).then(async response => {
         if (response.status == 200) {
             Swal.mixin({

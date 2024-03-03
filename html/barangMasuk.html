@@ -12,7 +12,7 @@
   <!-- Theme style -->
   <link rel="stylesheet" href="dist/css/adminlte.min.css">
   <!-- SweetAlert2 -->
-  <link rel="stylesheet" href="/plugins/sweetalert2-theme-bootstrap-4/bootstrap-4.min.css">
+  <link rel="stylesheet" id="swal_css" href="plugins/sweetalert2/sweetalert2.min.css">
   <!-- IonIcons -->
   <link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
   <!-- DataTables -->
@@ -21,8 +21,6 @@
   <link rel="stylesheet" href="plugins/datatables-buttons/css/buttons.bootstrap4.min.css">
   <!-- date picker -->
   <link rel="stylesheet" href="/plugins/jquery-ui/jquery-ui.min.css">
-  <!-- iCheck for checkboxes and radio inputs -->
-  <link rel="stylesheet" href="/plugins/bootstrap-toggle/bootstrap-toggle.min.css">
   <!-- AdminLTE Docs CSS -->
   <link rel="stylesheet" href="plugins/other-css/adminlte-docs.css">
 </head>
@@ -95,12 +93,7 @@
               </p>
             </a>
             <ul class="nav nav-treeview">
-              <li class="nav-item">
-                <a href="./tambahBarang" class="nav-link">
-                  <i class="fas fa-solid fa-plus nav-icon"></i>
-                  <p>Tambah Barang</p>
-                </a>
-              </li>
+              
               <li class="nav-item">
                 <a href="./daftarBarang" class="nav-link">
                   <i class="fas fa-solid fa-boxes-stacked nav-icon"></i>
@@ -196,7 +189,7 @@
                 <h3 class="card-title">Pengaturan Barang Masuk</h3>
               </div>
               <div class="card-body">
-                <label class="col-form-label">Tanggal Barang Masuk (D/M/YYYY):</label>
+                <label>Tanggal Barang Masuk (D/M/YYYY)</label>
                 <div class="input-group">
                   <div class="input-group-prepend">
                     <span class="input-group-text">
@@ -394,18 +387,10 @@
 <script src="../../plugins/moment/moment.min.js"></script>
 <!-- date picker -->
 <script src="plugins/jquery-ui/jquery-ui.min.js"></script>
-<script src="plugins/bootstrap-toggle/bootstrap-toggle.min.js"></script>
 <script>
   $("#cariBarang").DataTable({
       scrollCollapse: true,
       paging:         true,
-      fixedColumns: {
-          left: 1,
-          right: 1
-      },
-      "bInfo" : false,
-      "ordering": false,
-      "responsive": true, "lengthChange": false, "autoWidth": false, "searching": true,
       "columnDefs": [
       {
           "targets": [0],
@@ -424,9 +409,6 @@
       scrollX:        true,
       scrollCollapse: true,
       paging:         true,
-      "bInfo" : false,
-      "ordering": false,
-      "lengthChange": false, "autoWidth": false, "searching": false,
       "columnDefs": [
       {
           "targets": [2],

@@ -4,7 +4,7 @@
 #include "../utils/utils.h"
 #include "../teleFunction/teleFunction.h"
 #include "../telegramClient/telegramClient.h"
-#include "../../vendor/str/str.h"
+#include "../../vendor/string_lib/string_lib.h"
 #include "../funcVarPub.h"
 
 #include "teleFunction.h"
@@ -22,20 +22,20 @@ int teleKasir(sb_Event* e) {
     char* formatCurrency2;
     char* formatCurrency3;
     int tempInt[3] = {0, 0, 0};
-    Str totalString;
+    string totalString;
     
-    str_init(&totalString);
-    str_append_format(&totalString, "Kasir (Barang Keluar)\n\n");
+    string_init(&totalString);
+    string_add(&totalString, "Kasir (Barang Keluar)\n\n");
 
     sb_Body body;
     sb_get_body(e->stream, &body);
 
     size_t sizeSplit = 0;
-    char** stringSplit = strsplit(body.data, "\n", &sizeSplit);
+    char** stringSplit = strsplit((char*)body.data, "\x01", &sizeSplit);
     free(body.data);
 
     for (int a = 0; a < sizeSplit; a++) {
-        char** valueSplit = strsplit(stringSplit[a], "|", 0);
+        char** valueSplit = strsplit(stringSplit[a], "\x02", 0);
         
         tempInt[0] += atoi(valueSplit[1]);
         tempInt[1] += atoi(valueSplit[2]);
@@ -45,7 +45,7 @@ int teleKasir(sb_Event* e) {
         formatCurrency2 = formatCurrency(atoi(valueSplit[2]));
         formatCurrency3 = formatCurrency(atoi(valueSplit[3]));
 
-        str_append_format(&totalString, "Nama Barang: %s\nJumlah Barang: %s\nHarga Modal: %s\nHarga Jual: %s\n\n", valueSplit[0], formatCurrency1, formatCurrency2, formatCurrency3);
+        string_add_format(&totalString, "Nama Barang: %s\nJumlah Barang: %s\nHarga Modal: %s\nHarga Jual: %s\n\n", valueSplit[0], formatCurrency1, formatCurrency2, formatCurrency3);
         
         free(formatCurrency1);
         free(formatCurrency2);
@@ -59,7 +59,7 @@ int teleKasir(sb_Event* e) {
     formatCurrency2 = formatCurrency(tempInt[1]);
     formatCurrency3 = formatCurrency(tempInt[2]);
 
-    str_append_format(&totalString, "Total Barang Dibeli: %s\nTotal Jumlah Barang: %s\nTotal Harga Modal: %s\nTotal Harga Jual: %s\n\n", formatCurrency0, formatCurrency1, formatCurrency2, formatCurrency3);
+    string_add_format(&totalString, "Total Barang Dibeli: %s\nTotal Jumlah Barang: %s\nTotal Harga Modal: %s\nTotal Harga Jual: %s\n\n", formatCurrency0, formatCurrency1, formatCurrency2, formatCurrency3);
     
     free(stringSplit);
     free(formatCurrency0);
@@ -67,8 +67,8 @@ int teleKasir(sb_Event* e) {
     free(formatCurrency2);
     free(formatCurrency3);
 
-    sendMessage(totalString.value, NULL, NULL);
-    str_finalize(&totalString);
+    sendMessage(totalString.val, NULL, NULL);
+    string_finalize(&totalString);
 
     sb_send_header(e->stream, "Access-Control-Allow-Origin", "*");
     sb_send_status(e->stream, 200, "OK");

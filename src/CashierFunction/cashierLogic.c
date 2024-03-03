@@ -14,7 +14,6 @@
 
 int cashierFindBarang(sb_Event* e) {
     char inputBarang[255], strTemp[1024];
-    char* errMsg;
     sqlite3* db;
     sqlite3_stmt* statement;
     SQLRow allrows = {0};

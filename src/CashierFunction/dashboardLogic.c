@@ -12,7 +12,6 @@
 
 int dashboardLogic(sb_Event* e) {
     char tempString[512];
-    char* errMsg;
     sqlite3* db;
     sqlite3_stmt* statement;
     SQLRow rowBack = {0};
@@ -95,10 +94,10 @@ int dashboardLogic(sb_Event* e) {
                 if (!rowBack.totalChar) continue;
 
                 size_t splitTotal;
-                char** stringSplit = strsplit(rowBack.rows, "\n", &splitTotal);
+                char** stringSplit = strsplit(rowBack.rows, "\x01", &splitTotal);
 
                 for (int b = 0; b < splitTotal - 1; b++) {
-                    char** valueSplit = strsplit(stringSplit[b], "|", 0);
+                    char** valueSplit = strsplit(stringSplit[b], "\x02", 0);
 
                     if (keyTotal != 0) {
                         for (int c = 0; c < keyTotal; c++) {
@@ -107,7 +106,7 @@ int dashboardLogic(sb_Event* e) {
                                 goto GO_HERE;
                             }
                         }
-                            
+
                         keyTotal++;
                         keyData = realloc(keyData, keyTotal * sizeof(char*));
                         valueData = realloc(valueData, keyTotal * sizeof(int));
@@ -131,7 +130,7 @@ int dashboardLogic(sb_Event* e) {
             }
 
             for (int a = 0; a < keyTotal; a++) {
-                sb_writef(e->stream, "%s|%d\n", keyData[a], valueData[a]);
+                sb_writef(e->stream, "%s\x02%d\n", keyData[a], valueData[a]);
                 free(keyData[a]);
             }
 
@@ -166,10 +165,7 @@ int dashboardLogic(sb_Event* e) {
             // mengecek database kemarin
             break;
         }
-        default: {
-            return SB_RES_OK;
-            break;
-        }
+        default: return SB_RES_OK;
     }
 
     sqlite3_prepare_v2(db, tempString, -1, &statement, NULL);

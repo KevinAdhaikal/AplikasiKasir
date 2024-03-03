@@ -23,7 +23,7 @@ function formatCurrency(input) {
 }
 
 async function load(dateValue) {
-    await $("#barangMasukTable").DataTable().clear().draw()
+    await $("#barangMasukTable").DataTable().clear().draw(false)
     await fetch("/?api_args=12&barangMasukArgs=1", dateValue ? {
         method: "POST",
         headers: {
@@ -34,9 +34,9 @@ async function load(dateValue) {
     }).then(async response => {
         if (response.status == 200) {
             await response.text().then(data => {
-                data = data.split("\n")
+                data = data.split("\x01")
                 for (let a = 0; a < data.length - 1; a++) {
-                    data[a] = data[a].split("|")
+                    data[a] = data[a].split("\x02")
                     console.log(data[a])
                     tempData[0] += Number(data[a][3])
                     tempData[1] += Number(data[a][4])
@@ -46,7 +46,7 @@ async function load(dateValue) {
                     <button type="button" class="btn btn-danger" onclick="deleteBarangMasuk(${data[a][0]}, '${data[a][2]}', '${dateValue ? dateValue.replaceAll("-", "_") : ""}')">Hapus</button>
                     </center>`
                 }
-                $("#barangMasukTable").DataTable().rows.add(data.slice(0, -1)).draw()
+                $("#barangMasukTable").DataTable().rows.add(data.slice(0, -1)).draw(false)
                 if (!dateValue) document.getElementById("tanggalBarangMasuk").value = data[data.length - 1]
                 $("#barangMasukTable").DataTable().columns().footer()[2].innerHTML = `Total: ${Intl.NumberFormat('id', {}).format(data.length - 1)}`
                 $("#barangMasukTable").DataTable().columns().footer()[3].innerHTML = `Total: ${Intl.NumberFormat('id', {}).format(tempData[0])}`
@@ -104,7 +104,7 @@ async function deleteBarangMasuk(id, nama, tanggal) {
                         icon: 'success',
                         title: "Barang Masuk tersebut berhasil dihapus!"
                     })
-                    $("#barangMasukTable").DataTable().rows(function ( idx, data, node ) {return data[0] == id ? true : false;}).remove().draw()
+                    $("#barangMasukTable").DataTable().rows(function ( idx, data, node ) {return data[0] == id ? true : false;}).remove().draw(false)
                     var rowData = $("#barangMasukTable").DataTable().rows().data()
                     for (let a = 0; a < rowData.count() / 6; a++) {
                         tempData[0] += Number(rowData[0][3].replaceAll(".", ""))
@@ -164,13 +164,13 @@ function checkBarang(namaBarang) {
     }).then(async response => {
         if (response.status == 200) {
             await response.text().then(data => {
-                data = data.split("\n");
+                data = data.split("\x01");
                 if (data.length > 2) {
-                    $("#cariBarang").DataTable().clear().draw()
+                    $("#cariBarang").DataTable().clear().draw(false)
                     for (let a = 0; a < data.length - 1; a++) {
                         $("#cariBarang").DataTable().row.add([data[a], `<center>
                         <button type="button" class="btn btn-primary" onclick="tambahBarangMasuk(${a})">Tambah Barang</button>
-                        </center>`]).draw()
+                        </center>`]).draw(false)
                     }
                     $("#modal-findBarang").modal("show")
                     document.getElementById("namaBarcodeBarang").blur()

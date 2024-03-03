@@ -44,8 +44,7 @@ window.onload = async function() {
     await fetch("/?api_args=8", {
         method: "POST"
     }).then(async response => {
-        await response.text().then(data => cashierSettings = data.split("\n").slice(0, -1).map(Number))
-
+        await response.text().then(data => cashierSettings = data.split("\x01").slice(0, -1).map(Number))
     })
     document.getElementById("inputBarang").focus()
 }
@@ -67,8 +66,8 @@ $('#modal-findBarang').on('hidden.bs.modal', function () {
     $('#inputBarang').focus();
 })
 
-$("#modal-findBarang").on("shown.bs.modal", function() {
-    $('#cariBarang').DataTable().columns.adjust()
+$("#modal-findBarang").on("show.bs.modal", function() {
+    setTimeout(function() {$('#cariBarang').DataTable().columns.adjust()}, 200);
 })
 
 $(document).keydown(function(event) {
@@ -130,7 +129,7 @@ $("#kasirTable tbody").on('click', '.hapusBarangButton', function() {
     temp = $("#kasirTable").DataTable().columns().footer()[3].innerHTML.split(": Rp")
     temp[1] = Intl.NumberFormat('id', {}).format(Number(temp[1].replaceAll(".", "")) - Number(tableData[3].slice(2).replaceAll(".", "")));
     $("#kasirTable").DataTable().columns().footer()[3].innerHTML = temp.toString().replaceAll(",", ": Rp")
-    $("#kasirTable").DataTable().row(index).remove().draw()
+    $("#kasirTable").DataTable().row(index).remove().draw(false)
     delete tempBarang[tableData[0]]
 });
 
@@ -182,7 +181,7 @@ async function editBarang(index, limitStock) {
             <button type="button" class="btn btn-danger hapusBarangButton">Hapus</button>
             <button type="button" class="btn btn-primary editBarang">Edit</button>
             </center>`
-        ]).draw()
+        ]).draw(false)
         for (let a = 0; a < $("#kasirTable").DataTable().rows().data().count() / 5; a++) {
             total[0] += Number($("#kasirTable").DataTable().rows().data()[a][1].replaceAll(".", ""))
             total[1] += Number($("#kasirTable").DataTable().rows().data()[a][3].slice(2).replaceAll(".", ""))
@@ -237,7 +236,7 @@ function hapusSemuaBarang() {
                 title: "Semua barang di kasir berhasil di hapuskan!"
             })
             tempBarang = {}
-            $("#kasirTable").DataTable().clear().draw()
+            $("#kasirTable").DataTable().clear().draw(false)
             $("#kasirTable").DataTable().columns().footer()[0].innerHTML = "Total Barang: 0"
             $("#kasirTable").DataTable().columns().footer()[1].innerHTML = "Total Jumlah Barang: 0"
             $("#kasirTable").DataTable().columns().footer()[3].innerHTML = "Total Harga: Rp0"
@@ -258,8 +257,16 @@ function tambahBarangKasir(namaBarang) {
                     icon: 'error',
                     title: 'Barang Kosong',
                     text: `Barang Bernama "${namaBarang}" tidak bisa ditambahkan ke Kasir, karena Barang tersebut sudah kosong`,
-                    confirmButtonText: "Okay"
-                  })
+                    confirmButtonText: 'Okay',
+                    customClass: {
+                      title: 'swal-text-white', // menentukan kelas kustom untuk judul
+                      content: 'swal-text-white', // menentukan kelas kustom untuk konten
+                    },
+                    onOpen: () => {
+                      // Menambahkan gaya CSS langsung pada elemen teks jika perlu
+                      document.querySelector('.swal-text-white').style.color = 'white';
+                    }
+                  });                  
             }
 
             $("#kasirTable").DataTable().row(a).data([
@@ -300,7 +307,7 @@ function tambahBarangKasir(namaBarang) {
     <center>
     <button type="button" class="btn btn-danger hapusBarangButton">Hapus</button>
     <button type="button" class="btn btn-primary editBarang">Edit</button>
-    </center>`]).draw()
+    </center>`]).draw(false)
 
     for (let b = 0; b < $("#kasirTable").DataTable().rows().data().count() / 5; b++) {
         total[0] += Number($("#kasirTable").DataTable().rows().data()[b][1].replaceAll(".", ""))
@@ -325,9 +332,9 @@ async function findBarang(val) {
     }).then(async response => {
         if (response.status == 200) {
             await response.text().then(data => {
-                data = data.split("\n")
+                data = data.split("\x01")
                 if (data.length == 2) {
-                    data = data[0].split("|")
+                    data = data[0].split("\x02")
                     var tableData = $("#kasirTable").DataTable().rows().data()
                     for (let a = 0; a < tableData.count() / 5; a++) {
                         if (Object.keys(tempBarang)[a] == data[0]) {
@@ -391,20 +398,22 @@ async function findBarang(val) {
                     $("#kasirTable").DataTable().columns().footer()[3].innerHTML = temp.toString().replaceAll(",", ": Rp")
                 } else if (data.length > 2) {
                     document.getElementById("inputBarang").blur()
-                    $("#cariBarang").DataTable().clear().draw()
+                    $("#cariBarang").DataTable().clear().draw(false)
                     isShowDialog = 1;
+                    console.log(data)
                     for (let a = 0; a < data.length - 1; a++) {
-                        var result = data[a].split("|")
-                        result[1] = Intl.NumberFormat("id", {}).format(Number(result[1]))
-                        result[3] = Intl.NumberFormat('id', {}).format(Number(result[3]))
-                        tempFindBarang[result[0]] = []
-                        tempFindBarang[result[0]][0] = Number(result[3].replaceAll(".", ""))
-                        tempFindBarang[result[0]][1] = Number(result[2].replaceAll(".", ""))
-                        tempFindBarang[result[0]][2] = Number(result[1].replaceAll(".", ""))
-                        $("#cariBarang").DataTable().row.add(result.concat(`<center><button type="button" class="btn btn-info" onclick="tambahBarangKasir('${result[0]}')">Tambah Barang</button></center>`)).draw(false)
+                        data[a] = data[a].split("\x02")
+                        data[a][1] = Intl.NumberFormat("id", {}).format(Number(data[a][1]))
+                        data[a][3] = Intl.NumberFormat('id', {}).format(Number(data[a][3]))
+                        data[a][data[a].length] = `<center><button type="button" class="btn btn-info" onclick="tambahBarangKasir('${data[a][0]}')">Tambah Barang</button></center>`
+                        tempFindBarang[data[a][0]] = []
+                        tempFindBarang[data[a][0]][0] = Number(data[a][3].replaceAll(".", ""))
+                        tempFindBarang[data[a][0]][1] = Number(data[a][2].replaceAll(".", ""))
+                        tempFindBarang[data[a][0]][2] = Number(data[a][1].replaceAll(".", ""))
                     }
+                    console.log(data)
+                    $("#cariBarang").DataTable().rows.add(data.slice(0, -1)).draw(false)
                     $("#modal-findBarang").modal("show")
-                    
                 } else {
                     Swal.mixin({
                         toast: true,
@@ -466,7 +475,7 @@ async function bayarFunction() {
     var resultData = "";
     var tableRow = $("#kasirTable").DataTable().rows().data()
     for (let a = 0; a < tableRow.count() / 5; a++) {
-        resultData += `${tableRow[a][0]}|${tableRow[a][1].replaceAll(".", "")}|${tableRow[a][2]}|${tableRow[a][3].slice(2).replaceAll(".", "")}\n`
+        resultData += `${tableRow[a][0]}\x02${tableRow[a][1].replaceAll(".", "")}\x02${tableRow[a][2]}\x02${tableRow[a][3].slice(2).replaceAll(".", "")}\x01`
     }
     
     await fetch("/?api_args=10&pembukuanArgs=1", {
@@ -489,7 +498,7 @@ async function bayarFunction() {
             $("#kasirTable").DataTable().columns().footer()[0].innerHTML = "Total Barang: 0"
             $("#kasirTable").DataTable().columns().footer()[1].innerHTML = "Total Jumlah Barang: 0"
             $("#kasirTable").DataTable().columns().footer()[3].innerHTML = "Total Harga: Rp0"
-            $("#kasirTable").DataTable().clear().draw()
+            $("#kasirTable").DataTable().clear().draw(false)
         }
     })
 

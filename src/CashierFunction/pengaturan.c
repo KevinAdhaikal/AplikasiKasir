@@ -25,7 +25,6 @@ int send_error(sb_Event* e, const char* text, char** valueSplit, sqlite3* db) {
 }
 
 int pengaturan(sb_Event* e) {
-    char tempString[1024];
     sqlite3* db;
     sqlite3_stmt* statement;
 
@@ -46,7 +45,7 @@ int pengaturan(sb_Event* e) {
             sqlite3_open("database/settings.db", &db);
             sb_get_body(e->stream, &bodyClient);
             size_t valueLen;
-            char** valueSplit = strsplit(bodyClient.data, "\n", &valueLen);
+            char** valueSplit = strsplit((char*)bodyClient.data, "\x01", &valueLen);
             free(bodyClient.data);
 
             // melakukan pengecekan data dari client

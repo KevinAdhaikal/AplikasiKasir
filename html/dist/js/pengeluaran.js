@@ -114,7 +114,7 @@ function getCookie(cname) {
 }
 
 async function load(dateValue) {
-    await $("#pengeluaranTable").DataTable().clear().draw()
+    await $("#pengeluaranTable").DataTable().clear().draw(false)
     fetch("/?api_args=10&pembukuanArgs=5", dateValue ? {
         "method": "POST",
         headers: {
@@ -125,12 +125,12 @@ async function load(dateValue) {
     }).then(response => {
         if (response.status == 200) {
             response.text().then(data => {
-                data = data.split("\n")
+                data = data.split("\x01")
 
                 $("#pengeluaranTable").DataTable().columns().footer()[2].innerHTML = `Total: ${data.length - 1}`
 
                 for (let a = 0; a < data.length - 1; a++) {
-                    data[a] = data[a].split("|");
+                    data[a] = data[a].split("\x02");
                     data[a][3] = "Rp" + Intl.NumberFormat('id', {}).format(Number(data[a][3].replaceAll(".", "")))
                     data[a][4] = `<center>
                     <button type="button" class="btn btn-danger" onclick="hapusPengeluaran(${data[a][0]}, '${dateValue ? dateValue.replaceAll("-", "_") : ""}')">Hapus</button>
@@ -213,7 +213,7 @@ async function hapusPengeluaran(id, dateValue) {
                     var pengeluaranData = $("#pengeluaranTable").DataTable().row(function ( idx, data, node ) {return data[0] == id ? true : false;});
                     $("#pengeluaranTable").DataTable().columns().footer()[2].innerHTML = "Total: " + Intl.NumberFormat('id', {}).format(Number($("#pengeluaranTable").DataTable().columns().footer()[2].innerHTML.split(": ")[1].replaceAll(".", "")) - 1)
                     $("#pengeluaranTable").DataTable().columns().footer()[3].innerHTML = "Total: Rp" + Intl.NumberFormat('id', {}).format(Number($("#pengeluaranTable").DataTable().columns().footer()[3].innerHTML.split(": Rp")[1].replaceAll(".", "") - pengeluaranData.data()[3].slice(2).replaceAll(".", "")))
-                    pengeluaranData.remove().draw()
+                    pengeluaranData.remove().draw(false)
                 }
                 else {
                     Swal.mixin({

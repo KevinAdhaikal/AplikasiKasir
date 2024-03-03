@@ -46,7 +46,7 @@ struct sb_Options {
 };
 
 struct sb_Body {
-  char* data;
+  unsigned char* data;
   int sizeData;
 };
 
@@ -87,6 +87,7 @@ int sb_get_header(sb_Stream *st, const char *field, char *dst, size_t len);
 int sb_get_var(sb_Stream *st, const char *name, char *dst, size_t len);
 int sb_get_cookie(sb_Stream *st, const char *name, char *dst, size_t len);
 int sb_get_body(sb_Stream *st, sb_Body *body);
+unsigned int sb_get_body_static(sb_Stream* st, char* dst, int dst_size);
 int sb_convert_var_to_int(sb_Stream *st, const char* name);
 const void *sb_get_multipart(sb_Stream *st, const char *name, size_t *len);
 

@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdint.h>
 
 #include "../vendor/sqlite3/sqlite3.h"
 #include "sqliteFunction.h"
@@ -11,8 +12,18 @@ int tableExists(void *data, int argc, char **argv, char **azColName) {
     return 0;
 }
 
+char check_is_row(sqlite3* db, const char* sql) {
+    sqlite3_stmt* statement;
+    sqlite3_prepare_v2(db, sql, -1, &statement, NULL);
+    char res = sqlite3_step(statement) == SQLITE_ROW;
+    printf("%d\n", res);
+    sqlite3_finalize(statement);
+    return res;
+}
+
 void freeRowBack(SQLRow* data) {
-    if (data->totalChar) free(data->rows);
+    if (data->totalChar > 0) free(data->rows);
+    data->rows = NULL;
     memset(data, 0, sizeof(SQLRow));
 }
 
@@ -26,8 +37,7 @@ int RowBack(void* data, int argc, char** argv, char** colName) {
         if (!rowData->rows) {
             if (!argv[a]) {
                 rowData->rows = malloc(6);
-                strcpy(rowData->rows, "NULL");
-                rowData->rows[4] = '|';
+                memcpy(rowData->rows, "NULL\x02", 5);
                 rowData->totalChar += 5;
                 continue;
             }
@@ -50,7 +60,7 @@ int RowBack(void* data, int argc, char** argv, char** colName) {
         }
     }
 
-    rowData->rows[rowData->totalChar - 1] = '\n';
+    rowData->rows[rowData->totalChar - 1] = '\x01';
     rowData->rows[rowData->totalChar] = '\0';
     return 0;
 }
@@ -101,10 +111,15 @@ int sqlTOF(void* data, int argc, char** argv, char** colName) {
     return 1;
 }
 
-void statement_get_row(sqlite3_stmt* statement, SQLRow* row, char no_lf) {
+char statement_get_row(sqlite3_stmt* statement, SQLRow* row, char no_lf) {
+    row->sql_ret = sqlite3_step(statement);
+    if (row->sql_ret == SQLITE_ROW) goto HAS_ROW;
+    else return 0;
+    
     while (sqlite3_step(statement) == SQLITE_ROW) {
+        HAS_ROW:
         int columnCount = sqlite3_column_count(statement);
-        if (!columnCount) return;
+        if (!columnCount) return 0;
         for (int a = 0; a < columnCount; a++) {
             switch (sqlite3_column_type(statement, a)) {
                 case SQLITE_TEXT: {
@@ -112,35 +127,37 @@ void statement_get_row(sqlite3_stmt* statement, SQLRow* row, char no_lf) {
                     int str_len = strlen(text);
 
                     row->rows = realloc(row->rows, row->totalChar + str_len + 2);
-                    snprintf(row->rows + row->totalChar, str_len + 2, "%s|", text);
+                    snprintf(row->rows + row->totalChar, str_len + 2, "%s\x02", text);
                     row->totalChar += str_len + 1;
                     break;
                 }
                 case SQLITE_INTEGER: {
-                    int value = sqlite3_column_int(statement, a);
+                    int64_t value = sqlite3_column_int64(statement, a);
                     char int_to_str[64];
-                    int str_len = snprintf(int_to_str, sizeof(int_to_str), "%d|", value);
-
+                    char str_len = snprintf(int_to_str, sizeof(int_to_str), "%lld\x02", value);
                     row->rows = realloc(row->rows, row->totalChar + str_len + 1);
                     snprintf(row->rows + row->totalChar, str_len + 1, "%s", int_to_str);
+                    
                     row->totalChar += str_len;
                     break;
                 }
                 case SQLITE_NULL: {
                     row->rows = realloc(row->rows, row->totalChar + 6);
-                    memcpy(row->rows + row->totalChar, "NULL|", 5);
+                    memcpy(row->rows + row->totalChar, "NULL\x02", 5);
                     row->totalChar += 5;
                     break;
                 }
             }
         }
-        row->rows[row->totalChar - 1] = '\n';
+        row->rows[row->totalChar - 1] = 0x01;
     }
     if (row->totalChar) row->rows[no_lf == 1 ? --row->totalChar : row->totalChar] = '\0';
+
+    return 1;
 } // thanks ChatGPT
 
-int statement_row_plus(sqlite3_stmt* statement) {
-    int result = 0;
+int64_t statement_row_plus(sqlite3_stmt* statement) {
+    int64_t result = 0;
 
     while(sqlite3_step(statement) == SQLITE_ROW) {
         int columnCount = sqlite3_column_count(statement);
@@ -149,7 +166,7 @@ int statement_row_plus(sqlite3_stmt* statement) {
         for (int a = 0; a < columnCount; a++) {
             switch(sqlite3_column_type(statement, a)) {
                 case SQLITE_INTEGER: {
-                    result += sqlite3_column_int(statement, a);
+                    result += sqlite3_column_int64(statement, a);
                     break;
                 }
             }

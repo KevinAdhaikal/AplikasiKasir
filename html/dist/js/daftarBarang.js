@@ -1,5 +1,6 @@
 var currentKey = 0;
-
+var current_id = 0;
+var is_infoBarang = 0;
 $("input[data-type='currency']").on({
     input: function() {
         formatCurrency($(this));
@@ -23,7 +24,6 @@ function formatCurrency(input) {
 }
 
 async function mainPage() {
-    console.log("test");
     await fetch("/?api_args=3", {
         method: "POST"
     }).then(async response => {
@@ -39,18 +39,20 @@ async function mainPage() {
             })
         } else {
             await response.text().then(data => {
-                data = data.split('\n');
+                data = data.split('\x01');
                 for (let a = 0; a < data.length - 1; a++) {
-                    data[a] = data[a].split("|")
+                    data[a] = data[a].split("\x02")
                     data[a][2] = Intl.NumberFormat('id', {}).format((data[a][2]));
                     data[a][3] = "Rp" + Intl.NumberFormat('id', {}).format((data[a][3]));
                     data[a][4] = "Rp" + Intl.NumberFormat('id', {}).format((data[a][4]));
+                    data[a][5] = data[a][5] ? data[a][5] : "Tidak Ada"
                     data[a][6] = `<center>
                     <button type="button" class="btn btn-danger hapusBarangButton" onclick=hapusDaftarBarang(${data[a][0]})>Hapus</button>
                     <button type="button" class="btn btn-primary" onclick='infoBarang(${data[a][0]}, ${data[a][5] ? 0 : 1})'>Edit/Info</button>
                     </center>`
-                    data[a][5] = data[a][5] ? data[a][5] : "Tidak Ada"
+
                 }
+                current_id = data[data.length-2][0]
                 $("#daftarBarangTable").DataTable().rows.add(data.slice(0, -1)).draw(false)
                 data = ""
             })
@@ -60,6 +62,38 @@ async function mainPage() {
 
 $('#modal-infoBarang').on('shown.bs.modal', function () {
     $('#namaBarang').focus();
+    $('#no_auto_close_modal').bootstrapToggle('destroy');
+    $('#no_auto_close_modal').bootstrapToggle();
+
+    if ($("#no_auto_close_modal").is(':checked') && !is_infoBarang) {
+        document.getElementById("reset_nama_barang_toggle").style = ""
+        document.getElementById("reset_jumlah_barang_toggle").style = ""
+        document.getElementById("reset_harga_modal_toggle").style = ""
+        document.getElementById("reset_harga_jual_toggle").style = ""
+        document.getElementById("reset_barcode_barang_toggle").style = ""
+    } else {
+        document.getElementById("reset_nama_barang_toggle").style = "display: none;"
+        document.getElementById("reset_jumlah_barang_toggle").style = "display: none;"
+        document.getElementById("reset_harga_modal_toggle").style = "display: none;"
+        document.getElementById("reset_harga_jual_toggle").style = "display: none;"
+        document.getElementById("reset_barcode_barang_toggle").style = "display: none;"
+    }
+})
+
+$("#no_auto_close_modal").change(function() {
+    if ($("#no_auto_close_modal").is(':checked')) {
+        document.getElementById("reset_nama_barang_toggle").style = ""
+        document.getElementById("reset_jumlah_barang_toggle").style = ""
+        document.getElementById("reset_harga_modal_toggle").style = ""
+        document.getElementById("reset_harga_jual_toggle").style = ""
+        document.getElementById("reset_barcode_barang_toggle").style = ""
+    } else {
+        document.getElementById("reset_nama_barang_toggle").style = "display: none;"
+        document.getElementById("reset_jumlah_barang_toggle").style = "display: none;"
+        document.getElementById("reset_harga_modal_toggle").style = "display: none;"
+        document.getElementById("reset_harga_jual_toggle").style = "display: none;"
+        document.getElementById("reset_barcode_barang_toggle").style = "display: none;"
+    }
 })
 
 $('#namaBarang').keypress(function(e) {
@@ -136,7 +170,112 @@ window.onload = function() {
     mainPage()
 }
 
+function tambahBarang() {
+    is_infoBarang = 0;
+    document.getElementById("no_auto_close_modal_style").style = ""
+    document.getElementById("editButton").setAttribute("onclick", "tambahBarang_process()");
+    document.getElementById("editButton").innerText = "Tambahkan Barang"
+    document.getElementById("infoBarang_title").innerText = "Tambah Barang"
+    document.getElementById("namaBarang").value = ""
+    document.getElementById("jumlahBarang").value = ""
+    document.getElementById("hargaModal").value = ""
+    document.getElementById("hargaJual").value = ""
+    document.getElementById("persenJual").value = ""
+    document.getElementById("barcodeBarang").value = ""
+    document.getElementById("resetNamaBarang").checked = true
+    document.getElementById("resetJumlahBarang").checked = true
+    document.getElementById("resetHargaModal").checked = true
+    document.getElementById("resetHargaJual").checked = true
+    document.getElementById("resetBarcodeBarang").checked = true
+    $("#modal-infoBarang").modal("show")
+}
+
+async function tambahBarang_process() {
+    if (!document.getElementById("namaBarang").value) {document.getElementById("namaBarang").focus(); return Swal.mixin({toast: true,position: 'top-end',showConfirmButton: false,timer: 3000}).fire({icon: 'error',title: 'mohon isi Nama Barang dengan benar!'})}
+    else if (!document.getElementById("jumlahBarang").value) {document.getElementById("jumlahBarang").focus(); return Swal.mixin({toast: true,position: 'top-end',showConfirmButton: false,timer: 3000}).fire({icon: 'error',title: 'mohon isi Jumlah Barang dengan benar!'})}
+    else if (!document.getElementById("hargaModal").value) {document.getElementById("hargaModal").focus(); return Swal.mixin({toast: true,position: 'top-end',showConfirmButton: false,timer: 3000}).fire({icon: 'error',title: 'mohon isi Harga Modal dengan benar!'})}
+    else if (!document.getElementById("hargaJual").value) {document.getElementById("hargaJual").focus(); return Swal.mixin({toast: true,position: 'top-end',showConfirmButton: false,timer: 3000}).fire({icon: 'error',title: 'mohon isi Harga Jual dengan benar!'})}
+    else if (parseInt(document.getElementById("jumlahBarang").value) < 1) {document.getElementById("jumlahBarang").focus(); return Swal.mixin({toast: true,position: 'top-end',showConfirmButton: false,timer: 3000}).fire({icon: 'error',title: 'Jumlah Barang tidak bisa di isi dengan 0 mohon isi harga dengan benar!'})}
+    else if (parseInt(document.getElementById("hargaModal").value) < 1) {document.getElementById("hargaModal").focus(); return Swal.mixin({toast: true,position: 'top-end',showConfirmButton: false,timer: 3000}).fire({icon: 'error',title: 'Harga Modal tidak bisa di isi dengan 0 mohon isi harga dengan benar!'})}
+    else if (parseInt(document.getElementById("hargaJual").value) < 1) {document.getElementById("hargaJual").focus(); return Swal.mixin({toast: true,position: 'top-end',showConfirmButton: false,timer: 3000}).fire({icon: 'error',title: 'Harga Jual tidak bisa di isi dengan 0 mohon isi harga dengan benar!'})}
+    await fetch("/?api_args=2", {
+        method: "POST",
+        headers: {
+            "namaBarang": document.getElementById("namaBarang").value,
+            "jumlahBarang": document.getElementById("jumlahBarang").value.replaceAll(".", ""),
+            "hargaModal": document.getElementById("hargaModal").value.replaceAll(".", ""),
+            "hargaJual": document.getElementById("hargaJual").value.replaceAll(".", ""),
+            "barcodeBarang": document.getElementById("barcodeBarang").value ? document.getElementById("barcodeBarang").value : ""
+        }
+    }).then(response => {
+        if (response.status == 200) {
+            Swal.mixin({
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 3000,
+              }).fire({
+                icon: 'success',
+                title: 'Barang berhasil ditambahkan ke database!'
+            })
+            current_id++
+            $("#daftarBarangTable").DataTable().row.add([
+                current_id,
+                document.getElementById("namaBarang").value,
+                document.getElementById("jumlahBarang").value,
+                document.getElementById("hargaModal").value,
+                document.getElementById("hargaJual").value,
+                document.getElementById("barcodeBarang").value ? document.getElementById("barcodeBarang").value : "Tidak Ada",
+                `<center>
+                <button type="button" class="btn btn-danger hapusBarangButton" onclick=hapusDaftarBarang(${current_id})>Hapus</button>
+                <button type="button" class="btn btn-primary" onclick=infoBarang(${current_id})>Edit/Info</button>
+                </center>`
+            ]).draw(false)
+
+            if ($("#no_auto_close_modal").is(':checked')) {
+                if (document.getElementById("resetNamaBarang").checked) document.getElementById("namaBarang").value = ""
+                if (document.getElementById("resetJumlahBarang").checked) document.getElementById("jumlahBarang").value = ""
+                if (document.getElementById("resetHargaModal").checked) document.getElementById("hargaModal").value = ""
+                if (document.getElementById("resetHargaJual").checked && document.getElementById("resetHargaModal").checked) {
+                    document.getElementById("hargaJual").value = ""
+                    document.getElementById("persenJual").value = ""
+                }
+                else if (document.getElementById("resetHargaJual").checked && !document.getElementById("resetHargaModal").checked) {
+                    document.getElementById("hargaJual").value = document.getElementById("hargaModal").value
+                    document.getElementById("persenJual").value = "0.00"
+                }
+                else if (!document.getElementById("resetHargaJual").checked && document.getElementById("resetHargaModal").checked) {
+                    document.getElementById("hargaJual").value = ""
+                    document.getElementById("persenJual").value = ""
+                }
+                if (document.getElementById("resetBarcodeBarang").checked) document.getElementById("barcodeBarang").value = ""
+                document.getElementById("namaBarang").focus()
+            } else $("#modal-infoBarang").modal("hide")
+        }
+        else {
+            Swal.mixin({
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 3000,
+              }).fire({
+                icon: 'error',
+                title: response.statusText
+            })
+        }
+    })
+}
+
 function infoBarang(id, isBarcodeNull) {
+    document.getElementById("no_auto_close_modal_style").style = "display: none;"
+    document.getElementById("reset_nama_barang_toggle").style = "display: none;"
+    document.getElementById("reset_jumlah_barang_toggle").style = "display: none;"
+    document.getElementById("reset_harga_modal_toggle").style = "display: none;"
+    document.getElementById("reset_harga_jual_toggle").style = "display: none;"
+    document.getElementById("reset_barcode_barang_toggle").style = "display: none;"
+    is_infoBarang = 1;
+    document.getElementById("editButton").innerText = "Edit Barang"
+    document.getElementById("infoBarang_title").innerText = "Edit Barang"
     var rowData = $("#daftarBarangTable").DataTable().rows(function ( idx, data, node ) {return data[0] == id ? true : false;}).data()[0]
     document.getElementById("namaBarang").value = rowData[1]
     document.getElementById("jumlahBarang").value = rowData[2]
@@ -176,7 +315,8 @@ async function hapusDaftarBarang(id) {
                         icon: 'success',
                         title: 'Barang tersebut berhasil dihapuskan!'
                     })
-                    $("#daftarBarangTable").DataTable().rows(function ( idx, data, node ) {return data[0] == id ? true : false;}).remove().draw()
+                    $("#daftarBarangTable").DataTable().rows(function ( idx, data, node ) {return data[0] == id ? true : false;}).remove().draw(false)
+                    current_id = $('#daftarBarangTable').DataTable().row($('#daftarBarangTable').DataTable().rows().count() - 1).data()[0]
                 } else {
                     Swal.mixin({
                         toast: true,

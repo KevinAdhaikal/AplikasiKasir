@@ -32,4 +32,5 @@ extern pthread_t tele_thread[1];
 #endif
 
 // public function
+void prepare_db(char check_db_ver);
 void loadSettings();

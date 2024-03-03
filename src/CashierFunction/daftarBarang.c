@@ -12,7 +12,6 @@
 #include "cashierFunction.h"
 
 int daftarBarang(sb_Event* e) {
-    char* errMsg;
     sqlite3* db;
     SQLRow allRows = {0};
     sqlite3_stmt* statement;

@@ -57,7 +57,7 @@
 #undef TLS_I_MACRO
 #endif
 
-#include "libtomcrypt.c"
+#include "libtomcrypt.h"
 
 #if (CRYPT <= 0x0117)
     #define LTC_PKCS_1_EMSA LTC_LTC_PKCS_1_EMSA
@@ -4083,7 +4083,6 @@ void _private_tls_create_hash(struct TLSContext *context) {
     
     TLSHash *hash = _private_tls_ensure_hash(context);
     if ((context->version == TLS_V12) || (context->version == DTLS_V12) || (context->version == TLS_V13) || (context->version == DTLS_V13)) {
-        int hash_size = _private_tls_mac_length(context);
         if (hash->created) {
             unsigned char temp[TLS_MAX_SHA_SIZE];
             sha384_done(&hash->hash32, temp);
@@ -5486,7 +5485,6 @@ struct TLSPacket *tls_build_hello(struct TLSContext *context, int tls13_downgrad
         else
             memcpy(context->local_random + TLS_SERVER_RANDOM_SIZE - 8, "DOWNGRD\x00", 8);
     }
-    unsigned short packet_version = context->version;
     unsigned short version = context->version;
 #ifdef WITH_TLS_13
     if (context->version == TLS_V13)

@@ -12,11 +12,14 @@
   <!-- Theme style -->
   <link rel="stylesheet" href="dist/css/adminlte.min.css">
   <!-- SweetAlert2 -->
-  <link rel="stylesheet" href="/plugins/sweetalert2-theme-bootstrap-4/bootstrap-4.min.css">
+  <link rel="stylesheet" id="swal_css" href="plugins/sweetalert2/sweetalert2.min.css">
+  <!-- DataTables -->
+  <link rel="stylesheet" href="plugins/datatables-bs4/css/dataTables.bootstrap4.min.css">
+  <link rel="stylesheet" href="plugins/datatables-responsive/css/responsive.bootstrap4.min.css">
+  <link rel="stylesheet" href="plugins/datatables-buttons/css/buttons.bootstrap4.min.css">
   <!-- IonIcons -->
   <link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
-  <!-- iCheck for checkboxes and radio inputs -->
-  <link rel="stylesheet" href="/plugins/bootstrap-toggle/bootstrap-toggle.min.css">
+  <link rel="stylesheet" href="plugins/toggle-switchy/toggle-switchy.css">
   <!-- AdminLTE Docs CSS -->
   <link rel="stylesheet" href="plugins/other-css/adminlte-docs.css">
   <style type="text/css">
@@ -116,12 +119,7 @@
               </p>
             </a>
             <ul class="nav nav-treeview">
-              <li class="nav-item">
-                <a href="./tambahBarang" class="nav-link">
-                  <i class="fas fa-solid fa-plus nav-icon"></i>
-                  <p>Tambah Barang</p>
-                </a>
-              </li>
+              
               <li class="nav-item">
                 <a href="./daftarBarang" class="nav-link">
                   <i class="fas fa-solid fa-boxes-stacked nav-icon"></i>
@@ -208,14 +206,23 @@
       <div class="container-fluid">
         <div class="row">
           <div class="col-md-12">
-            <div class="card card-primary card-tabs">
-              <div class="card-header p-0 pt-1">
+            <div class="card card-primary card-outline card-outline-tabs">
+              <div class="card-header p-0 border-bottom-0">
                 <ul class="nav nav-tabs" id="custom-tabs-one-tab" role="tablist">
                   <li class="nav-item">
-                    <a class="nav-link active" id="general-tabs" data-toggle="pill" href="#general-content" role="tab" aria-controls="general-content" aria-selected="true">General</a>
+                    <a class="nav-link active" id="general-tabs" data-toggle="tab" href="#general-content" role="tab" aria-controls="general-content" aria-selected="true">General</a>
                   </li>
                   <li class="nav-item">
-                    <a class="nav-link" id="telegram-tab" data-toggle="pill" href="#telegram-content" role="tab" aria-controls="telegram-content" aria-selected="false">Telegram</a>
+                    <a class="nav-link" id="telegram-tab" data-toggle="tab" href="#telegram-content" role="tab" aria-controls="telegram-content" aria-selected="false">Telegram</a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link" id="user-tab" data-toggle="tab" using_table="true" href="#user-content" role="tab" aria-controls="user-content" aria-selected="false">User</a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link" id="role-tab" data-toggle="tab" using_table="true" href="#role-content" role="tab" aria-controls="role-content" aria-selected="false">Role Permission</a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link" id="database-tab" data-toggle="tab" href="#database-content" role="tab" aria-controls="database-content" aria-selected="false">Database</a>
                   </li>
                 </ul>
               </div>
@@ -224,14 +231,24 @@
                   <div class="tab-pane fade active show" id="general-content" role="tabpanel" aria-labelledby="general-tab">
                     <label class="normallabel">Memblok barang kosong</label> <a>(Anda tidak akan tidak bisa menambahkan barang kosong di Kasir)</a>
                     <br>
-                    <input type="checkbox" id="blockBarangKosong" data-toggle="toggle" data-onstyle="success" data-offstyle="danger" data-width="85" data-height="0">
+                    <label class="toggle-switchy" data-color="green" data-size="lg" data-style="rounded">
+                      <input type="checkbox" id="blockBarangKosong">
+                      <span class="toggle">
+                        <span class="switch"></span>
+                      </span>
+                    </label>
                     <span class="brmedium"></span>
-                    <div class="border-bottom"></div><br>
+                    <div class="border-bottom"></div>
+                    <span class="brmedium"></span>
                     <label class="normallabel">Otomatis Refresh Barang Total Terjual</label> <a>(Jika anda ke dashboard, Barang Total Terjual akan otomatis Refresh)</a>
                     <br>
-                    <input type="checkbox" id="isAutoRefreshBarangTotalTerjual" data-toggle="toggle" data-onstyle="success" data-offstyle="danger" data-width="85" data-height="0">
+                    <label class="toggle-switchy" data-color="green" data-size="lg" data-style="rounded">
+                      <input type="checkbox" id="isAutoRefreshBarangTotalTerjual">
+                      <span class="toggle">
+                        <span class="switch"></span>
+                      </span>
+                    </label>
                     <span class="brmedium"></span>
-                    
                     <label class="normallabel">Otomatis Set Filter Date</label> <a>(Barang Total Terjual akan otomatis set Filter Date yang sesuai Anda pilih)</a>
                     <br>
                     <select class="custom-select rounded-0 col-lg-3" id="AutoSetFilterDate_date_select">
@@ -242,15 +259,26 @@
                     <span class="brmedium"></span>
                     <label class="normallabel">Perbedaan Info Total Hari ini dengan Kemarin</label> <a>(Jika anda nyalakan fitur ini, anda akan melihat perbedaan info total hari ini dengan kemarin)</a>
                     <br>
-                    <input type="checkbox" id="perbedaanInfoHariIniDenganKemarin" data-toggle="toggle" data-onstyle="success" data-offstyle="danger" data-width="85" data-height="0">
+                    <label class="toggle-switchy" data-color="green" data-size="lg" data-style="rounded">
+                      <input type="checkbox" id="perbedaanInfoHariIniDenganKemarin">
+                      <span class="toggle">
+                        <span class="switch"></span>
+                      </span>
+                    </label>
                   </div>
                   <div class="tab-pane fade" id="telegram-content" role="tabpanel" aria-labelledby="telegram-tab">
                     <label class="normallabel">Memakai Telegram Bot</label> <a>(Notifikasi menggunakan Telegram)</a>
                     <br>
-                    <input type="checkbox" id="menggunakanTelegramBot" data-toggle="toggle" data-onstyle="success" data-offstyle="danger" data-width="85" data-height="0">
+                    <label class="toggle-switchy" data-color="green" data-size="lg" data-style="rounded">
+                      <input type="checkbox" id="menggunakanTelegramBot" onchange="menggunakanTelegramBot_onChange(this.checked)">
+                      <span class="toggle">
+                        <span class="switch"></span>
+                      </span>
+                    </label>
+                    <span class="brmedium"></span>
                     <div id="boxTelegram">
-                      <br>
-                      <div class="border-bottom"></div><br>
+                      <span class="brmedium"></span>
+                      <div class="border-bottom"></div><span class="brmedium"></span>
                       <div class="form-group">
                         <label for="telegramBotToken" class="normallabel">Telegram Bot Token</label>
                         <a>(Untuk membuat bot, Anda harus Connect ke <a href="https://t.me/BotFather">@BotFather</a>)</a>
@@ -263,26 +291,120 @@
                         <input class="form-control" id="telegramUserID" placeholder="Telegram User ID">
                       </div>
                       <button class="btn btn-primary" id="testMessageButton" onclick="testMessage()">Test Message Telegram</button>
-                      <br><br>
-                      <div class="border-bottom"></div><br>
+                      <span class="brmedium"></span>
+                      <div class="border-bottom"></div><span class="brmedium"></span>
                       <label class="normallabel">Notifikasi Barang Kosong</label> <a>(Anda akan mendapatkan Notifikasi jika ada barang yang Kosong)</a><br>
-                      <input type="checkbox" id="notifyBarangKosong" data-toggle="toggle" data-onstyle="success" data-offstyle="danger" data-width="85" data-height="0"><span class="brmedium"></span>
+                      <label class="toggle-switchy" data-color="green" data-size="lg" data-style="rounded">
+                        <input type="checkbox" id="notifyBarangKosong">
+                        <span class="toggle">
+                          <span class="switch"></span>
+                        </span>
+                      </label>
+                      <span class="brmedium"></span>
                       <label class="normallabel">Notifikasi Kasir</label> <a>(Anda akan mendapatkan Notifikasi jika ada yang membeli Barang)</a><br>
-                      <input type="checkbox" id="notifyKasir" data-toggle="toggle" data-onstyle="success" data-offstyle="danger" data-width="85" data-height="0"><span class="brmedium"></span>
+                      <label class="toggle-switchy" data-color="green" data-size="lg" data-style="rounded">
+                        <input type="checkbox" id="notifyKasir">
+                        <span class="toggle">
+                          <span class="switch"></span>
+                        </span>
+                      </label>
+                      <span class="brmedium"></span>
                       <label class="normallabel">Notifikasi Stock Barang dibawah Jumlah</label> <a>(Anda akan mendapatkan Notifikasi jika Stock Barang dibawah Jumlah)</a><br>
-                      <input type="checkbox" id="isNotifyStockBarangDibawahJumlah" data-toggle="toggle" data-onstyle="success" data-offstyle="danger" data-width="85" data-height="0"><span class="brmedium"></span>
+                      <label class="toggle-switchy" data-color="green" data-size="lg" data-style="rounded">
+                        <input type="checkbox" id="isNotifyStockBarangDibawahJumlah" onchange="isNotifyStockBarangDibawahJumlah_onChange(this.checked)">
+                        <span class="toggle">
+                          <span class="switch"></span>
+                        </span>
+                      </label>
+                      <span class="brmedium"></span>
                       <div id="isNotifyStockBarangDibawahJumlah_div" class="d-none">
                         <label class="normallabel">Target Notifikasi Stock Barang dibawah Jumlah</label> <a>(Berapa target Stock barang dibawah Jumlah, min: 0 max: 65535)</a><br>
                         <div class="col-md-2 pl-0"><input type="number" class="form-control" id="jumlahNotifyStockBarangDibawahJumlah" step="1" max="65535"></div><br>
                       </div>
                       <label class="normallabel">Otomatis Mengirim Pembukuan Hari Ini</label> <a>(Otomatis mengirim hasil pembukuan hari ini)</a><br>
-                      <input type="checkbox" id="isNotifyAlarmPembukuan" data-toggle="toggle" data-onstyle="success" data-offstyle="danger" data-width="85" data-height="0"><span class="brmedium"></span>
+                      <label class="toggle-switchy" data-color="green" data-size="lg" data-style="rounded">
+                        <input type="checkbox" id="isNotifyAlarmPembukuan" onchange="isNotifyAlarmPembukuan_onChange(this.checked)">
+                        <span class="toggle">
+                          <span class="switch"></span>
+                        </span>
+                      </label>
+                      <span class="brmedium"></span>
                       <div class="d-none" id="isNotifyAlarmPembukuan_div">
                         <label class="normallabel">Waktu Otomatis Mengirim Pembukuan Hari Ini</label><br>
                         <div class="col-md-2 pl-0"><div class="input-group"><input type="time" id="waktuNotifyAlarmPembukuan" class="form-control" value="21:30" autocomplete="off"></div>
                       </div>
                     </div>
                     </div>
+                  </div>
+                  <div class="tab-pane fade" id="user-content" role="tabpanel" aria-labelledby="user-tab">
+                    <div class="col-3 row">
+                      <button type="button" class="btn btn-success btn-block" onclick="show_create_user_dialog()"><i class="fa fa-plus"></i> Tambah User</button>
+                    </div>
+                    <div class="brmedium"></div>
+                    <div class="border-bottom"></div>
+                    <div class="brmedium"></div>
+                    <table id="users_list" class="table table-bordered table-hover display nowrap" style="width:100%">
+                      <thead>
+                      <tr>
+                        <th hidden>User ID</th>
+                        <th>Username</th> <!-- Index 0 -->
+                        <th>Tanggal Dibuat</th> <!-- Index 1 -->
+                        <th>Tanggal Dimodifikasi</th> <!-- Index 2 -->
+                        <th>Action Button</th> <!-- Index 3 -->
+                      </tr>
+                      </thead>
+                      <tbody>
+                      </tbody>
+                      <tfoot>
+                      <tr>
+                        <th hidden>User ID</th>
+                        <th>Username</th>
+                        <th>Tanggal Dibuat</th>
+                        <th>Tanggal Dimodifikasi</th>
+                        <th>Action Button</th>
+                      </tr>
+                      </tfoot>
+                    </table>
+                  </div>
+                  <div class="tab-pane fade" id="role-content" role="tabpanel" aria-labelledby="role-tab">
+                    <div class="col-3 row">
+                      <button type="button" class="btn btn-success btn-block" onclick="tambahRole()"><i class="fa fa-plus"></i> Tambah Role</button>
+                    </div>
+                    <div class="brmedium"></div>
+                    <div class="border-bottom"></div>
+                    <div class="brmedium"></div>
+                    <table id="roles_lists" class="table table-bordered table-hover display nowrap" style="width:100%">
+                      <thead>
+                      <tr>
+                        <th hidden>Role ID</th>
+                        <th>Nama Role</th> <!-- Index 0 -->
+                        <th>Tanggal Dibuat</th> <!-- Index 1 -->
+                        <th>Tanggal Dimodifikasi</th> <!-- Index 2 -->
+                        <th>Action Button</th> <!-- Index 3 -->
+                      </tr>
+                      </thead>
+                      <tbody>
+                      </tbody>
+                      <tfoot>
+                      <tr>
+                        <th hidden>Role ID</th>
+                        <th>Nama Role</th>
+                        <th>Tanggal Dibuat</th>
+                        <th>Tanggal Dimodifikasi</th>
+                        <th>Action Button</th>
+                      </tr>
+                      </tfoot>
+                    </table>
+                  </div>
+                  <div class="tab-pane fade" id="database-content" role="tabpanel" aria-labelledby="database-tab">
+                    <label class="normallabel">Backup Database</label> <a>(Membackup semua database yang ada di AplikasiKasir, termasuk Settings Database)</a>
+                    <br>
+                    <button class="btn btn-success" onclick="backup_database()">Backup Database</button>
+                    <span class="brmedium"></span>
+                    <div class="border-bottom"></div><span class="brmedium"></span>
+                    <label class="normallabel">Import Database</label> <a>(Mengimpor database)</a>
+                    <br>
+                    <button class="btn btn-primary" id="import_database_upload">Import Database</button>
                   </div>
                 </div>
               </div>
@@ -294,6 +416,132 @@
         </div>
         <!-- /.row -->
       </div><!-- /.container-fluid -->
+    </div>
+    <div class="modal fade" id="modal-editUser" style="display: none;" aria-hidden="true">
+      <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h4 class="modal-title" id="title_modal_user">Edit User</h4>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">×</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <div class="form-group">
+              <label for="username_user">Username</label>
+              <div class="input-group">
+                <div class="input-group-prepend">
+                  <span class="input-group-text"><i class="fa-solid fa-user"></i></span>
+                </div>
+                <input type="text" class="form-control" id="username_user" placeholder="Username" autocomplete="off">
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="password_user">Password</label>
+              <div class="input-group">
+                <div class="input-group-prepend">
+                  <span class="input-group-text"><i class="fa-solid fa-key"></i></span>
+                </div>
+                <input type="text" class="form-control" id="password_user" placeholder="Password" autocomplete="off">
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="role_user">Role</label>
+              <div class="input-group">
+                <div class="input-group-prepend">
+                  <span class="input-group-text"><i class="fa-solid fa-user-group"></i></span>
+                </div>
+                <select class="custom-select rounded-0" id="role_user" autocomplete="off">
+                </select>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer justify-content-between">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close (Esc)</button>
+            <button type="button" class="btn btn-success" id="edit_user_button" onclick="process_edit_user()">Edit User</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal fade" id="modal-editRolePermission" style="display: none;" aria-hidden="true">
+      <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h4 class="modal-title" id="title_modal_permission">Edit Role Permission</h4>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">×</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <div class="row">
+              <div class="col-5 col-sm-3">
+                <div class="nav flex-column nav-tabs h-100" id="vert-tabs-tab" role="tablist" aria-orientation="vertical">
+                  <a class="nav-link active" id="user-information-tab" data-toggle="tab" do_resize="1" href="#user-information" role="tab" aria-controls="user-information" aria-selected="true">Role Information</a>
+                  <a class="nav-link" id="permission-role-tab" data-toggle="tab" href="#permission-role" role="tab" aria-controls="permission-role" aria-selected="false" using_bootstrap_toggle="true">Permission Role</a>
+                </div>
+              </div>
+              <div class="col-7 col-sm-9">
+                <div class="tab-content" id="vert-tabs-tabContent">
+                  <div class="tab-pane text-left fade active show" id="user-information" role="tabpanel" aria-labelledby="user-information-tab">
+                    <label>Nama Role Permission</label>
+                    <div class="input-group">
+                      <div class="input-group-prepend">
+                        <span class="input-group-text"><i class="fa-solid fa-user-group"></i></span>
+                      </div>
+                      <input type="text" class="form-control" id="nama_role_permission" placeholder="Nama Role Permission" autocomplete="off">
+                    </div>
+                    <div id="who_using_this_role" style="display: none;">
+                      <span class="brmedium"></span>
+                      <div class="border-bottom"></div>
+                      <span class="brmedium"></span>
+                      <table id="who_using_this_role_table" class="table table-bordered table-hover display nowrap" style="width:100%">
+                        <thead>
+                        <tr>
+                          <th>Nama Akun</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                        <tfoot>
+                        <tr>
+                          <th>Nama Akun</th>
+                        </tr>
+                        </tfoot>
+                      </table>
+                    </div>
+                  </div>
+                  <div class="tab-pane fade" id="permission-role" role="tabpanel" aria-labelledby="permission-role-tab">
+                    <div id="alert_permission" class="alert alert-info alert-dismissible" style="display:none;">
+                      <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+                      <h5><i class="icon fas fa-info"></i> Informasi</h5>
+                      Untuk Permission Super Role, Permission nya di kunci.<br>
+                      Jadi anda tidak bisa mengubah Permission di Role ini.
+                    </div>
+                    <label>Permission Full Access</label>
+                    <br>
+                    <label class="toggle-switchy" data-color="green" data-size="lg" data-style="rounded">
+                      <input type="checkbox" id="full_access" permission_checkbox>
+                      <span class="toggle">
+                        <span class="switch"></span>
+                      </span>
+                    </label>
+                    <span class="brmedium"></span>
+                    <div class="border-bottom"></div>
+                    <span class="brmedium"></span>
+                    <h1>Permission Lain disini semua</h1>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer justify-content-between">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close (Esc)</button>
+            <button type="button" class="btn btn-success" id="edit_role_button" onclick="process_edit_role()">Edit Role Permission</button>
+          </div>
+        </div>
+        <!-- /.modal-content -->
+      </div>
+      <!-- /.modal-dialog -->
     </div>
     <!-- /.content -->
   </div>
@@ -324,8 +572,24 @@
 <script src="../../plugins/sweetalert2/sweetalert2.min.js"></script>
 <!-- Bootstrap Switch -->
 <script src="plugins/bootstrap-toggle/bootstrap-toggle.min.js"></script>
+<!-- DataTables  & Plugins -->
+<script src="plugins/datatables/jquery.dataTables.min.js"></script>
+<script src="plugins/datatables-bs4/js/dataTables.bootstrap4.min.js"></script>
+<script src="plugins/datatables-responsive/js/dataTables.responsive.min.js"></script>
+<script src="plugins/datatables-responsive/js/responsive.bootstrap4.min.js"></script>
+<script src="plugins/datatables-buttons/js/dataTables.buttons.min.js"></script>
+<script src="plugins/datatables-buttons/js/buttons.bootstrap4.min.js"></script>
+<script src="plugins/datatables-buttons/js/buttons.html5.min.js"></script>
+<script src="plugins/datatables-buttons/js/buttons.print.min.js"></script>
+<script src="plugins/datatables-buttons/js/buttons.colVis.min.js"></script>
 <!-- My Script -->
 <script src="dist/js/AplikasiKasir.js"></script>
 <script src="dist/js/pengaturan.js"></script>
+<script>
+  $(function () {
+    $("#users_list").DataTable().column(0).visible(false)
+    $("#roles_lists").DataTable().column(0).visible(false)
+  })
+</script>
 </body>
 </html>

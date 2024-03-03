@@ -13,28 +13,22 @@
 #include "cashierFunction.h"
 
 int hapusDaftarBarang(sb_Event* e) {
-    char IDNumber[11], namaBarang[255], strTemp[512];
+    char IDNumber[32], namaBarang[255], strTemp[512];
     SQLRow row = {0};
     sqlite3_stmt* statement;
     sqlite3* db;
-    char* errMsg;
 
-    sb_get_header(e->stream, "IDNumber", IDNumber, 10);
+    sb_get_header(e->stream, "IDNumber", IDNumber, 31);
 
     if (!IDNumber[0]) {
         sb_send_status(e->stream, 403, "Mohon input ID Barang yang benar!");
-        return SB_RES_OK;
-    }
-    uint8_t str_len = strlen(IDNumber);
-    for (uint8_t a = 0; a < str_len; a++) if (!isdigit(IDNumber[a])) {
-        sb_send_status(e->stream, 403, "ID Barang tidak berbentuk nomor! Mohon input ID Barang yang benar");
         return SB_RES_OK;
     }
 
     sqlite3_open("database/daftarBarang.db", &db);
 
     sqlite3_prepare_v2(db, "SELECT nama FROM daftarBarang WHERE rowid = ?", -1 , &statement, NULL);
-    sqlite3_bind_int(statement, 1, atoi(IDNumber));
+    sqlite3_bind_int64(statement, 1, atoll(IDNumber));
     statement_get_row(statement, &row, 1);
     sqlite3_finalize(statement);
     if (!row.totalChar) {
@@ -46,7 +40,7 @@ int hapusDaftarBarang(sb_Event* e) {
     freeRowBack(&row);
 
     sqlite3_prepare_v2(db, "DELETE FROM daftarBarang WHERE rowid = ?", -1, &statement, NULL);
-    sqlite3_bind_int(statement, 1, atoi(IDNumber));
+    sqlite3_bind_int64(statement, 1, atoll(IDNumber));
     sqlite3_step(statement);
     sqlite3_finalize(statement);
 
@@ -60,7 +54,7 @@ int hapusDaftarBarang(sb_Event* e) {
 
     size_t splitLen = 0;
     if (row.totalChar) {
-        char** strSplit = strsplit(row.rows, "\n", &splitLen);
+        char** strSplit = strsplit(row.rows, "\x01", &splitLen);
         for (int a = 0; a < splitLen - 1; a++) {
             sprintf(strTemp, "DELETE FROM %s WHERE nama = ?", strSplit[a]);
             sqlite3_prepare_v2(db, strTemp, -1, &statement, NULL);

@@ -15,7 +15,6 @@
 int barangMasukLogic(sb_Event* e) {
     char tanggalBarangMasuk[32];
     char tempString[1024];
-    char* errMsg;
 
     sqlite3* db;
     sqlite3_stmt* statement;
@@ -28,7 +27,6 @@ int barangMasukLogic(sb_Event* e) {
 
     switch(sb_convert_var_to_int(e->stream, "barangMasukArgs")) {
         case 1: {
-            char is_exist;
             sb_get_header(e->stream, "tanggalBarangMasuk", tanggalBarangMasuk, 31);
             sqlite3_open("database/barangMasuk.db", &db);
 
@@ -38,17 +36,9 @@ int barangMasukLogic(sb_Event* e) {
                     return SB_RES_OK;
                 }
                 
-                sprintf(tempString, "SELECT name from pragma_table_info('barangMasuk_%s') where name = 'waktu'", tanggalBarangMasuk);
-                sqlite3_exec(db, tempString, sqlTOF, &is_exist, NULL);
-                if (is_exist) sprintf(tempString, "SELECT rowid,waktu,nama,jumlah,harga from barangMasuk_%s", tanggalBarangMasuk);
-                else sprintf(tempString, "SELECT rowid,'-',nama,jumlah,harga from barangMasuk_%s", tanggalBarangMasuk);
+                sprintf(tempString, "SELECT rowid,waktu,nama,jumlah,harga from barangMasuk_%s", tanggalBarangMasuk);
             }
-            else {
-                sprintf(tempString, "SELECT name from pragma_table_info('barangMasuk_%d_%d_%d') where name = 'waktu'", timeinfo->tm_mday, timeinfo->tm_mon + 1, timeinfo->tm_year + 1900);
-                sqlite3_exec(db, tempString, sqlTOF, &is_exist, NULL);
-                if (is_exist) sprintf(tempString, "SELECT rowid,waktu,nama,jumlah,harga from barangMasuk_%d_%d_%d", timeinfo->tm_mday, timeinfo->tm_mon + 1, timeinfo->tm_year + 1900);
-                else sprintf(tempString, "SELECT rowid,'-',nama,jumlah,harga from barangMasuk_%d_%d_%d", timeinfo->tm_mday, timeinfo->tm_mon + 1, timeinfo->tm_year + 1900);
-            }
+            else sprintf(tempString, "SELECT rowid,waktu,nama,jumlah,harga from barangMasuk_%d_%d_%d", timeinfo->tm_mday, timeinfo->tm_mon + 1, timeinfo->tm_year + 1900);
 
             sqlite3_prepare_v2(db, tempString, -1, &statement, NULL);
             statement_get_row(statement, &rowBack, 0);
@@ -93,7 +83,6 @@ int barangMasukLogic(sb_Event* e) {
             return SB_RES_OK;
         }
         case 3: {
-            char is_exist;
             char namaBarang[255];
             char jumlahBarang[32];
             char hargaBarang[32];
@@ -118,25 +107,12 @@ int barangMasukLogic(sb_Event* e) {
             sprintf(tempString, "CREATE TABLE IF NOT EXISTS barangMasuk_%d_%d_%d (nama TEXT, jumlah INT, harga INT, waktu TEXT DEFAULT (strftime('%%H:%%M:%%S', 'now', 'localtime')));", timeinfo->tm_mday, timeinfo->tm_mon + 1, timeinfo->tm_year + 1900);
             if (sqlNormalExec(e, db, tempString) == SB_RES_OK) return SB_RES_OK;
 
-            sprintf(tempString, "SELECT name from pragma_table_info('barangMasuk_%d_%d_%d') where name = 'waktu'", timeinfo->tm_mday, timeinfo->tm_mon + 1, timeinfo->tm_year + 1900);
-            sqlite3_exec(db, tempString, sqlTOF, &is_exist, NULL);
-            if (!is_exist) {
-                sprintf(tempString, "CREATE TABLE IF NOT EXISTS barangMasuk_%d_%d_%d_new (nama TEXT, jumlah INT, harga INT, waktu TEXT DEFAULT (strftime('%%H:%%M:%%S', 'now', 'localtime')));", timeinfo->tm_mday, timeinfo->tm_mon + 1, timeinfo->tm_year + 1900);
-                sqlite3_exec(db, tempString, 0, 0, NULL);
-                sprintf(tempString, "INSERT INTO barangMasuk_%d_%d_%d_new (nama, jumlah, harga) SELECT nama, jumlah, harga FROM barangMasuk_%d_%d_%d", timeinfo->tm_mday, timeinfo->tm_mon + 1, timeinfo->tm_year + 1900, timeinfo->tm_mday, timeinfo->tm_mon + 1, timeinfo->tm_year + 1900);
-                sqlite3_exec(db, tempString, 0, 0, NULL);
-                sprintf(tempString, "DROP TABLE barangMasuk_%d_%d_%d", timeinfo->tm_mday, timeinfo->tm_mon + 1, timeinfo->tm_year + 1900);
-                sqlite3_exec(db, tempString, 0, 0, NULL);
-                sprintf(tempString, "ALTER TABLE barangMasuk_%d_%d_%d_new rename to barangMasuk_%d_%d_%d", timeinfo->tm_mday, timeinfo->tm_mon + 1, timeinfo->tm_year + 1900, timeinfo->tm_mday, timeinfo->tm_mon + 1, timeinfo->tm_year + 1900);
-                sqlite3_exec(db, tempString, 0, 0, NULL);
-            }
-
             sprintf(tempString, "INSERT INTO barangMasuk_%d_%d_%d (nama, jumlah, harga) VALUES (?, ?, ?)", timeinfo->tm_mday, timeinfo->tm_mon + 1, timeinfo->tm_year + 1900);
             sqlite3_prepare_v2(db, tempString, -1, &statement, NULL);
 
             sqlite3_bind_text(statement, 1, namaBarang, -1, SQLITE_STATIC);
-            sqlite3_bind_int(statement, 2, atoi(jumlahBarang));
-            sqlite3_bind_int(statement, 3, atoi(hargaBarang));
+            sqlite3_bind_int64(statement, 2, atoll(jumlahBarang));
+            sqlite3_bind_int64(statement, 3, atoll(hargaBarang));
 
             sqlite3_step(statement);
             sqlite3_finalize(statement);
@@ -145,7 +121,7 @@ int barangMasukLogic(sb_Event* e) {
             sqlite3_open("database/daftarBarang.db", &db);
 
             sqlite3_prepare_v2(db, "UPDATE daftarBarang SET jumlah=jumlah + ? where nama = ?", -1, &statement, NULL);
-            sqlite3_bind_int(statement, 1, atoi(jumlahBarang));
+            sqlite3_bind_int64(statement, 1, atoll(jumlahBarang));
             sqlite3_bind_text(statement, 2, namaBarang, -1, SQLITE_STATIC);
 
             sqlite3_step(statement);
@@ -158,11 +134,11 @@ int barangMasukLogic(sb_Event* e) {
         }
         case 4: {
             char namaBarang[255];
-            char barangMasukID[11];
+            char barangMasukID[32];
 
             sb_get_header(e->stream, "namaBarang", namaBarang, 254);
             sb_get_header(e->stream, "tanggalBarangMasuk", tanggalBarangMasuk, 11);
-            sb_get_header(e->stream, "barangMasukID", barangMasukID, 11);
+            sb_get_header(e->stream, "barangMasukID", barangMasukID, 31);
 
             if (!namaBarang[0]) {
                 sb_send_status(e->stream, 403, "Nama/Barcode barang tidak boleh kosong!");
@@ -181,9 +157,9 @@ int barangMasukLogic(sb_Event* e) {
                     sb_send_status(e->stream, 403, "Tanggal tidak valid!");
                     return SB_RES_OK;
                 }
-                sprintf(tempString, "SELECT jumlah FROM barangMasuk_%s where rowid = ?", tanggalBarangMasuk, atoi(barangMasukID));
+                sprintf(tempString, "SELECT jumlah FROM barangMasuk_%s where rowid = ?", tanggalBarangMasuk);
             }
-            else sprintf(tempString, "SELECT jumlah FROM barangMasuk_%d_%d_%d WHERE rowid = ?", timeinfo->tm_mday, timeinfo->tm_mon + 1, timeinfo->tm_year + 1900, atoi(barangMasukID));
+            else sprintf(tempString, "SELECT jumlah FROM barangMasuk_%d_%d_%d WHERE rowid = ?", timeinfo->tm_mday, timeinfo->tm_mon + 1, timeinfo->tm_year + 1900);
 
             sqlite3_prepare_v2(db, tempString, -1, &statement, NULL);
             statement_get_row(statement, &rowBack, 0);
@@ -193,7 +169,7 @@ int barangMasukLogic(sb_Event* e) {
             else sprintf(tempString, "DELETE FROM barangMasuk_%d_%d_%d where rowid = ?", timeinfo->tm_mday, timeinfo->tm_mon + 1, timeinfo->tm_year + 1900);
 
             sqlite3_prepare_v2(db, tempString, -1, &statement, NULL);
-            sqlite3_bind_int(statement, 1, atoi(barangMasukID));
+            sqlite3_bind_int64(statement, 1, atoll(barangMasukID));
             sqlite3_step(statement);
             sqlite3_finalize(statement);
             sqlite3_close(db);
@@ -201,7 +177,7 @@ int barangMasukLogic(sb_Event* e) {
             sqlite3_open("database/daftarBarang.db", &db);
             sqlite3_prepare_v2(db, "UPDATE daftarBarang SET jumlah=jumlah - ? where nama = ?", -1, &statement, NULL);
             
-            sqlite3_bind_int(statement, 1, atoi(rowBack.rows));
+            sqlite3_bind_int64(statement, 1, atoll(rowBack.rows));
             sqlite3_bind_text(statement, 2, namaBarang, -1, SQLITE_STATIC);
             sqlite3_step(statement);
             sqlite3_finalize(statement);

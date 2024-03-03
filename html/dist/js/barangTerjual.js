@@ -20,14 +20,14 @@ async function mergeFunction() {
             mergeArray[dataTable[a][2]][0] = Object.keys(mergeArray).indexOf(dataTable[a][2])
         }
     }
-    await $("#barangTerjualTable").DataTable().clear().draw()
+    await $("#barangTerjualTable").DataTable().clear().draw(false)
 
     for (let a = 0; a < Object.keys(mergeArray).length; a++) {
         var name = Object.keys(mergeArray)[a]
         console.log(mergeArray[name])
         $("#barangTerjualTable").DataTable().row.add([mergeArray[name][0], '-', mergeArray[name][1], mergeArray[name][2], "Rp" + mergeArray[name][3], "Rp" + mergeArray[name][4], `<center>
         <button type="button" class="btn btn-danger" onclick="hapusBarangTerjualMerge('${name}', '${document.getElementById("tanggalBarangTerjual").value}', ${a})">Hapus</button>
-        </center>`]).draw()
+        </center>`]).draw(false)
     }
     
     $("#barangTerjualTable").DataTable().columns().footer()[2].innerHTML = `Total: ${Object.keys(mergeArray).length}`
@@ -35,7 +35,7 @@ async function mergeFunction() {
 }
 
 async function load(dateValue) {
-    await $("#barangTerjualTable").DataTable().clear().draw()
+    await $("#barangTerjualTable").DataTable().clear().draw(false)
     await fetch("/?api_args=10&pembukuanArgs=2", dateValue ? {
         method: "POST",
         headers: {
@@ -46,10 +46,10 @@ async function load(dateValue) {
     }).then(async response => {
         if (response.status == 200) {
             await response.text().then(data => {
-                data = data.split("\n");
+                data = data.split("\x01");
                 $("#barangTerjualTable").DataTable().columns().footer()[2].innerHTML = `Total: ${data.length - 1}`
                 for (let a = 0; a < data.length - 1; a++) {
-                    data[a] = data[a].split("|")
+                    data[a] = data[a].split("\x02")
                     data[a][3] = Intl.NumberFormat('id', {}).format(Number(data[a][3].replaceAll(".", "")))
                     data[a][4] = "Rp" + Intl.NumberFormat('id', {}).format(Number(data[a][4].replaceAll(".", "")))
                     data[a][5] = "Rp" + Intl.NumberFormat('id', {}).format(Number(data[a][5].replaceAll(".", "")))
@@ -136,7 +136,7 @@ function hapusBarangTerjual(id, dateValue) {
                     $("#barangTerjualTable").DataTable().columns().footer()[3].innerHTML = "Total: " + Intl.NumberFormat('id', {}).format(Number($("#barangTerjualTable").DataTable().columns().footer()[3].innerHTML.split(": ")[1].replaceAll(".", "") - barangTerjualData.data()[3].replaceAll(".", "")))
                     $("#barangTerjualTable").DataTable().columns().footer()[4].innerHTML = "Total: Rp" + Intl.NumberFormat('id', {}).format(Number($("#barangTerjualTable").DataTable().columns().footer()[4].innerHTML.split(": Rp")[1].replaceAll(".", "") - barangTerjualData.data()[4].slice(2).replaceAll(".", "")))
                     $("#barangTerjualTable").DataTable().columns().footer()[5].innerHTML = "Total: Rp" + Intl.NumberFormat('id', {}).format(Number($("#barangTerjualTable").DataTable().columns().footer()[5].innerHTML.split(": Rp")[1].replaceAll(".", "") - barangTerjualData.data()[5].slice(2).replaceAll(".", "")))
-                    barangTerjualData.remove().draw()
+                    barangTerjualData.remove().draw(false)
                 }
                 else {
                     Swal.mixin({
@@ -193,7 +193,7 @@ function hapusBarangTerjualMerge(namaBarang, valueDate, id) {
                     $("#barangTerjualTable").DataTable().columns().footer()[3].innerHTML = "Total: " + Intl.NumberFormat('id', {}).format(Number($("#barangTerjualTable").DataTable().columns().footer()[3].innerHTML.split(": ")[1].replaceAll(".", "") - barangTerjualData.data()[3].replaceAll(".", "")))
                     $("#barangTerjualTable").DataTable().columns().footer()[4].innerHTML = "Total: Rp" + Intl.NumberFormat('id', {}).format(Number($("#barangTerjualTable").DataTable().columns().footer()[4].innerHTML.split(": Rp")[1].replaceAll(".", "") - barangTerjualData.data()[4].slice(2).replaceAll(".", "")))
                     $("#barangTerjualTable").DataTable().columns().footer()[5].innerHTML = "Total: Rp" + Intl.NumberFormat('id', {}).format(Number($("#barangTerjualTable").DataTable().columns().footer()[5].innerHTML.split(": Rp")[1].replaceAll(".", "") - barangTerjualData.data()[5].slice(2).replaceAll(".", "")))
-                    barangTerjualData.remove().draw()
+                    barangTerjualData.remove().draw(false)
                 }
                 else {
                     Swal.mixin({

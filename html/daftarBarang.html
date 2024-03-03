@@ -12,7 +12,7 @@
   <!-- Theme style -->
   <link rel="stylesheet" href="dist/css/adminlte.min.css">
   <!-- SweetAlert2 -->
-  <link rel="stylesheet" href="/plugins/sweetalert2-theme-bootstrap-4/bootstrap-4.min.css">
+  <link rel="stylesheet" id="swal_css" href="plugins/sweetalert2/sweetalert2.min.css">
   <!-- DataTables -->
   <link rel="stylesheet" href="plugins/datatables-bs4/css/dataTables.bootstrap4.min.css">
   <link rel="stylesheet" href="plugins/datatables-responsive/css/responsive.bootstrap4.min.css">
@@ -21,6 +21,10 @@
   <link rel="stylesheet" href="/plugins/bootstrap-toggle/bootstrap-toggle.min.css">
   <!-- AdminLTE Docs CSS -->
   <link rel="stylesheet" href="plugins/other-css/adminlte-docs.css">
+  <!-- My CSS -->
+  <link rel="stylesheet" href="dist/css/mycss.css">
+  <!-- iCheck for checkboxes and radio inputs -->
+  <link rel="stylesheet" href="/plugins/bootstrap-toggle/bootstrap-toggle.min.css">
 </head>
 <body id="bodyMain" class="hold-transition sidebar-mini layout-fixed layout-footer-fixed sidebar-collapse">
 <div class="wrapper">
@@ -91,12 +95,7 @@
               </p>
             </a>
             <ul class="nav nav-treeview">
-              <li class="nav-item">
-                <a href="./tambahBarang" class="nav-link">
-                  <i class="fas fa-solid fa-plus nav-icon"></i>
-                  <p>Tambah Barang</p>
-                </a>
-              </li>
+              
               <li class="nav-item">
                 <a href="#" class="nav-link active">
                   <i class="fas fa-solid fa-boxes-stacked nav-icon"></i>
@@ -190,6 +189,12 @@
               </div>
               <!-- /.card-header -->
               <div class="card-body">
+                <div class="col-3 row">
+                  <button type="button" class="btn btn-success btn-block" onclick="tambahBarang()"><i class="fa fa-plus"></i> Tambah Barang</button>
+                </div>
+                <div class="brmedium"></div>
+                <div class="border-bottom"></div>
+                <div class="brmedium"></div>
                 <table id="daftarBarangTable" class="table table-bordered table-hover display nowrap" style="width:100%">
                   <thead>
                   <tr>
@@ -231,12 +236,20 @@
       <div class="modal-dialog modal-xl modal-dialog-centered">
         <div class="modal-content">
           <div class="modal-header">
-            <h4 class="modal-title">Info Barang</h4>
+            <h4 class="modal-title" id="infoBarang_title">Info Barang</h4>
             <button type="button" class="close" data-dismiss="modal" aria-label="Close">
               <span aria-hidden="true">×</span>
             </button>
           </div>
           <div class="modal-body">
+            <div id="no_auto_close_modal_style" style="display: none;">
+              <label>Jangan Otomatis Close Modal</label> <a>(Ini membantu untuk menambahkan barang tanpa terganggu Close Modal)</a>
+              <br>
+              <input type="checkbox" id="no_auto_close_modal" data-toggle="toggle" data-onstyle="success" data-offstyle="danger" data-width="85" data-height="0">
+              <div class="brmedium"></div>
+              <div class="border-bottom"></div>
+              <div class="brmedium"></div>
+            </div>
             <!-- Content here -->
             <div class="form-group">
               <label for="namaBarang">Nama Barang</label>
@@ -245,6 +258,10 @@
                   <span class="input-group-text"><i class="fa-solid fa-box"></i></span>
                 </div>
                 <input type="text" class="form-control" id="namaBarang" placeholder="Nama Barang" autocomplete="off">
+              </div>
+              <div id="reset_nama_barang_toggle" class="custom-control custom-checkbox" style="display: none;">
+                <input class="custom-control-input" type="checkbox" id="resetNamaBarang">
+                <label for="resetNamaBarang" class="custom-control-label">Otomatis reset Nama Barang</label>
               </div>
             </div>
             <div class="form-group">
@@ -255,6 +272,10 @@
                 </div>
                 <input type="text" class="form-control" id="jumlahBarang" placeholder="Jumlah Barang" autocomplete="off" data-type="currency">
               </div>
+              <div id="reset_jumlah_barang_toggle" class="custom-control custom-checkbox" style="display: none;">
+                <input class="custom-control-input" type="checkbox" id="resetJumlahBarang">
+                <label for="resetJumlahBarang" class="custom-control-label">Otomatis reset Jumlah Barang</label>
+              </div>
             </div>
             <div class="form-group">
               <label for="hargaModal">Harga Modal</label>
@@ -263,6 +284,10 @@
                   <span class="input-group-text">Rp</span>
                 </div>
                 <input type="text" class="form-control" id="hargaModal" placeholder="Harga Modal" autocomplete="off" data-type="currency">
+              </div>
+              <div id="reset_harga_modal_toggle" class="custom-control custom-checkbox" style="display: none;">
+                <input class="custom-control-input" type="checkbox" id="resetHargaModal">
+                <label for="resetHargaModal" class="custom-control-label">Otomatis reset Harga Modal</label>
               </div>
             </div>
             <div class="row">
@@ -274,6 +299,10 @@
                       <span class="input-group-text">Rp</span>
                     </div>
                     <input type="text" class="form-control" id="hargaJual" placeholder="Harga Jual" autocomplete="off" data-type="currency">
+                  </div>
+                  <div id="reset_harga_jual_toggle" class="custom-control custom-checkbox" style="display: none;">
+                    <input class="custom-control-input" type="checkbox" id="resetHargaJual">
+                    <label for="resetHargaJual" class="custom-control-label">Otomatis reset Harga Jual</label>
                   </div>
                 </div>
               </div>
@@ -297,11 +326,15 @@
                 </div>
                 <input type="text" class="form-control" id="barcodeBarang" placeholder="Barcode Barang" autocomplete="off">
               </div>
+              <div id="reset_barcode_barang_toggle" class="custom-control custom-checkbox" style="display: none;">
+                <input class="custom-control-input" type="checkbox" id="resetBarcodeBarang">
+                <label for="resetBarcodeBarang" class="custom-control-label">Otomatis reset Barcode Barang</label>
+              </div>
             </div>
           </div>
           <div class="modal-footer justify-content-between">
             <button type="button" class="btn btn-default" data-dismiss="modal">Close (Esc)</button>
-            <button type="button" class="btn btn-success" id="editButton">Edit</button>
+            <button type="button" class="btn btn-success" id="editButton">Edit Barang</button>
           </div>
         </div>
         <!-- /.modal-content -->
@@ -359,10 +392,6 @@
       scrollX:        true,
       scrollCollapse: true,
       paging:         true,
-      fixedColumns: {
-          left: 1,
-          right: 1
-      }, "lengthChange": false, "autoWidth": false,
       "columnDefs": [
       {
           "targets": [1, 5],
@@ -372,7 +401,7 @@
           }
       }
     ]
-    }).buttons().container().appendTo('#daftarBarangTable_wrapper .col-md-6:eq(0)');
+    })
     $("#daftarBarangTable").DataTable().column(3).visible(false)
     $("#daftarBarangTable").DataTable().column(0).visible(false)
     $('#daftarBarangTable').DataTable().columns.adjust()

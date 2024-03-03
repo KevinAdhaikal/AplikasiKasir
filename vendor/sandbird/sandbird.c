@@ -613,7 +613,7 @@ int sb_send_file(sb_Stream *st, const char *filename, char using_cache, const ch
     char client_date[21];
     strftime(date, 20, "%d-%m-%y %H:%M:%S", localtime(&(file_stat.st_mtime)));
     sb_get_header(st, "If-Modified-Since", client_date, 20);
-    if (client_date && isStr(date, client_date, 1)) {
+    if (isStr(date, client_date, 1)) {
         sb_send_status(st, 304, "Not Modified");
         fclose(fp);
         st->state = STATE_SENDING_DATA;
@@ -698,8 +698,19 @@ int sb_get_body(sb_Stream *st, sb_Body *body) {
   int findEmptyCRLF = findEmptyCRLFPosition(st->recv_buf.s) + 4;
   body->sizeData = st->recv_buf.len - findEmptyCRLF;
   body->data = malloc(body->sizeData + 1);
-  strcpy(body->data, st->recv_buf.s + findEmptyCRLF);
+  memcpy(body->data, st->recv_buf.s + findEmptyCRLF, body->sizeData);
+  body->data[body->sizeData] = '\0';
+  
   return SB_ESUCCESS;
+}
+
+
+unsigned int sb_get_body_static(sb_Stream* st, char* dst, int dst_size) {
+  int findEmptyCRLF = findEmptyCRLFPosition(st->recv_buf.s) + 4;
+  int size_copy = (st->recv_buf.len - findEmptyCRLF) > dst_size ? dst_size : st->recv_buf.len - findEmptyCRLF;
+  memcpy(dst, st->recv_buf.s + findEmptyCRLF, size_copy);
+  dst[size_copy] = '\0';
+  return size_copy;
 }
 
 
@@ -721,6 +732,7 @@ int sb_get_var(sb_Stream *st, const char *name, char *dst, size_t len) {
   }
   return url_decode(dst, s, len);
 }
+
 
 int sb_convert_var_to_int(sb_Stream *st, const char* name) {
   const char *q, *s = NULL;
@@ -834,7 +846,6 @@ fail:
   *len = 0;
   return NULL;
 }
-
 
 /*===========================================================================
  * Server

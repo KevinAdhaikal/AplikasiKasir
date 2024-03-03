@@ -5,8 +5,20 @@
 #include <ctype.h>
 #include <unistd.h>
 #include <time.h>
+#include <stdint.h>
 
 #include "utils.h"
+
+#undef get16bits
+#if (defined(__GNUC__) && defined(__i386__)) || defined(__WATCOMC__) \
+  || defined(_MSC_VER) || defined (__BORLANDC__) || defined (__TURBOC__)
+#define get16bits(d) (*((const uint16_t *) (d)))
+#endif
+
+#if !defined (get16bits)
+#define get16bits(d) ((((uint32_t)(((const uint8_t *)(d))[1])) << 8)\
+                       +(uint32_t)(((const uint8_t *)(d))[0]) )
+#endif
 
 char** strsplit(const char* s, const char* delim, size_t* nb) { // https://github.com/mr21/strsplit.c
     void* data;
@@ -40,11 +52,10 @@ char** strsplit(const char* s, const char* delim, size_t* nb) { // https://githu
     return data;
 }
 
-char* formatCurrency(int num) {
-    int absNum = abs(num);
-    // Convert the absolute value of the integer to a string
-    char str[15]; // Assuming the number will have at most 15 digits
-    sprintf(str, "%d", absNum);
+char* formatCurrency(long long int num) {
+    long long int absNum = llabs(num);
+    char str[25];
+    sprintf(str, "%lld", absNum);
 
     int len = strlen(str);
     int commaCount = (len - 1) / 3;
@@ -142,16 +153,16 @@ const char* MIMETypes(const char* nameFile) {
     else return "application/octet-stream";
 }
 
-char isStr(const char* str, unsigned char* toFind, char isEndLine) {
+char isStr(const char* str, const char* toFind, char isEndLine) {
     int string_len = strlen(toFind);
-    for (int a = 0; a < string_len; a++) {
-        if (str[a] != toFind[a]) return 0;
-    }
+    if (strlen(str) > string_len) return 0;
+
+    for (int a = 0; a < string_len; a++) if (str[a] != toFind[a]) return 0;
     if (str[string_len] != '\0' && isEndLine) return 0;
     return 1;
 }
 
-char includeStr(const char* str, const unsigned char* toFind, int len) {
+char includeStr(const char* str, const char* toFind, int len) {
 	int toFindLen = strlen(toFind);
 	for (int a = 0, b = 0; a < len; a++) {
 		if (str[a] == toFind[b]) b++;
@@ -296,3 +307,55 @@ char* dateRange(void* startDate_void, void* endDate_void) {
 
     return result;
 } // thanks ChatGPT
+
+uint32_t SuperFastHash (const char * data, int len) { // http://www.azillionmonkeys.com/qed/hash.html
+    uint32_t hash = len, tmp;
+    int rem;
+
+    if (len <= 0 || data == NULL) return 0;
+
+    rem = len & 3;
+    len >>= 2;
+
+    /* Main loop */
+    for (;len > 0; len--) {
+        hash  += get16bits (data);
+        tmp    = (get16bits (data+2) << 11) ^ hash;
+        hash   = (hash << 16) ^ tmp;
+        data  += 2*sizeof (uint16_t);
+        hash  += hash >> 11;
+    }
+
+    /* Handle end cases */
+    switch (rem) {
+        case 3: hash += get16bits (data);
+                hash ^= hash << 16;
+                hash ^= ((signed char)data[sizeof (uint16_t)]) << 18;
+                hash += hash >> 11;
+                break;
+        case 2: hash += get16bits (data);
+                hash ^= hash << 11;
+                hash += hash >> 17;
+                break;
+        case 1: hash += (signed char)*data;
+                hash ^= hash << 10;
+                hash += hash >> 1;
+    }
+
+    /* Force "avalanching" of final 127 bits */
+    hash ^= hash << 3;
+    hash += hash >> 5;
+    hash ^= hash << 4;
+    hash += hash >> 17;
+    hash ^= hash << 25;
+    hash += hash >> 6;
+
+    return hash;
+}
+
+char file_exists(const char* name_file) {
+    FILE* fp = fopen(name_file, "rb");
+    if (!fp) return 0;
+    fclose(fp);
+    return 1;
+}

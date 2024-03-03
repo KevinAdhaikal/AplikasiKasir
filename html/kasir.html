@@ -12,7 +12,7 @@
   <!-- Theme style -->
   <link rel="stylesheet" href="dist/css/adminlte.min.css">
   <!-- SweetAlert2 -->
-  <link rel="stylesheet" href="/plugins/sweetalert2-theme-bootstrap-4/bootstrap-4.min.css">
+  <link rel="stylesheet" id="swal_css" href="plugins/sweetalert2/sweetalert2.min.css">
   <!-- DataTables -->
   <link rel="stylesheet" href="plugins/datatables-bs4/css/dataTables.bootstrap4.min.css">
   <link rel="stylesheet" href="plugins/datatables-responsive/css/responsive.bootstrap4.min.css">
@@ -89,12 +89,7 @@
               </p>
             </a>
             <ul class="nav nav-treeview">
-              <li class="nav-item">
-                <a href="./tambahBarang" class="nav-link">
-                  <i class="fas fa-solid fa-plus nav-icon"></i>
-                  <p>Tambah Barang</p>
-                </a>
-              </li>
+              
               <li class="nav-item">
                 <a href="./daftarBarang" class="nav-link">
                   <i class="fas fa-solid fa-boxes-stacked nav-icon"></i>
@@ -466,20 +461,12 @@
           }
       }
     ]
-    }).buttons().container().appendTo('#kasirTable_wrapper .col-md-6:eq(0)')
+    })
     $("#kasirTable").DataTable().column(2).visible(false)
     $("#cariBarang").DataTable({
       scrollY:        "350px",
       scrollX:        true,
       scrollCollapse: true,
-      paging:         false,
-      fixedColumns: {
-          left: 1,
-          right: 1
-      },
-      "bInfo" : true,
-      "ordering": true,
-      "lengthChange": false, "autoWidth": false, "searching": true,
       "columnDefs": [
       {
           "targets": [0],
@@ -489,7 +476,7 @@
           }
       }
     ]
-    }).buttons().container().appendTo('#cariBarang_wrapper .col-md-6:eq(0)');
+    })
     $("#cariBarang").DataTable().column(2).visible(false)
   });
   

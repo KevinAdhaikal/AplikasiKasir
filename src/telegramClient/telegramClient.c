@@ -79,8 +79,8 @@ int connect_server(int* sockfd) {
 }
 
 int sendMessage(void* message, const char* token, const char* userid) {
-    unsigned char read_buffer[0xFFFF];
-    unsigned char client_message[0xFFFF];
+    char read_buffer[0xFFFF];
+    char client_message[0xFFFF];
 
     int sockfd;
 
@@ -109,12 +109,11 @@ int sendMessage(void* message, const char* token, const char* userid) {
 
             int read_size;
             while ((read_size = recv(sockfd, client_message, sizeof(client_message), 0)) > 0) {
-                tls_consume_stream(context, client_message, read_size, NULL);
+                tls_consume_stream(context, (unsigned char*)client_message, read_size, NULL);
                 send_pending(sockfd, context);
                 if (tls_established(context)) {
                     tls_write(context, (unsigned char *)request, strlen(request));
                     send_pending(sockfd, context);
-                    int tempLen = tls_read(context, read_buffer, 0xFFFF - 1);
                 }
             }
 
@@ -154,12 +153,11 @@ int sendMessage(void* message, const char* token, const char* userid) {
 
         int read_size;
         while ((read_size = recv(sockfd, client_message, sizeof(client_message), 0)) > 0) {
-            tls_consume_stream(context, client_message, read_size, NULL);
+            tls_consume_stream(context, (unsigned char*)client_message, read_size, NULL);
             send_pending(sockfd, context);
             if (tls_established(context)) {
                 tls_write(context, (unsigned char *)request, strlen(request));
                 send_pending(sockfd, context);
-                int tempLen = tls_read(context, read_buffer, 0xFFFF - 1);
             }
         }
 
@@ -184,8 +182,8 @@ int sendMessage(void* message, const char* token, const char* userid) {
 
 void* sendMessageThread(void* message) {
     if (!teleBot.usingTelegramBot) return NULL;
-    unsigned char read_buffer[0xFFFF];
-    unsigned char client_message[0xFFFF];
+    char read_buffer[0xFFFF];
+    char client_message[0xFFFF];
 
     int sockfd;
 
@@ -209,12 +207,11 @@ void* sendMessageThread(void* message) {
 
         int read_size;
         while ((read_size = recv(sockfd, client_message, sizeof(client_message), 0)) > 0) {
-            tls_consume_stream(context, client_message, read_size, NULL);
+            tls_consume_stream(context, (unsigned char*)client_message, read_size, NULL);
             send_pending(sockfd, context);
             if (tls_established(context)) {
                 tls_write(context, (unsigned char *)request, strlen(request));
                 send_pending(sockfd, context);
-                int tempLen = tls_read(context, read_buffer, 0xFFFF - 1);
             }
         }
 

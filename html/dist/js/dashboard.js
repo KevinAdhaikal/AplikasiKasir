@@ -28,7 +28,7 @@ async function dashboardLoad() {
     }).then(async response => {
         if (response.status == 200) {
             await response.text().then(async data => {
-                data = data.split("\n")
+                data = data.split("\x01")
                 pengaturan = data
                 if (data[1] == '1') {
                     await loadDate(Number(data[0]), true)
@@ -54,7 +54,7 @@ async function dashboardLoad() {
         if (response.status == 200) {
             await response.text().then(data => {
                 if (data) {
-                    data = data.split("|")
+                    data = data.split("\x02")
                     $("#barangTerjualID").text(Intl.NumberFormat('id', {}).format(data[0]))
                     $("#pendapatanHargaJualID").text("Rp" + Intl.NumberFormat('id', {}).format(data[1]))
                     $("#keuntunganID").text("Rp" + Intl.NumberFormat('id', {}).format(data[2]))
@@ -104,11 +104,10 @@ async function dashboardLoad() {
                     document.getElementById("totalPendapatanText").innerHTML = "Total Pendapatan (Hari Ini / Kemarin)"
                     data = data.split("\n");
                     data[0] = data[0].split("|")
-                    console.log(data)
-                    $("#barangTerjualID").text($("#barangTerjualID").text() + " / " + Intl.NumberFormat('id', {}).format(data[0][0] ? data[0][0] : 0))
-                    $("#pendapatanHargaJualID").text($("#pendapatanHargaJualID").text() + " / Rp" + Intl.NumberFormat('id', {}).format(data[0][1] ? data[0][1] : 0))
-                    $("#keuntunganID").text($("#keuntunganID").text() + " / Rp" + Intl.NumberFormat('id', {}).format(data[0][2] ? data[0][2] : 0))
-                    $("#pengeluaranID").text($("#pengeluaranID").text() + " / Rp" + Intl.NumberFormat('id', {}).format(data[1] ? data[1] : 0))
+                    $("#barangTerjualID").text($("#barangTerjualID").text() + " / " + Intl.NumberFormat('id', {}).format(data[0][0]))
+                    $("#pendapatanHargaJualID").text($("#pendapatanHargaJualID").text() + " / Rp" + Intl.NumberFormat('id', {}).format(data[0][1]))
+                    $("#keuntunganID").text($("#keuntunganID").text() + " / Rp" + Intl.NumberFormat('id', {}).format(data[0][2]))
+                    $("#pengeluaranID").text($("#pengeluaranID").text() + " / Rp" + Intl.NumberFormat('id', {}).format(data[1]))
                     $("#pendapatanID").text("Rp" + Intl.NumberFormat('id', {}).format(Number(Number($("#pendapatanHargaJualID").text().split(" / ")[0].slice(2).replaceAll(".", "")) - Number($("#pengeluaranID").text().split(" / ")[0].slice(2).replaceAll(".", "")))) + " / Rp" + Intl.NumberFormat('id', {}).format(Number(Number($("#pendapatanHargaJualID").text().split(" / ")[1].slice(2).replaceAll(".", "")) - Number($("#pengeluaranID").text().split(" / ")[1].slice(2).replaceAll(".", "")))))
 
                     document.getElementById("barangTerjualText").innerHTML += ` <i class="${Number($("#barangTerjualID").text().split(" / ")[0].replaceAll(".", "")) > Number($("#barangTerjualID").text().split(" / ")[1].replaceAll(".", "")) ? "ion ion-android-arrow-up text-success" : "ion ion-android-arrow-down text-danger"}"></i>`
@@ -216,13 +215,13 @@ document.getElementById("date_select").addEventListener("change", async function
 })
 
 async function refreshBarangKosong() {
-    $("#barangKosongTable").DataTable().clear().draw()
+    $("#barangKosongTable").DataTable().clear().draw(false)
     await fetch("/?api_args=11&dashboardType=3", {
         method: "POST"
     }).then(async response => {
         if (response.status == 200) {
             await response.text().then(data => {
-                data = data.split("\n");
+                data = data.split("\x01");
                 for (let a = 0; a < data.length - 1; a++) $("#barangKosongTable").DataTable().row.add([data[a]]).draw(false)
             })
         } else {
@@ -240,7 +239,7 @@ async function refreshBarangKosong() {
 }
 
 async function refreshBarangTotalTerjual() {
-    $("#barangTotalTerjualTable").DataTable().clear().draw()
+    $("#barangTotalTerjualTable").DataTable().clear().draw(false)
     var dateSplit = document.getElementById("dateBarangSeringTerjual").value.split(" - ")
     await fetch("/?api_args=11&dashboardType=4", {
         method: "POST",
@@ -251,10 +250,10 @@ async function refreshBarangTotalTerjual() {
     }).then(async response => {
         if (response.status == 200) {
             await response.text().then(data => {
-                data = data.split("\n");
+                data = data.split("\x01");
 
-                for (let a = 0; a < data.length - 1; a++) {
-                    var valueSplit = data[a].split("|")
+                for (let a = 0; a < data.length; a++) {
+                    var valueSplit = data[a].split("\x02")
                     $("#barangTotalTerjualTable").DataTable().row.add([valueSplit[0], valueSplit[1]]).draw(false)
                 }
             })
