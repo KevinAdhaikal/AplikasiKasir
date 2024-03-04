@@ -5,6 +5,10 @@ if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release)
 endif()
 
+set(CMAKE_C_STANDARD 99)
+set(CMAKE_C_STANDARD_REQUIRED ON)
+set(CMAKE_C_EXTENSIONS OFF)
+
 file(GLOB_RECURSE SOURCES "src/*.c" "src/**/*.c")
 file(GLOB_RECURSE VENDOR_SOURCES "vendor/*.c" "vendor/**/*.c")
 

@@ -20,9 +20,11 @@ int dbBackup(sb_Event* e) {
                          "database/daftarBarang.db",
                          "database/pembukuan.db",
                          "database/pengeluaran.db",
-                         "database/settings.db"};
+                         "database/settings.db",
+                         "database/user.db",
+                         "database/role.db"};
 
-    short total_file = 5;
+    short total_file = 7;
 
     if (fp_hash && file_exists("database/backup.ksr")) {
         short current_total_file;

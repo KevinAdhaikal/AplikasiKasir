@@ -141,16 +141,22 @@ void prepare_db(char check_db_ver) {
 
     // user.db
     sqlite3_open("database/user.db", &db);
-    sqlite3_exec(db, "CREATE TABLE IF NOT EXISTS user_table (username TEXT, password TEXT, role_id INT, is_super BOOLEAN DEFAULT 0, dibuat_waktu TEXT DEFAULT (strftime('%d-%m-%Y %H:%M:%S', 'now', 'localtime')), dimodif_waktu TEXT DEFAULT (strftime('%d-%m-%Y %H:%M:%S', 'now', 'localtime')));"
+    sqlite3_prepare_v2(db, "SELECT 1 FROM sqlite_master WHERE type='table' AND name='user_table'", -1, &statement, NULL);
+    if (sqlite3_step(statement) != SQLITE_ROW) sqlite3_exec(db, "CREATE TABLE IF NOT EXISTS user_table (username TEXT, password TEXT, role_id INT, is_super BOOLEAN DEFAULT 0, dibuat_waktu TEXT DEFAULT (strftime('%d-%m-%Y %H:%M:%S', 'now', 'localtime')), dimodif_waktu TEXT DEFAULT (strftime('%d-%m-%Y %H:%M:%S', 'now', 'localtime')));"
                      "INSERT INTO user_table(username, password, role_id, is_super) VALUES ('admin', 'admin', 1, 1);", 0, NULL, NULL);
+    
     sqlite3_close(db);
+    sqlite3_finalize(statement);
 
     // role.db
     sqlite3_open("database/role.db", &db);
-    sqlite3_exec(db, "CREATE TABLE IF NOT EXISTS role_table (name_role TEXT, role_perm TEXT, is_super BOOLEAN DEFAULT 0, dibuat_waktu TEXT DEFAULT (strftime('%d-%m-%Y %H:%M:%S', 'now', 'localtime')), dimodif_waktu TEXT DEFAULT (strftime('%d-%m-%Y %H:%M:%S', 'now', 'localtime')));"
+    sqlite3_prepare_v2(db, "SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'role_table'", -1, &statement, NULL);
+    if (sqlite3_step(statement) != SQLITE_ROW) sqlite3_exec(db, "CREATE TABLE IF NOT EXISTS role_table (name_role TEXT, role_perm TEXT, is_super BOOLEAN DEFAULT 0, dibuat_waktu TEXT DEFAULT (strftime('%d-%m-%Y %H:%M:%S', 'now', 'localtime')), dimodif_waktu TEXT DEFAULT (strftime('%d-%m-%Y %H:%M:%S', 'now', 'localtime')));"
                      "INSERT INTO role_table(name_role, role_perm, is_super) VALUES ('Administrator', '1', 1);", 0, NULL, NULL);
+    
     sqlite3_close(db);
-
+    sqlite3_finalize(statement);
+    
     // database kasir version
     fp = fopen("database/db_ver.bin", "wb");
     db_ver = 1;

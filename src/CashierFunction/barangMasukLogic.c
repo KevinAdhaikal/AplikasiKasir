@@ -24,7 +24,6 @@ int barangMasukLogic(sb_Event* e) {
 
     time(&rawtime);
     timeinfo = localtime(&rawtime);
-
     switch(sb_convert_var_to_int(e->stream, "barangMasukArgs")) {
         case 1: {
             sb_get_header(e->stream, "tanggalBarangMasuk", tanggalBarangMasuk, 31);

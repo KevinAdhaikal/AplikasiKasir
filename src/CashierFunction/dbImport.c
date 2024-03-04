@@ -27,7 +27,9 @@ int dbImport(sb_Event* e) {
                          "database/daftarBarang.db",
                          "database/pembukuan.db",
                          "database/pengeluaran.db",
-                         "database/settings.db"};
+                         "database/settings.db",
+                         "database/user.db",
+                         "database/role.db"};
     short file_count;
     int compress_size;
     int real_size;
