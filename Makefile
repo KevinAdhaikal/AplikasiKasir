@@ -10,15 +10,16 @@ VENDOR_DIR := vendor
 SRCS := $(wildcard $(SRC_DIR)/**/*.c) $(wildcard $(SRC_DIR)/*.c) $(wildcard $(VENDOR_DIR)/**/*.c) $(wildcard $(VENDOR_DIR)/*.c)
 OBJS := $(patsubst $(SRC_DIR)/%.c,$(OBJ_SRC_DIR)/%.o,$(filter $(SRC_DIR)/%.c,$(SRCS))) $(patsubst $(VENDOR_DIR)/%.c,$(OBJ_VENDOR_DIR)/%.o,$(filter $(VENDOR_DIR)/%.c,$(SRCS)))
 
-LIBS := -lpthread -lm
-TARGET := AplikasiKasir
+LIBS := -lpthread -lm # Compiler Libs
+CO := -O3 # Compiler Options
+TARGET := AplikasiKasir # Output file
 
 .PHONY: all clean
 
 all: $(TARGET)
 
 $(TARGET): $(OBJS)
-	$(CC) $(CFLAGS) $^ -o $@ $(LIBS)
+	$(CC) $(CFLAGS) $^ -o $@ $(CO) $(LIBS)
 
 $(OBJ_SRC_DIR)/%.o: $(SRC_DIR)/%.c | $(OBJ_SRC_DIR)
 	@mkdir -p $(dir $@)
