@@ -21,7 +21,8 @@ Untuk membuild source ini, anda harus mengikuti step di bawah ini
 Jika anda malas untuk membuild source, anda bisa download lewat <a href="https://github.com/KevinAdhaikal/AplikasiKasir/releases">Release</a>
 
 ## Linux
-Untuk membuild source ini di Linux, anda harus mengikuti step di bawah ini
+### CMake
+Untuk membuild source ini di Linux menggunakan CMake, anda harus mengikuti step di bawah ini
 1. lakukan update repository pada APT `apt update`
 2. setelah itu, lakukan install Package `apt install git build-essential cmake -y`
 3. lakukan git clone dari repository saya `git clone https://github.com/KevinAdhaikal/AplikasiKasir`
@@ -29,6 +30,14 @@ Untuk membuild source ini di Linux, anda harus mengikuti step di bawah ini
 5. Setelah masuk ke folder AplikasiKasir, buatlah folder "build" dan langsung masuk ke folder Build `mkdir build; cd build`
 6. Setelah masuk ke folder build, lakukan `cmake ..`
 7. Terakhir, jika CMake megenerate "Makefile", lakukan `make` (jika ingin cepat, anda bisa melakukan `make -j 4`) dan anda akan melihat file, bernama "AplikasiKasir". dan untuk menjalankan aplikasinya, ketik `sudo ./AplikasiKasir`
+
+### Makefile
+Untuk membuild source ini di Linux menggunakan Makefile (tanpa perlu CMake), anda harus mengikuti step di bawah ini
+1. lakukan update repository pada APT `apt update`
+2. setelah itu, lakukan install Package `apt install git build-essential -y`
+3. lakukan git clone dari repository saya `git clone https://github.com/KevinAdhaikal/AplikasiKasir`
+4. jika anda sudah melakukan git clone, masuk ke folder "AplikasiKasir" `cd AplikasiKasir`
+5. lakukan `make` (jika ingin cepat, anda bisa melakukan `make -j 4`) dan anda akan melihat file, bernama "AplikasiKasir". dan untuk menjalankan aplikasinya, ketik `sudo ./AplikasiKasir`
 
 ## Mac OS X
 Untuk membuild source ini di Mac OS X, anda harus mengikuti step di bawah ini
