@@ -12,6 +12,10 @@
 #include "cashierFunction.h"
 
 int dbBackup(sb_Event* e) {
+    unsigned char* temp_buffer;
+    unsigned char* compress_buffer;
+    FILE* fpwb;
+
     char kasir_db_magic_code[] = {'K', 'S', 'R', 'D', 'B'}; // wm kang
 
     FILE* fp_hash = fopen("database/dbhash.bin", "rb");
@@ -57,12 +61,10 @@ int dbBackup(sb_Event* e) {
     if (fp_hash) fclose(fp_hash);
     fp_hash = fopen("database/dbhash.bin", "wb");
 
+    
+
     COMPRESS_FILE:
-
-    unsigned char* temp_buffer;
-    unsigned char* compress_buffer;
-
-    FILE* fpwb = fopen("database/backup.ksr", "wb");
+    fpwb = fopen("database/backup.ksr", "wb");
 
     fwrite(kasir_db_magic_code, 5, 1, fpwb);
     fwrite(&total_file, 2, 1, fpwb);

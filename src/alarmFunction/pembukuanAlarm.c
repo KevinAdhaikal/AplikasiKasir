@@ -101,9 +101,7 @@ void* pembukuanAlarm(void* args) {
             sleep(60);
             break;
         }
-
-        sleep(0.5);
+        delay(0.5);
     }
-
     return NULL;
 }

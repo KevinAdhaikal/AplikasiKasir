@@ -28,7 +28,14 @@ Untuk membuild source ini di Linux, anda harus mengikuti step di bawah ini
 4. jika anda sudah melakukan git clone, masuk ke folder "AplikasiKasir" `cd AplikasiKasir`
 5. Setelah masuk ke folder AplikasiKasir, buatlah folder "build" dan langsung masuk ke folder Build `mkdir build; cd build`
 6. Setelah masuk ke folder build, lakukan `cmake ..`
-7. Terakhir, jika CMake megenerate "Makefile", lakukan `make` (jika ingin cepat, anda bisa melakukan `make -j 4`) dan anda akan melihat file, bernama "AplikasiKasir". dan untuk menjalankan aplikasinya, ketik ./AplikasiKasir
+7. Terakhir, jika CMake megenerate "Makefile", lakukan `make` (jika ingin cepat, anda bisa melakukan `make -j 4`) dan anda akan melihat file, bernama "AplikasiKasir". dan untuk menjalankan aplikasinya, ketik `sudo ./AplikasiKasir`
+
+## Mac OS X
+Untuk membuild source ini di Mac OS X, anda harus mengikuti step di bawah ini
+1. buka Terminal dan ketik `xcode-select --install` (jika sudah di install, tidak perlu menginstall lagi)
+2. Setelah itu, lakukan clone dengan cara `git clone https://github.com/kevinadhaikal/aplikasikasir`
+3. Setelah clone, ke folder AplikasiKasir, dan ketik `make`
+4. Setelah melakukan `make`, dia akan mengeluarkan file bernama `AplikasiKasir`. untuk menjalankannya, ketik `sudo ./AplikasiKasir`
 
 ## Android (versi 7.0 keatas)
 Anda bisa mengetest AplikasiKasir di Android kalian, dan ini harus menggunakan Android Versi 7.0 keatas.

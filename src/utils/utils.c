@@ -52,6 +52,14 @@ char** strsplit(const char* s, const char* delim, size_t* nb) { // https://githu
     return data;
 }
 
+void delay(double seconds) {
+    struct timespec req;
+    req.tv_sec = (time_t)seconds;
+    req.tv_nsec = (long)((seconds - (double)req.tv_sec) * 1e9);
+
+    nanosleep(&req, NULL);
+}
+
 char* formatCurrency(long long int num) {
     long long int absNum = llabs(num);
     char str[25];

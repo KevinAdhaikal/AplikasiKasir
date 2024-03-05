@@ -115,10 +115,10 @@ char statement_get_row(sqlite3_stmt* statement, SQLRow* row, char no_lf) {
     row->sql_ret = sqlite3_step(statement);
     if (row->sql_ret == SQLITE_ROW) goto HAS_ROW;
     else return 0;
-    
+    int columnCount;
     while (sqlite3_step(statement) == SQLITE_ROW) {
         HAS_ROW:
-        int columnCount = sqlite3_column_count(statement);
+        columnCount = sqlite3_column_count(statement);
         if (!columnCount) return 0;
         for (int a = 0; a < columnCount; a++) {
             switch (sqlite3_column_type(statement, a)) {

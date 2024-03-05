@@ -4,6 +4,7 @@
 #include <stdint.h>
 
 char** strsplit(const char* s, const char* delim, size_t* nb);
+void delay(double seconds);
 void static_string_format(char* dest, const char *message, ...);
 char* dynamic_string_format(const char *format, ...);
 char findStrLast(const char* str, const char* strFind);
