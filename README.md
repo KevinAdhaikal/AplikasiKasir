@@ -1,5 +1,5 @@
 # AplikasiKasir (BETA)
-AplikasiKasir bertujuan untuk memudahkan pemilik usaha dalam mengelola kasir mereka.
+AplikasiKasir bertujuan untuk memudahkan pemilik usaha dalam mengelola kasir.
 
 ## Fitur
 - Dasar untuk Kasir (Daftar Barang, Tambah Barang, Barang Masuk, Barang Terjual, Pembukuan)
@@ -15,6 +15,7 @@ AplikasiKasir bertujuan untuk memudahkan pemilik usaha dalam mengelola kasir mer
 5. Buka file `AplikasiKasir.cbp` dalam folder build menggunakan CodeBlocks, kemudian tekan Build.
 
 Jika Anda tidak ingin membuild, Anda dapat mengunduhnya Executable dari [Releases](https://github.com/KevinAdhaikal/AplikasiKasir/releases).
+<hr>
 
 ### Linux
 <details><summary><b>CMake</b></summary>
@@ -39,12 +40,15 @@ Jika Anda tidak ingin membuild, Anda dapat mengunduhnya Executable dari [Release
 6. Untuk menjalankan aplikasi, ketik `sudo ./AplikasiKasir`
 
 </details>
+<hr>
 
 ### Mac OS X
 1. Buka Terminal dan jalankan `xcode-select --install` jika belum diinstal.
 2. Clone repositori dengan `git clone https://github.com/kevinadhaikal/aplikasikasir`.
 3. Masuk ke direktori AplikasiKasir dan jalankan `make` (atau lakukan `make -j 4` agar build nya lebih cepat).
 4. Aplikasi akan dibangun dengan nama `AplikasiKasir`. Jalankan dengan cara `sudo ./AplikasiKasir`.
+
+<hr>
 
 ### Android (versi 7.0 ke atas)
 Untuk Android versi 7.0 ke atas, bisa menggunakan [Termux](https://f-droid.org/id/packages/com.termux/). dan Download Termux harus lewat di F-Droid
@@ -72,6 +76,7 @@ Untuk Android versi 7.0 ke atas, bisa menggunakan [Termux](https://f-droid.org/i
 7. Untuk menjalankan aplikasi, ketik `./AplikasiKasir` (Untuk pengguna root. bisa menjalankan AplikasiKasir, dengan melakukan `sudo ./AplikasiKasir`).
 
 </details>
+<hr>
 
 PERINGATAN: Jangan memakai port 8081, karena itu untuk HTTP Telegram API<br>
 Untuk pengguna non-root, pastikan port yang Anda gunakan tidak bertabrakan dengan port lainnya. Misalnya, `opt[0].port = "8082"`.
